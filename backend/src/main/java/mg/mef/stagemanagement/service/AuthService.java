@@ -9,6 +9,7 @@ import mg.mef.stagemanagement.repository.HistoriqueConnexionUtilisateurRepositor
 import mg.mef.stagemanagement.repository.SessionUtilisateurRepository;
 import mg.mef.stagemanagement.repository.UtilisateurRepository;
 import mg.mef.stagemanagement.repository.UtilisateurRoleRepository;
+import mg.mef.stagemanagement.dto.auth.AuthMeResponse; 
 
 import org.springframework.boot.web.server.servlet.Session;
 import org.springframework.http.HttpStatus;
@@ -163,5 +164,7 @@ public class AuthService {
             );
         }
     }
+
+    
 
 }
