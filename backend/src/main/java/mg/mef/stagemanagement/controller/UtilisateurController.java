@@ -1,62 +1,64 @@
 package mg.mef.stagemanagement.controller;
 
-import mg.mef.stagemanagement.model.Utilisateur;
-import mg.mef.stagemanagement.service.UtilisateurService;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import mg.mef.stagemanagement.dto.utilisateur.CreerUtilisateurRequest;
+import mg.mef.stagemanagement.dto.utilisateur.UtilisateurListResponse;
+import mg.mef.stagemanagement.service.UtilisateurGestionService;
+import mg.mef.stagemanagement.service.UtilisateurService;
 
 @RestController
 @RequestMapping("/api/utilisateurs")
 public class UtilisateurController {
 
-    private final UtilisateurService service;
+    private final UtilisateurService utilisateurService;
+    private final UtilisateurGestionService utilisateurGestionService;
 
-    public UtilisateurController(UtilisateurService service) {
-        this.service = service;
+    public UtilisateurController(
+            UtilisateurService utilisateurService,
+            UtilisateurGestionService utilisateurGestionService
+    ) {
+        this.utilisateurService = utilisateurService;
+        this.utilisateurGestionService = utilisateurGestionService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Utilisateur>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<UtilisateurListResponse>> findAll() {
+
+        return ResponseEntity.ok(
+                utilisateurService.listerUtilisateurs()
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Utilisateur> findById(@PathVariable Integer id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<UtilisateurListResponse> findById(
+            @PathVariable Integer id
+    ) {
+
+        return ResponseEntity.ok(
+                utilisateurGestionService.trouverUtilisateur(id)
+        );
     }
 
     @PostMapping
-    public ResponseEntity<Utilisateur> create(@RequestBody Utilisateur utilisateur) {
-        utilisateur.setId(null);
-        Utilisateur saved = service.save(utilisateur);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
+    public ResponseEntity<UtilisateurListResponse> create(
+            @RequestBody CreerUtilisateurRequest request
+    ) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Utilisateur> update(
-            @PathVariable Integer id,
-            @RequestBody Utilisateur utilisateur) {
+        UtilisateurListResponse utilisateur =
+                utilisateurGestionService.creerUtilisateur(request);
 
-        if (!service.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        utilisateur.setId(id);
-        return ResponseEntity.ok(service.save(utilisateur));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (!service.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        service.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(utilisateur);
     }
 }
