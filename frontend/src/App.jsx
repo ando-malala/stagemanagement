@@ -1,27 +1,17 @@
-import { useState, useEffect } from "react";
-import { getTypeAlerte } from "./api/alerte/alerteApi";
+import { useCallback,useState, useEffect } from "react";
+import { login, logout, me } from './api/auth/authApi.js';
+import UtilisateursPanel from './components/UtilisateursPanel.jsx';
+import './App.css';
 
-function App(){
-  const [typeAlerte, setTypeAlerte] = useState([]);
+export default function App(){
+    const [token,setToken] = useState(null);
+    const [utilisateur,setUtilisateur] = useState(null);
 
-  useEffect(()=>{
-      async function loadTypeAlerte() {
-        const liste = await getTypeAlerte();
-        setTypeAlerte(liste);
-      }
+    const [identifiant,setIdentifiant] = useState('');
+    const [motDePasse, setMotDePasse] = useState('');
 
-      loadTypeAlerte();
-  },[])
+    const [enCours, setEnCours] = useState(false);
+    const [erreur, setErreur] = useState('');
 
-  return(
-    <>
-      {typeAlerte.map((type) => (
-        <p key={type.id}>
-            {type.libelle}
-        </p>
-      ))}
-    </>
-  )
+    const viderSession = useCallback
 }
-
-export default App

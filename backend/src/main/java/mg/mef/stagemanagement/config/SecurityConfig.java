@@ -18,105 +18,108 @@ import mg.mef.stagemanagement.security.SessionAuthenticationFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(
-                HttpSecurity http,
-                SessionAuthenticationFilter sessionAuthenticationFilter
-        ) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            SessionAuthenticationFilter sessionAuthenticationFilter
+    ) throws Exception {
 
-                http.csrf(csrf -> csrf.disable())
+        http
+                .csrf(csrf -> csrf.disable())
 
-                        .sessionManagement(session ->
-                                session.sessionCreationPolicy(
-                                        SessionCreationPolicy.STATELESS
-                                )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, error) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                         )
-
-                        .exceptionHandling(exception ->
-                                exception
-                                        .authenticationEntryPoint(
-                                                (request, response, authException) ->
-                                                        response.sendError(
-                                                                HttpServletResponse.SC_UNAUTHORIZED
-                                                        )
-                                        )
-                                        .accessDeniedHandler(
-                                                (request, response, accessDeniedException) ->
-                                                        response.sendError(
-                                                                HttpServletResponse.SC_FORBIDDEN
-                                                        )
-                                        )
+                        .accessDeniedHandler((request, response, error) ->
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN)
                         )
+                )
 
-                        .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
 
-                                // Authentification
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "/api/auth/login"
-                                ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login")
+                        .permitAll()
 
-                                .requestMatchers("/error").permitAll()
+                        .requestMatchers("/error")
+                        .permitAll()
 
-                                // Bloquer les anciens CRUD génériques des données sensibles
-                                .requestMatchers(
-                                        "/api/sessions-utilisateur",
-                                        "/api/sessions-utilisateur/**",
-                                        "/api/utilisateurs-role",
-                                        "/api/utilisateurs-role/**",
-                                        "/api/historique-connexions",
-                                        "/api/historique-connexions/**",
-                                        "/api/utilisateur-statut-historique",
-                                        "/api/utilisateur-statut-historique/**",
-                                        "/api/journal-audit",
-                                        "/api/journal-audit/**"
-                                ).denyAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/me")
+                        .authenticated()
 
-                                // Consulter les utilisateurs
-                                .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/api/utilisateurs",
-                                        "/api/utilisateurs/**"
-                                ).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout")
+                        .authenticated()
 
-                                // Créer un utilisateur
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "/api/utilisateurs"
-                                ).hasRole("ADMIN")
-
-                                // Interdire les autres opérations sur les utilisateurs
-                                .requestMatchers(
-                                        "/api/utilisateurs",
-                                        "/api/utilisateurs/**"
-                                ).denyAll()
-
-                                // Référentiel des rôles : consultation ADMIN uniquement
-                                .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/api/roles",
-                                        "/api/roles/**"
-                                ).hasRole("ADMIN")
-
-                                .requestMatchers(
-                                        "/api/roles",
-                                        "/api/roles/**"
-                                ).denyAll()
-
-                                // Protection temporaire des autres API
-                                .anyRequest().authenticated()
+                        // Routes sensibles : on bloque les CRUD génériques.
+                        .requestMatchers(
+                                "/api/sessions-utilisateur",
+                                "/api/sessions-utilisateur/**",
+                                "/api/utilisateurs-role",
+                                "/api/utilisateurs-role/**",
+                                "/api/historique-connexions",
+                                "/api/historique-connexions/**",
+                                "/api/utilisateur-statut-historique",
+                                "/api/utilisateur-statut-historique/**",
+                                "/api/journal-audit",
+                                "/api/journal-audit/**"
                         )
+                        .denyAll()
 
-                        .addFilterBefore(
-                                sessionAuthenticationFilter,
-                                UsernamePasswordAuthenticationFilter.class
-                        );
+                        // Gestion des utilisateurs : ADMIN uniquement.
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/utilisateurs",
+                                "/api/utilisateurs/*"
+                        )
+                        .hasRole("ADMIN")
 
-                return http.build();
-        }
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/utilisateurs"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/utilisateurs",
+                                "/api/utilisateurs/**"
+                        )
+                        .denyAll()
+
+                        // Rôles : consultation ADMIN uniquement.
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/roles",
+                                "/api/roles/*"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/roles",
+                                "/api/roles/**"
+                        )
+                        .denyAll()
+
+                        // Sécurité provisoire :
+                        // les autres CRUD générés restent fermés jusqu'à ce qu'on ajoute les DTO
+                        // et les règles métier module par module.
+                        .anyRequest()
+                        .denyAll()
+                )
+
+                .addFilterBefore(
+                        sessionAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
+        return http.build();
+    }
 }
