@@ -177,5 +177,108 @@ public class UtilisateurGestionService {
                 Integer utilisateurId,
                 ChangerStatutUtilisateurRequest request,
                 Integer responsableId
-        ){}
+        ){
+                if (request == null 
+                        || request.getStatutCode() == null 
+                        || request.getStatutCode().trim().isEmpty()){
+
+                                throw new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                "Le nouveau statut est obligatoire"
+                                );
+                }
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() -> 
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                "Utilisateur introuvable"
+                                )
+                        );
+
+                Utilisateur responsable = utilisateurRepository.findById(responsableId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.UNAUTHORIZED,
+                                        "Responsable introuvable"
+                                )
+                        );
+
+                String nouveauStatutCode = request.getStatutCode().trim().toUpperCase();
+
+                Statut nouveauStatut = statutRepository
+                        .findStatutUtilisateurByCode(nouveauStatutCode)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "Statut utilisateur invalide"
+                                )
+                        );
+
+                Statut ancienStatut = utilisateur.getStatut();
+
+                 if (ancienStatut != null
+                        && ancienStatut.getId().equals(nouveauStatut.getId())) {
+
+                        return new UtilisateurListResponse(
+                                utilisateur.getId(),
+                                utilisateur.getIdentifiant(),
+                                nouveauStatut.getCode()
+                        );
+                }
+
+                utilisateur.setStatut(nouveauStatut);
+
+                Utilisateur utilisateurEnregistre =
+                        utilisateurRepository.save(utilisateur);
+
+                UtilisateurStatutHistorique historique =
+                        new UtilisateurStatutHistorique();
+
+                historique.setUtilisateur(utilisateurEnregistre);
+                historique.setAncienStatut(ancienStatut);
+                historique.setStatut(nouveauStatut);
+                historique.setResponsable(responsable);
+                historique.setMotif(request.getMotif());
+                historique.setDateModification(LocalDateTime.now());
+
+                utilisateurStatutHistoriqueRepository.save(historique);
+
+                return new UtilisateurListResponse(
+                        utilisateurEnregistre.getId(),
+                        utilisateurEnregistre.getIdentifiant(),
+                        nouveauStatut.getCode()
+                );
+        }
+
+        @Transactional
+        public void reinitialiserMotDePasse(
+                Integer utilisateurId,
+                ReinitialiserMotDePasseRequest request
+        ) {
+
+                if (request == null
+                        || request.getNouveauMotDePasse() == null
+                        || request.getNouveauMotDePasse().length() < 12) {
+
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Le nouveau mot de passe doit contenir au moins 12 caractères"
+                        );
+                }
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                utilisateur.setMotDePasseHash(
+                        passwordEncoder.encode(request.getNouveauMotDePasse())
+                );
+
+                utilisateurRepository.save(utilisateur);
+        }
 }

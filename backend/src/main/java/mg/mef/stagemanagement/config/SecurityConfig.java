@@ -89,6 +89,13 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
 
                         .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/utilisateurs/*/statut",
+                                "/api/utilisateurs/*/mot-de-passe"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
                                 "/api/utilisateurs",
                                 "/api/utilisateurs/**"
                         )
