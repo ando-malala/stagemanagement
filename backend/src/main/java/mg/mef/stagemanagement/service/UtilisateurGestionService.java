@@ -50,7 +50,7 @@ public class UtilisateurGestionService {
                 this.utilisateurStatutHistoriqueRepository = utilisateurStatutHistoriqueRepository;
         }
 
-        @Transactional
+        @Transactional(readOnly = false)
         public UtilisateurListResponse creerUtilisateur( CreerUtilisateurRequest request ) {
 
                 // 1. Vérifier les informations reçues
@@ -172,7 +172,7 @@ public class UtilisateurGestionService {
                 );
         }
 
-        @Transactional(readOnly = true)
+        @Transactional(readOnly = false)
         public UtilisateurListResponse changerStatut(
                 Integer utilisateurId,
                 ChangerStatutUtilisateurRequest request,
@@ -251,7 +251,7 @@ public class UtilisateurGestionService {
                 );
         }
 
-        @Transactional
+        @Transactional(readOnly = false)
         public void reinitialiserMotDePasse(
                 Integer utilisateurId,
                 ReinitialiserMotDePasseRequest request
