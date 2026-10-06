@@ -47,19 +47,35 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login")
+                        // =========================
+                        // AUTHENTIFICATION
+                        // =========================
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/auth/login"
+                        )
                         .permitAll()
 
                         .requestMatchers("/error")
                         .permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/auth/me")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/auth/me"
+                        )
                         .authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/auth/logout"
+                        )
                         .authenticated()
 
-                        // Routes sensibles : on bloque les CRUD génériques.
+                        // =========================
+                        // ROUTES SENSIBLES BLOQUÉES
+                        // =========================
+
                         .requestMatchers(
                                 "/api/sessions-utilisateur",
                                 "/api/sessions-utilisateur/**",
@@ -74,11 +90,14 @@ public class SecurityConfig {
                         )
                         .denyAll()
 
-                        // Gestion des utilisateurs : ADMIN uniquement.
+                        // =========================
+                        // UTILISATEURS — ADMIN
+                        // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/utilisateurs",
-                                "/api/utilisateurs/*"
+                                "/api/utilisateurs/{id}"
                         )
                         .hasRole("ADMIN")
 
@@ -90,22 +109,70 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
-                                "/api/utilisateurs/*/statut",
-                                "/api/utilisateurs/*/mot-de-passe"
+                                "/api/utilisateurs/{id}/statut",
+                                "/api/utilisateurs/{id}/mot-de-passe"
                         )
                         .hasRole("ADMIN")
 
+                        // =========================
+                        // RÔLES DES UTILISATEURS — ADMIN
+                        // =========================
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/utilisateurs/{id}/roles"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/utilisateurs/{id}/roles"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/utilisateurs/{id}/roles/{roleCode}"
+                        )
+                        .hasRole("ADMIN")
+
+                        // =========================
+                        // DÉPARTEMENTS DES RESPONSABLES — ADMIN
+                        // =========================
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/utilisateurs/{id}/departements"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/utilisateurs/{id}/departements"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/utilisateurs/{id}/departements/{departementId}"
+                        )
+                        .hasRole("ADMIN")
+
+                        // Tout autre accès aux utilisateurs est interdit.
                         .requestMatchers(
                                 "/api/utilisateurs",
                                 "/api/utilisateurs/**"
                         )
                         .denyAll()
 
-                        // Rôles : consultation ADMIN uniquement.
+                        // =========================
+                        // RÔLES — ADMIN EN LECTURE
+                        // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/roles",
-                                "/api/roles/*"
+                                "/api/roles/{id}"
                         )
                         .hasRole("ADMIN")
 
@@ -115,9 +182,12 @@ public class SecurityConfig {
                         )
                         .denyAll()
 
-                        // Sécurité provisoire :
-                        // les autres CRUD générés restent fermés jusqu'à ce qu'on ajoute les DTO
-                        // et les règles métier module par module.
+                        // =========================
+                        // AUTRES ROUTES
+                        // =========================
+                        // Les autres CRUD générés restent fermés
+                        // jusqu'à ce qu'on ajoute leurs DTO et règles métier.
+
                         .anyRequest()
                         .denyAll()
                 )

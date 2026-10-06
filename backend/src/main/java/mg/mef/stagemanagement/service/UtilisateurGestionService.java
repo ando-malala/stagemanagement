@@ -1,6 +1,7 @@
 package mg.mef.stagemanagement.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,20 +9,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import mg.mef.stagemanagement.dto.utilisateur.AjouterDepartementUtilisateurRequest;
+import mg.mef.stagemanagement.dto.utilisateur.AjouterRoleUtilisateurRequest;
+import mg.mef.stagemanagement.dto.utilisateur.ChangerStatutUtilisateurRequest;
 import mg.mef.stagemanagement.dto.utilisateur.CreerUtilisateurRequest;
+import mg.mef.stagemanagement.dto.utilisateur.DepartementUtilisateurResponse;
+import mg.mef.stagemanagement.dto.utilisateur.ReinitialiserMotDePasseRequest;
 import mg.mef.stagemanagement.dto.utilisateur.UtilisateurListResponse;
+import mg.mef.stagemanagement.model.Departement;
+import mg.mef.stagemanagement.model.ResponsableDepartement;
 import mg.mef.stagemanagement.model.Role;
 import mg.mef.stagemanagement.model.Statut;
 import mg.mef.stagemanagement.model.Utilisateur;
 import mg.mef.stagemanagement.model.UtilisateurRole;
+import mg.mef.stagemanagement.model.UtilisateurStatutHistorique;
+import mg.mef.stagemanagement.repository.DepartementRepository;
+import mg.mef.stagemanagement.repository.ResponsableDepartementRepository;
 import mg.mef.stagemanagement.repository.RoleRepository;
 import mg.mef.stagemanagement.repository.StatutRepository;
 import mg.mef.stagemanagement.repository.UtilisateurRepository;
 import mg.mef.stagemanagement.repository.UtilisateurRoleRepository;
-
-import mg.mef.stagemanagement.dto.utilisateur.ChangerStatutUtilisateurRequest;
-import mg.mef.stagemanagement.dto.utilisateur.ReinitialiserMotDePasseRequest;
-import mg.mef.stagemanagement.model.UtilisateurStatutHistorique;
 import mg.mef.stagemanagement.repository.UtilisateurStatutHistoriqueRepository;
 
 @Service
@@ -33,6 +40,8 @@ public class UtilisateurGestionService {
         private final UtilisateurRoleRepository utilisateurRoleRepository;
         private final PasswordEncoder passwordEncoder;
         private final UtilisateurStatutHistoriqueRepository utilisateurStatutHistoriqueRepository;
+        private final DepartementRepository departementRepository;
+        private final ResponsableDepartementRepository responsableDepartementRepository;
 
         public UtilisateurGestionService(
                 UtilisateurRepository utilisateurRepository,
@@ -40,7 +49,9 @@ public class UtilisateurGestionService {
                 StatutRepository statutRepository,
                 UtilisateurRoleRepository utilisateurRoleRepository,
                 PasswordEncoder passwordEncoder,
-                UtilisateurStatutHistoriqueRepository utilisateurStatutHistoriqueRepository
+                UtilisateurStatutHistoriqueRepository utilisateurStatutHistoriqueRepository,
+                DepartementRepository departementRepository,
+                ResponsableDepartementRepository responsableDepartementRepository
         ) {
                 this.utilisateurRepository = utilisateurRepository;
                 this.roleRepository = roleRepository;
@@ -48,6 +59,8 @@ public class UtilisateurGestionService {
                 this.utilisateurRoleRepository = utilisateurRoleRepository;
                 this.passwordEncoder = passwordEncoder;
                 this.utilisateurStatutHistoriqueRepository = utilisateurStatutHistoriqueRepository;
+                this.departementRepository = departementRepository;
+                this.responsableDepartementRepository = responsableDepartementRepository;
         }
 
         @Transactional(readOnly = false)
@@ -173,11 +186,7 @@ public class UtilisateurGestionService {
         }
 
         @Transactional(readOnly = false)
-        public UtilisateurListResponse changerStatut(
-                Integer utilisateurId,
-                ChangerStatutUtilisateurRequest request,
-                Integer responsableId
-        ){
+        public UtilisateurListResponse changerStatut(Integer utilisateurId, ChangerStatutUtilisateurRequest request, Integer responsableId ){
                 if (request == null 
                         || request.getStatutCode() == null 
                         || request.getStatutCode().trim().isEmpty()){
@@ -252,10 +261,7 @@ public class UtilisateurGestionService {
         }
 
         @Transactional(readOnly = false)
-        public void reinitialiserMotDePasse(
-                Integer utilisateurId,
-                ReinitialiserMotDePasseRequest request
-        ) {
+        public void reinitialiserMotDePasse( Integer utilisateurId, ReinitialiserMotDePasseRequest request ) {
 
                 if (request == null
                         || request.getNouveauMotDePasse() == null
@@ -280,5 +286,246 @@ public class UtilisateurGestionService {
                 );
 
                 utilisateurRepository.save(utilisateur);
+        }
+
+        @Transactional(readOnly = true)
+        public List<String> listerRolesUtilisateur(Integer utilisateurId) {
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                return utilisateurRoleRepository
+                        .findByUtilisateur_Id(utilisateur.getId())
+                        .stream()
+                        .map(utilisateurRole ->
+                                utilisateurRole.getRole().getCode()
+                        )
+                        .toList();
+        }
+
+        @Transactional(readOnly = false)
+        public List<String> ajouterRole( Integer utilisateurId, AjouterRoleUtilisateurRequest request) {
+
+                if (request == null
+                        || request.getRoleCode() == null
+                        || request.getRoleCode().trim().isEmpty()) {
+
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Le rôle est obligatoire"
+                        );
+                }
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                String roleCode = request.getRoleCode().trim().toUpperCase();
+
+                Role role = roleRepository.findByCode(roleCode)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "Rôle introuvable"
+                                )
+                        );
+
+                if (!Boolean.TRUE.equals(role.getActif())) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Ce rôle est désactivé"
+                        );
+                }
+
+                boolean existeDeja =
+                        utilisateurRoleRepository.existsByUtilisateur_IdAndRole_Id(
+                                utilisateur.getId(),
+                                role.getId()
+                        );
+
+                if (existeDeja) {
+                        return listerRolesUtilisateur(utilisateur.getId());
+                }
+
+                UtilisateurRole utilisateurRole = new UtilisateurRole();
+
+                utilisateurRole.setUtilisateur(utilisateur);
+                utilisateurRole.setRole(role);
+
+                utilisateurRoleRepository.save(utilisateurRole);
+
+                return listerRolesUtilisateur(utilisateur.getId());
+        }
+
+        @Transactional(readOnly = false)
+        public List<String> retirerRole( Integer utilisateurId,String roleCode) {
+
+                if (roleCode == null || roleCode.trim().isEmpty()) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Le rôle est obligatoire"
+                        );
+                }
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                String roleCodeNettoye = roleCode.trim().toUpperCase();
+
+                UtilisateurRole utilisateurRole =
+                        utilisateurRoleRepository
+                                .findByUtilisateur_IdAndRole_Code(
+                                        utilisateur.getId(),
+                                        roleCodeNettoye
+                                )
+                                .orElseThrow(() ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Ce rôle n'est pas attribué à cet utilisateur"
+                                        )
+                                );
+
+                List<String> rolesActuels =
+                        listerRolesUtilisateur(utilisateur.getId());
+
+                if (rolesActuels.size() <= 1) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Un utilisateur doit conserver au moins un rôle"
+                        );
+                }
+
+                utilisateurRoleRepository.delete(utilisateurRole);
+
+                return listerRolesUtilisateur(utilisateur.getId());
+        }
+
+        @Transactional(readOnly = true)
+        public List<DepartementUtilisateurResponse> listerDepartementsUtilisateur(
+                Integer utilisateurId
+        ) {
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                return responsableDepartementRepository
+                        .findByUtilisateur_Id(utilisateur.getId())
+                        .stream()
+                        .map(responsableDepartement -> {
+                                Departement departement =
+                                        responsableDepartement.getDepartement();
+
+                                String statut = departement.getStatut() != null
+                                        ? departement.getStatut().getCode()
+                                        : null;
+
+                                return new DepartementUtilisateurResponse(
+                                        departement.getId(),
+                                        departement.getLibelle(),
+                                        statut
+                                );
+                        })
+                        .toList();
+        }
+
+        @Transactional(readOnly = false)
+        public List<DepartementUtilisateurResponse> ajouterDepartementUtilisateur(
+                Integer utilisateurId,
+                AjouterDepartementUtilisateurRequest request
+        ) {
+
+                if (request == null || request.getDepartementId() == null) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Le département est obligatoire"
+                        );
+                }
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                Departement departement = departementRepository.findById(request.getDepartementId())
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Département introuvable"
+                                )
+                        );
+
+                boolean existeDeja =
+                        responsableDepartementRepository.existsByUtilisateur_IdAndDepartement_Id(
+                                utilisateur.getId(),
+                                departement.getId()
+                        );
+
+                if (existeDeja) {
+                        return listerDepartementsUtilisateur(utilisateur.getId());
+                }
+
+                ResponsableDepartement responsableDepartement =
+                        new ResponsableDepartement();
+
+                responsableDepartement.setUtilisateur(utilisateur);
+                responsableDepartement.setDepartement(departement);
+
+                responsableDepartementRepository.save(responsableDepartement);
+
+                return listerDepartementsUtilisateur(utilisateur.getId());
+        }
+
+        @Transactional(readOnly = false)
+        public List<DepartementUtilisateurResponse> retirerDepartementUtilisateur(
+                Integer utilisateurId,
+                Integer departementId
+        ) {
+
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+                ResponsableDepartement responsableDepartement =
+                        responsableDepartementRepository
+                                .findByUtilisateur_IdAndDepartement_Id(
+                                        utilisateur.getId(),
+                                        departementId
+                                )
+                                .orElseThrow(() ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Ce département n'est pas attribué à cet utilisateur"
+                                        )
+                                );
+
+                responsableDepartementRepository.delete(responsableDepartement);
+
+                return listerDepartementsUtilisateur(utilisateur.getId());
         }
 }
