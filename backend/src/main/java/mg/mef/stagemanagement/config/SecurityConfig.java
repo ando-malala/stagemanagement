@@ -223,6 +223,27 @@ public class SecurityConfig {
                         )
                         .hasRole("ADMIN")
                         
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/stagiaires",
+                                "/api/stagiaires/{id}",
+                                "/api/stagiaires/{id}/academiques"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/stagiaires",
+                                "/api/stagiaires/{id}/academiques"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/stagiaires/{id}"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        
                         .anyRequest()
                         .denyAll()
                 )
