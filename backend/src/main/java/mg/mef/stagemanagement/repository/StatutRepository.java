@@ -34,4 +34,18 @@ public interface StatutRepository extends JpaRepository<Statut, Integer> {
     Optional<Statut> findStatutUtilisateurByCode(
             @Param("code") String code
     );
+
+    @Query(value = """
+        SELECT s.*
+        FROM statuts s
+        JOIN types_statut ts ON ts.id = s.type_statut_id
+        WHERE ts.code = :typeCode
+          AND s.code = :statutCode
+          AND s.actif = TRUE
+          AND ts.actif = TRUE
+        """, nativeQuery = true)
+    Optional<Statut> findStatutByTypeCodeAndStatutCode(
+            @Param("typeCode") String typeCode,
+            @Param("statutCode") String statutCode
+    );
 }

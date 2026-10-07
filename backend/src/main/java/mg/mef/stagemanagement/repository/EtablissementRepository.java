@@ -4,6 +4,13 @@ import mg.mef.stagemanagement.model.Etablissement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-public interface EtablissementRepository extends JpaRepository<Etablissement, Integer> {
+public interface EtablissementRepository
+        extends JpaRepository<Etablissement, Integer> {
+
+    Optional<Etablissement> findByLibelleIgnoreCase(String libelle);
+
+    boolean existsByLibelleIgnoreCase(String libelle);
 }

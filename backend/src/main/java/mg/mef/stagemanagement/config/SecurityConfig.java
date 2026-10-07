@@ -188,6 +188,41 @@ public class SecurityConfig {
                         // Les autres CRUD générés restent fermés
                         // jusqu'à ce qu'on ajoute leurs DTO et règles métier.
 
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/referentiels/academiques/**"
+                        )
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/referentiels/academiques/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/referentiels/academiques/**"
+                        )
+                        .hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/referentiels/organisation/**"
+                        )
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/referentiels/organisation/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/referentiels/organisation/**"
+                        )
+                        .hasRole("ADMIN")
+                        
                         .anyRequest()
                         .denyAll()
                 )
