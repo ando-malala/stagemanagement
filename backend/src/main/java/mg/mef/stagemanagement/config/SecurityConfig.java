@@ -243,6 +243,68 @@ public class SecurityConfig {
                                 "/api/stagiaires/{id}"
                         )
                         .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/encadreurs",
+                                "/api/encadreurs/{id}"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/encadreurs"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/encadreurs/{id}",
+                                "/api/encadreurs/{id}/statut"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/stages",
+                                "/api/stages/{id}",
+                                "/api/stages/{id}/participants",
+                                "/api/stage-participants",
+                                "/api/stage-participants/{id}"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/stages",
+                                "/api/stage-participants"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/stages/{id}",
+                                "/api/stage-participants/{id}"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/stage-participants/{id}/statut"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/stage-participants/{id}/prolonger"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/stage-participants/{id}/suspendre",
+                                "/api/stage-participants/{id}/reprendre",
+                                "/api/stage-participants/{id}/abandonner",
+                                "/api/stage-participants/{id}/annuler",
+                                "/api/stage-participants/{id}/cloturer"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
                         
                         .anyRequest()
                         .denyAll()
