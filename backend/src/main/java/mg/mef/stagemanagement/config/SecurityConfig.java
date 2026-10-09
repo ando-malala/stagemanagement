@@ -393,6 +393,31 @@ public class SecurityConfig {
                                 "/api/evaluations/{id}"
                         )
                         .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/alertes",
+                                "/api/alertes/non-lues"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/alertes"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/alertes/{id}/lire",
+                                "/api/alertes/tout-lire"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/dashboard/resume"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
                         
                         .anyRequest()
                         .denyAll()
