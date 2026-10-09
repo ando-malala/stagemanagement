@@ -4,6 +4,12 @@ import mg.mef.stagemanagement.model.Soutenance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface SoutenanceRepository extends JpaRepository<Soutenance, Integer> {
+
+    Optional<Soutenance> findByStageParticipant_Id(Integer stageParticipantId);
+
+    boolean existsByStageParticipant_Id(Integer stageParticipantId);
 }

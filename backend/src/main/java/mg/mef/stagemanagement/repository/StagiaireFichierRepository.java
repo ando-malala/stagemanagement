@@ -4,6 +4,16 @@ import mg.mef.stagemanagement.model.StagiaireFichier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface StagiaireFichierRepository extends JpaRepository<StagiaireFichier, Integer> {
+public interface StagiaireFichierRepository
+        extends JpaRepository<StagiaireFichier, Integer> {
+
+    List<StagiaireFichier> findByStagiaire_Id(Integer stagiaireId);
+
+    boolean existsByStagiaire_IdAndTypePieceJointe_Id(
+            Integer stagiaireId,
+            Integer typePieceJointeId
+    );
 }

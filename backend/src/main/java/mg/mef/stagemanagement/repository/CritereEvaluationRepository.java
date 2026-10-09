@@ -4,6 +4,11 @@ import mg.mef.stagemanagement.model.CritereEvaluation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface CritereEvaluationRepository extends JpaRepository<CritereEvaluation, Integer> {
+public interface CritereEvaluationRepository
+        extends JpaRepository<CritereEvaluation, Integer> {
+
+    List<CritereEvaluation> findByActifTrueOrderByOrdreAsc();
 }
