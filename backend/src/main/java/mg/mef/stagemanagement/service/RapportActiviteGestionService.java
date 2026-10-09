@@ -43,6 +43,7 @@ public class RapportActiviteGestionService {
     private final MoisStageRepository moisStageRepository;
     private final StatutRepository statutRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final JournalAuditService journalAuditService;
 
     public RapportActiviteGestionService(
             RapportActiviteRepository rapportActiviteRepository,
@@ -51,7 +52,8 @@ public class RapportActiviteGestionService {
             StageParticipantRepository stageParticipantRepository,
             MoisStageRepository moisStageRepository,
             StatutRepository statutRepository,
-            UtilisateurRepository utilisateurRepository
+            UtilisateurRepository utilisateurRepository,
+            JournalAuditService journalAuditService
     ) {
         this.rapportActiviteRepository = rapportActiviteRepository;
         this.rapportObservationRepository = rapportObservationRepository;
@@ -60,6 +62,7 @@ public class RapportActiviteGestionService {
         this.moisStageRepository = moisStageRepository;
         this.statutRepository = statutRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.journalAuditService = journalAuditService;
     }
 
     public List<RapportActiviteResponse> listerRapports() {
@@ -381,6 +384,24 @@ public class RapportActiviteGestionService {
         historique.setDateModification(LocalDateTime.now());
 
         historiqueRepository.save(historique);
+
+       java.util.Map<String, Object> anciennesValeurs = new java.util.HashMap<>();
+        anciennesValeurs.put(
+                "statut",
+                ancienStatut != null ? ancienStatut.getCode() : null
+        );
+
+        java.util.Map<String, Object> nouvellesValeurs = new java.util.HashMap<>();
+        nouvellesValeurs.put("statut", nouveauStatut.getCode());
+
+        journalAuditService.enregistrer(
+                responsableId,
+                "CHANGER_STATUT_RAPPORT",
+                "RapportActivite",
+                rapportEnregistre.getId(),
+                anciennesValeurs,
+                nouvellesValeurs
+        );
 
         return toRapportResponse(rapportEnregistre);
     }

@@ -1,8 +1,7 @@
 package mg.mef.stagemanagement.controller;
 
-import mg.mef.stagemanagement.model.JournalAudit;
+import mg.mef.stagemanagement.dto.audit.JournalAuditResponse;
 import mg.mef.stagemanagement.service.JournalAuditService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,51 +11,37 @@ import java.util.List;
 @RequestMapping("/api/journal-audit")
 public class JournalAuditController {
 
-    private final JournalAuditService service;
+    private final JournalAuditService journalAuditService;
 
-    public JournalAuditController(JournalAuditService service) {
-        this.service = service;
+    public JournalAuditController(
+            JournalAuditService journalAuditService
+    ) {
+        this.journalAuditService = journalAuditService;
     }
 
     @GetMapping
-    public ResponseEntity<List<JournalAudit>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<JournalAuditResponse>> listerJournal() {
+        return ResponseEntity.ok(
+                journalAuditService.listerJournal()
+        );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<JournalAudit> findById(@PathVariable Integer id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/utilisateur/{utilisateurId}")
+    public ResponseEntity<List<JournalAuditResponse>> listerParUtilisateur(
+            @PathVariable Integer utilisateurId
+    ) {
+        return ResponseEntity.ok(
+                journalAuditService.listerParUtilisateur(utilisateurId)
+        );
     }
 
-    @PostMapping
-    public ResponseEntity<JournalAudit> create(@RequestBody JournalAudit journalAudit) {
-        journalAudit.setId(null);
-        JournalAudit saved = service.save(journalAudit);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<JournalAudit> update(
-            @PathVariable Integer id,
-            @RequestBody JournalAudit journalAudit) {
-
-        if (!service.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        journalAudit.setId(id);
-        return ResponseEntity.ok(service.save(journalAudit));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (!service.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        service.deleteById(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/entite/{entite}/{entiteId}")
+    public ResponseEntity<List<JournalAuditResponse>> listerParEntite(
+            @PathVariable String entite,
+            @PathVariable Integer entiteId
+    ) {
+        return ResponseEntity.ok(
+                journalAuditService.listerParEntite(entite, entiteId)
+        );
     }
 }

@@ -37,6 +37,7 @@ public class AlerteGestionService {
     private final EncadreurRepository encadreurRepository;
     private final SoutenanceRepository soutenanceRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final JournalAuditService journalAuditService;
 
     public AlerteGestionService(
             AlerteRepository alerteRepository,
@@ -45,7 +46,8 @@ public class AlerteGestionService {
             RapportActiviteRepository rapportActiviteRepository,
             EncadreurRepository encadreurRepository,
             SoutenanceRepository soutenanceRepository,
-            UtilisateurRepository utilisateurRepository
+            UtilisateurRepository utilisateurRepository,
+            JournalAuditService journalAuditService
     ) {
         this.alerteRepository = alerteRepository;
         this.typeAlerteRepository = typeAlerteRepository;
@@ -54,6 +56,7 @@ public class AlerteGestionService {
         this.encadreurRepository = encadreurRepository;
         this.soutenanceRepository = soutenanceRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.journalAuditService = journalAuditService;
     }
 
     public List<AlerteResponse> listerAlertes() {
@@ -193,6 +196,19 @@ public class AlerteGestionService {
         alerte.setTraitePar(utilisateur);
 
         Alerte enregistree = alerteRepository.save(alerte);
+
+        journalAuditService.enregistrer(
+                utilisateurId,
+                "TRAITER_ALERTE",
+                "Alerte",
+                enregistree.getId(),
+                java.util.Map.of(
+                        "statut", "A_TRAITER"
+                ),
+                java.util.Map.of(
+                        "statut", "TRAITEE"
+                )
+        );
 
         return toResponse(enregistree);
     }

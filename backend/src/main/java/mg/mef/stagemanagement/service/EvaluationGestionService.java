@@ -34,19 +34,22 @@ public class EvaluationGestionService {
     private final CritereEvaluationRepository critereEvaluationRepository;
     private final StageParticipantRepository stageParticipantRepository;
     private final EncadreurRepository encadreurRepository;
+    private final JournalAuditService journalAuditService;
 
     public EvaluationGestionService(
             EvaluationFinaleRepository evaluationFinaleRepository,
             EvaluationCritereRepository evaluationCritereRepository,
             CritereEvaluationRepository critereEvaluationRepository,
             StageParticipantRepository stageParticipantRepository,
-            EncadreurRepository encadreurRepository
+            EncadreurRepository encadreurRepository,
+            JournalAuditService journalAuditService
     ) {
         this.evaluationFinaleRepository = evaluationFinaleRepository;
         this.evaluationCritereRepository = evaluationCritereRepository;
         this.critereEvaluationRepository = critereEvaluationRepository;
         this.stageParticipantRepository = stageParticipantRepository;
         this.encadreurRepository = encadreurRepository;
+        this.journalAuditService = journalAuditService;
     }
 
     public List<EvaluationFinaleResponse> listerEvaluations() {
@@ -313,6 +316,19 @@ public class EvaluationGestionService {
 
         EvaluationFinale enregistree =
                 evaluationFinaleRepository.save(evaluation);
+                
+        journalAuditService.enregistrer(
+                null,
+                "FINALISER_EVALUATION",
+                "EvaluationFinale",
+                enregistree.getId(),
+                java.util.Map.of(
+                        "estFinalisee", false
+                ),
+                java.util.Map.of(
+                        "estFinalisee", true
+                )
+        );
 
         return toEvaluationResponse(enregistree);
     }

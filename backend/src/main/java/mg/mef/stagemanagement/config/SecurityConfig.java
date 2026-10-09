@@ -84,9 +84,7 @@ public class SecurityConfig {
                                 "/api/historique-connexions",
                                 "/api/historique-connexions/**",
                                 "/api/utilisateur-statut-historique",
-                                "/api/utilisateur-statut-historique/**",
-                                "/api/journal-audit",
-                                "/api/journal-audit/**"
+                                "/api/utilisateur-statut-historique/**"
                         )
                         .denyAll()
 
@@ -418,6 +416,13 @@ public class SecurityConfig {
                                 "/api/dashboard/resume"
                         )
                         .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/journal-audit",
+                                "/api/journal-audit/utilisateur/{utilisateurId}",
+                                "/api/journal-audit/entite/{entite}/{entiteId}"
+                        )
+                        .hasRole("ADMIN")
                         
                         .anyRequest()
                         .denyAll()
