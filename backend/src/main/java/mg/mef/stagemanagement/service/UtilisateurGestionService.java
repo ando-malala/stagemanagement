@@ -85,7 +85,7 @@ public class UtilisateurGestionService {
 
                 if (identifiant.isEmpty()
                         || identifiant.length() > 50
-                        || motDePasse.length() < 12
+                        || motDePasse.length() < 6
                         || roleCode.isEmpty()) {
 
                         throw new ResponseStatusException(
