@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AlerteRepository extends JpaRepository<Alerte, Integer> {
@@ -17,4 +18,8 @@ public interface AlerteRepository extends JpaRepository<Alerte, Integer> {
     boolean existsByCleDeduplication(String cleDeduplication);
 
     long countByStatut(AlerteStatut statut);
+
+    Optional<Alerte> findByCleDeduplication(String cleDeduplication);
+
+    List<Alerte> findByTypeAlerte_Code(String code);
 }

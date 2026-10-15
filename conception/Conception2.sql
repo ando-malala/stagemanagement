@@ -73,14 +73,18 @@ CREATE TABLE types_evenement_participation(
     actif BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE types_alerte(
+CREATE TABLE types_alerte (
     id SERIAL PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     libelle VARCHAR(150) NOT NULL UNIQUE,
     poids_priorite INT NOT NULL DEFAULT 0,
     action_recommandee VARCHAR(250),
+    nature_alerte VARCHAR(20) NOT NULL DEFAULT 'A_TRAITER',
     actif BOOLEAN NOT NULL DEFAULT TRUE,
-    CHECK(poids_priorite>=0)
+
+    CHECK (poids_priorite >= 0),
+    CONSTRAINT chk_types_alerte_nature
+        CHECK (nature_alerte IN ('INFORMATION', 'A_TRAITER'))
 );
 
 CREATE TABLE parametres_suivi(
@@ -517,7 +521,7 @@ CREATE TABLE alertes(
     traite_par_id INT,
     cle_deduplication VARCHAR(255) UNIQUE,
     CHECK(priorite IN('INFORMATION','AVERTISSEMENT','URGENT')),
-    CHECK(statut IN('A_TRAITER','TRAITEE','IGNOREE')),
+    CHECK (statut IN ('A_TRAITER', 'TRAITEE', 'IGNOREE', 'EXPIREE')),
     CHECK(stage_participant_id IS NOT NULL OR rapport_id IS NOT NULL OR encadreur_id IS NOT NULL OR soutenance_id IS NOT NULL),
     FOREIGN KEY(type_alerte_id) REFERENCES types_alerte(id),
     FOREIGN KEY(stage_participant_id) REFERENCES stage_participant(id),
@@ -1085,3 +1089,4 @@ FROM(
 ) AS v(type_code,source_code,cible_code)
 JOIN etats source ON source.type_code=v.type_code AND source.code=v.source_code
 JOIN etats cible ON cible.type_code=v.type_code AND cible.code=v.cible_code;
+

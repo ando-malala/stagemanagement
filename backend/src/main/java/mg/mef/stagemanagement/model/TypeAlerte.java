@@ -1,6 +1,7 @@
 package mg.mef.stagemanagement.model;
 
 import jakarta.persistence.*;
+import mg.mef.stagemanagement.model.enums.NatureAlerte;
 
 @Entity
 @Table(name = "types_alerte")
@@ -24,6 +25,10 @@ public class TypeAlerte {
 
     @Column(nullable = false)
     private Boolean actif = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nature_alerte", nullable = false, length = 20)
+    private NatureAlerte natureAlerte;
 
     public TypeAlerte() {
     }
@@ -74,6 +79,14 @@ public class TypeAlerte {
 
     public void setActif(Boolean actif) {
         this.actif = actif;
+    }
+
+    public NatureAlerte getNatureAlerte() {
+        return natureAlerte;
+    }
+
+    public void setNatureAlerte(NatureAlerte natureAlerte) {
+        this.natureAlerte = natureAlerte;
     }
 
 }
