@@ -27,6 +27,8 @@ public class AlerteResponse {
     private Integer traiteParId;
     private String traitePar;
 
+    private String natureAlerte;
+
     public AlerteResponse() {
     }
 
@@ -192,5 +194,13 @@ public class AlerteResponse {
 
     public void setTraitePar(String traitePar) {
         this.traitePar = traitePar;
+    }
+
+    public String getNatureAlerte() {
+        return natureAlerte;
+    }
+
+    public void setNatureAlerte(String natureAlerte) {
+        this.natureAlerte = natureAlerte;
     }
 }

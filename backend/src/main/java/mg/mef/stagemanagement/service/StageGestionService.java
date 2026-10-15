@@ -744,7 +744,7 @@ public class StageGestionService {
 
         StageParticipantResponse response = appliquerEvenementAvecStatut(
                 participationId,
-                "CLOTURE",
+                "CLOTUREE",
                 "TERMINEE",
                 request,
                 responsableId

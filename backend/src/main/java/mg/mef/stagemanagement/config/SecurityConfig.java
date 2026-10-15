@@ -423,6 +423,11 @@ public class SecurityConfig {
                                 "/api/journal-audit/entite/{entite}/{entiteId}"
                         )
                         .hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/alertes/detection/stages-depasses"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
                         
                         .anyRequest()
                         .denyAll()

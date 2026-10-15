@@ -18,6 +18,7 @@ import mg.mef.stagemanagement.repository.SoutenanceRepository;
 import mg.mef.stagemanagement.repository.StageParticipantRepository;
 import mg.mef.stagemanagement.repository.TypeAlerteRepository;
 import mg.mef.stagemanagement.repository.UtilisateurRepository;
+import mg.mef.stagemanagement.model.enums.NatureAlerte;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -183,6 +184,23 @@ public class AlerteGestionService {
                         )
                 );
 
+        if (alerte.getTypeAlerte().getNatureAlerte()
+                == NatureAlerte.INFORMATION) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Une alerte informative ne peut pas être résolue manuellement"
+                );
+        }
+
+        if (alerte.getStatut() != AlerteStatut.A_TRAITER) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Cette alerte n'est plus à traiter"
+                );
+        }
+
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -213,29 +231,15 @@ public class AlerteGestionService {
         return toResponse(enregistree);
     }
 
-    @Transactional(readOnly = false)
-    public void toutMarquerCommeTraite(Integer utilisateurId) {
-        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.UNAUTHORIZED,
-                                "Utilisateur connecté introuvable"
-                        )
-                );
+        @Transactional(readOnly = false)
+        public void toutMarquerCommeTraite(Integer utilisateurId) {
 
-        List<Alerte> alertes =
-                alerteRepository.findByStatutOrderByDateDetectionDesc(
-                        AlerteStatut.A_TRAITER
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Le traitement global des alertes est désactivé. "
+                        + "Chaque anomalie doit être vérifiée individuellement."
                 );
-
-        for (Alerte alerte : alertes) {
-            alerte.setStatut(AlerteStatut.TRAITEE);
-            alerte.setDateTraitement(LocalDateTime.now());
-            alerte.setTraitePar(utilisateur);
         }
-
-        alerteRepository.saveAll(alertes);
-    }
 
     private TypeAlerte trouverTypeAlerte(String code) {
         if (code == null || code.trim().isEmpty()) {
@@ -274,7 +278,7 @@ public class AlerteGestionService {
         TypeAlerte typeAlerte = alerte.getTypeAlerte();
         Utilisateur traitePar = alerte.getTraitePar();
 
-        return new AlerteResponse(
+        AlerteResponse response = new AlerteResponse(
                 alerte.getId(),
                 typeAlerte != null ? typeAlerte.getCode() : null,
                 typeAlerte != null ? typeAlerte.getLibelle() : null,
@@ -300,6 +304,14 @@ public class AlerteGestionService {
                 traitePar != null ? traitePar.getId() : null,
                 traitePar != null ? traitePar.getIdentifiant() : null
         );
+
+        response.setNatureAlerte(
+                typeAlerte != null && typeAlerte.getNatureAlerte() != null
+                        ? typeAlerte.getNatureAlerte().name()
+                        : null
+        );
+
+        return response;
     }
 
     private String nettoyerTexteObligatoire(String valeur, String message) {
