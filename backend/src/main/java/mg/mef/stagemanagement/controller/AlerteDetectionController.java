@@ -36,4 +36,18 @@ public class AlerteDetectionController {
                 )
         );
     }
+
+    @PostMapping("/fins-stages-proches")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_STAGE')")
+    public ResponseEntity<Map<String, Object>> detecterFinsStagesProches() {
+
+        int nouvellesAlertes = detectionService.detecterFinsStagesProches();
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "Vérification des fins de stage proches terminée",
+                        "nouvellesAlertes", nouvellesAlertes
+                )
+        );
+    }
 }

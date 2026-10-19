@@ -38,4 +38,19 @@ public interface StageParticipantRepository
         List<StageParticipant> findStagesDepassesNonClotures(
                 @Param("dateActuelle") LocalDate dateActuelle
         );
+
+        
+        @Query("""
+                SELECT sp
+                FROM StageParticipant sp
+                JOIN sp.statut s
+                WHERE sp.dateFinStage BETWEEN :dateActuelle AND :dateLimite
+                AND sp.dateCloture IS NULL
+                AND s.code IN ('EN_COURS', 'A_CLOTURER')
+        """)
+        List<StageParticipant> findStagesProchesDeFin(
+                @Param("dateActuelle") LocalDate dateActuelle,
+                @Param("dateLimite") LocalDate dateLimite
+        );
+
 }

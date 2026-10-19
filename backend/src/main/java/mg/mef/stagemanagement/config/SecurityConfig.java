@@ -428,6 +428,11 @@ public class SecurityConfig {
                                 "/api/alertes/detection/stages-depasses"
                         )
                         .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/alertes/detection/fins-stages-proches"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
                         
                         .anyRequest()
                         .denyAll()
