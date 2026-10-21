@@ -44,6 +44,13 @@ public class AlerteDetectionService {
                 this.seuilAlerteRepository = seuilAlerteRepository;
         }
 
+        public void detecterToutesLesAlertes() {
+
+                detecterFinsStagesProches();
+
+                detecterStagesDepasses();
+        }
+
         @Transactional
         public int detecterStagesDepasses() {
 
