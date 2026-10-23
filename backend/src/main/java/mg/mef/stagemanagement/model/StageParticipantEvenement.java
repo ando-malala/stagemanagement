@@ -23,6 +23,9 @@ public class StageParticipantEvenement {
     @Column(name = "date_evenement", nullable = false)
     private LocalDateTime dateEvenement = LocalDateTime.now();
 
+    @Column(name = "date_effet")
+    private LocalDate dateEffet;
+
     @Column(name = "ancienne_date_fin")
     private LocalDate ancienneDateFin;
 
@@ -101,6 +104,14 @@ public class StageParticipantEvenement {
 
     public void setResponsable(Utilisateur responsable) {
         this.responsable = responsable;
+    }
+
+    public LocalDate getDateEffet() {
+        return dateEffet;
+    }
+
+    public void setDateEffet(LocalDate dateEffet) {
+        this.dateEffet = dateEffet;
     }
 
 }

@@ -16,8 +16,13 @@ public class AlerteOrchestrationService {
 
     public void executerControlesQuotidiens() {
 
+        // 1. Détecter les stages proches de leur fin
         detectionService.detecterFinsStagesProches();
 
+        // 2. Détecter les stages dépassés
         detectionService.detecterStagesDepasses();
+
+        // 3. Détecter les rapports hebdomadaires manquants
+        detectionService.detecterRapportsManquants();
     }
 }

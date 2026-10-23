@@ -375,6 +375,7 @@ CREATE TABLE stage_participant_evenements(
     stage_participant_id INT NOT NULL,
     type_evenement_id INT NOT NULL,
     date_evenement TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_effet DATE,
     ancienne_date_fin DATE,
     nouvelle_date_fin DATE,
     motif TEXT,

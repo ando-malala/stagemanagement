@@ -11,7 +11,11 @@ import mg.mef.stagemanagement.repository.StageParticipantRepository;
 import mg.mef.stagemanagement.repository.TypeAlerteRepository;
 import mg.mef.stagemanagement.model.SeuilAlerte;
 import mg.mef.stagemanagement.repository.SeuilAlerteRepository;
-
+import mg.mef.stagemanagement.model.RapportActivite;
+import mg.mef.stagemanagement.repository.RapportActiviteRepository;
+import mg.mef.stagemanagement.model.RapportActivite;
+import mg.mef.stagemanagement.model.enums.AlertePriorite;
+import mg.mef.stagemanagement.model.enums.AlerteStatut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +27,13 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class AlerteDetectionService {
@@ -31,17 +42,23 @@ public class AlerteDetectionService {
         private final StageParticipantRepository participationRepository;
         private final TypeAlerteRepository typeAlerteRepository;
         private final SeuilAlerteRepository seuilAlerteRepository;
+        private final RapportActiviteRepository rapportActiviteRepository;
+        private final CalculPeriodesRapportService calculPeriodesRapportService;
 
         public AlerteDetectionService(
                 AlerteRepository alerteRepository,
                 StageParticipantRepository participationRepository,
                 TypeAlerteRepository typeAlerteRepository,
-                SeuilAlerteRepository seuilAlerteRepository
+                SeuilAlerteRepository seuilAlerteRepository,
+                RapportActiviteRepository rapportActiviteRepository,
+                CalculPeriodesRapportService calculPeriodesRapportService
         ) {
                 this.alerteRepository = alerteRepository;
                 this.participationRepository = participationRepository;
                 this.typeAlerteRepository = typeAlerteRepository;
                 this.seuilAlerteRepository = seuilAlerteRepository;
+                this.rapportActiviteRepository = rapportActiviteRepository;
+                this.calculPeriodesRapportService = calculPeriodesRapportService;
         }
 
         public void detecterToutesLesAlertes() {
@@ -251,5 +268,159 @@ public class AlerteDetectionService {
 
                 return nouvellesAlertes;
         }
+
+        
+        @Transactional
+        public int detecterRapportsManquants() {
+
+                LocalDate aujourdHui = LocalDate.now(
+                        ZoneId.of("Indian/Antananarivo")
+                );
+
+                TypeAlerte type = typeAlerteRepository
+                        .findByCodeIgnoreCaseAndActifTrue("RAPPORT_MANQUANT")
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Type RAPPORT_MANQUANT introuvable ou inactif"
+                        ));
+
+                List<StageParticipant> participations =
+                        participationRepository.findAll();
+
+                Set<String> clesActives = new HashSet<>();
+                int nouvellesAlertes = 0;
+
+                for (StageParticipant participation : participations) {
+
+                        String statutParticipation =
+                                participation.getStatut().getCode();
+
+                        // Ne pas demander de rapport pour un stage
+                        // annulé ou abandonné.
+                        if ("ANNULEE".equals(statutParticipation)
+                                || "ABANDONNEE".equals(statutParticipation)
+                                || "PLANIFIEE".equals(statutParticipation)) {
+                        continue;
+                        }
+
+                        List<RapportActivite> rapports =
+                                rapportActiviteRepository
+                                        .findByStageParticipant_Id(
+                                                participation.getId()
+                                        );
+
+                        var periodes = calculPeriodesRapportService.calculer(
+                                participation.getDateDebutStage(),
+                                participation.getDateFinStage()
+                        );
+
+                        for (var periode : periodes) {
+
+                        // Le lundi est encore autorisé pour la remise.
+                        // L'alerte commence donc le mardi.
+                        if (!aujourdHui.isAfter(periode.dateLimite())) {
+                                continue;
+                        }
+
+                        boolean rapportRemis = rapports.stream().anyMatch(
+                                rapport -> {
+
+                                        boolean memePeriode =
+                                                rapport.getDebutSemaine()
+                                                        .equals(periode.debut())
+                                                && rapport.getFinSemaine()
+                                                        .equals(periode.fin());
+
+                                        if (!memePeriode) {
+                                        return false;
+                                        }
+
+                                        String statutRapport =
+                                                rapport.getStatut().getCode();
+
+                                        boolean statutRemis =
+                                                "SOUMIS".equals(statutRapport)
+                                                || "VALIDE".equals(statutRapport)
+                                                || "A_CORRIGER".equals(statutRapport);
+
+                                        return statutRemis
+                                                && rapport.getDateSoumission() != null;
+                                }
+                        );
+
+                        String cle = "RAPPORT_MANQUANT_PARTICIPATION_"
+                                + participation.getId()
+                                + "_"
+                                + periode.debut();
+
+                        if (rapportRemis) {
+                                continue;
+                        }
+
+                        clesActives.add(cle);
+
+                        Alerte alerte = alerteRepository
+                                .findByCleDeduplication(cle)
+                                .orElse(null);
+
+                        if (alerte == null) {
+
+                                alerte = new Alerte();
+                                alerte.setTypeAlerte(type);
+                                alerte.setStageParticipant(participation);
+                                alerte.setCleDeduplication(cle);
+                                alerte.setDateDetection(LocalDateTime.now());
+
+                                nouvellesAlertes++;
+
+                        } else if (alerte.getStatut()
+                                != AlerteStatut.A_TRAITER) {
+
+                                alerte.setDateTraitement(null);
+                                alerte.setTraitePar(null);
+                        }
+
+                        alerte.setStatut(AlerteStatut.A_TRAITER);
+                        alerte.setPriorite(AlertePriorite.AVERTISSEMENT);
+                        alerte.setDateEcheance(periode.dateLimite());
+
+                        alerte.setMessage(
+                                "Rapport hebdomadaire manquant pour la "
+                                + "participation n°" + participation.getId()
+                                + ", période du " + periode.debut()
+                                + " au " + periode.fin()
+                                + ". Date limite : " + periode.dateLimite()
+                        );
+
+                        alerteRepository.save(alerte);
+                        }
+                }
+
+                // Résoudre les signalements dont la cause
+                // n'est plus détectée.
+                List<Alerte> alertesExistantes =
+                        alerteRepository.findByTypeAlerte_Code(
+                                "RAPPORT_MANQUANT"
+                        );
+
+                for (Alerte alerte : alertesExistantes) {
+
+                        String cle = alerte.getCleDeduplication();
+
+                        if (cle != null
+                                && cle.startsWith("RAPPORT_MANQUANT_PARTICIPATION_")
+                                && !clesActives.contains(cle)
+                                && alerte.getStatut() == AlerteStatut.A_TRAITER) {
+
+                        alerte.setStatut(AlerteStatut.TRAITEE);
+                        alerte.setDateTraitement(LocalDateTime.now());
+                        alerte.setTraitePar(null);
+
+                        alerteRepository.save(alerte);
+                        }
+                }
+
+                return nouvellesAlertes;
+        }
+
 
 }

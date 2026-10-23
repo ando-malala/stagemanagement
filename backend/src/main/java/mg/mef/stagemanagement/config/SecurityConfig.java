@@ -433,6 +433,16 @@ public class SecurityConfig {
                                 "/api/alertes/detection/fins-stages-proches"
                         )
                         .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/alertes/detection/rapports-manquants"
+                        )
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/alertes/detection/test-orchestration"
+                        )
+                        .hasRole("ADMIN")
                         
                         .anyRequest()
                         .denyAll()

@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 @Component
 public class AlerteScheduler {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(AlerteScheduler.class);
+
     private final AlerteOrchestrationService orchestrationService;
-    private static final Logger logger = LoggerFactory.getLogger(AlerteScheduler.class);
 
     public AlerteScheduler(
             AlerteOrchestrationService orchestrationService
@@ -20,12 +22,8 @@ public class AlerteScheduler {
     }
 
     @Scheduled(
-        cron = "0 0 6 * * *",
-        zone = "Indian/Antananarivo"
-    )
-    @Scheduled(
-        cron = "0 0 6 * * *",
-        zone = "Indian/Antananarivo"
+            cron = "0 0 6 * * *",
+            zone = "Indian/Antananarivo"
     )
     public void executerVerificationQuotidienne() {
 
@@ -37,7 +35,6 @@ public class AlerteScheduler {
             logger.info("Contrôle quotidien des alertes terminé");
 
         } catch (Exception exception) {
-
             logger.error(
                     "Erreur pendant le contrôle quotidien des alertes",
                     exception

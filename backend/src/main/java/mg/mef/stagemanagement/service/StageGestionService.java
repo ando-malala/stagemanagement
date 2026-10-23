@@ -38,6 +38,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.time.LocalDate;
 
 @Service
 @Transactional(readOnly = true)
@@ -812,11 +813,85 @@ public class StageGestionService {
 
         Statut ancienStatut = participant.getStatut();
 
+        
+        LocalDate dateEffet = null;
+
+        if ("SUSPENSION".equals(typeEvenementCode)
+                || "REPRISE".equals(typeEvenementCode)) {
+
+        if (request == null || request.getDateEffet() == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La date d'effet est obligatoire pour une suspension ou une reprise"
+                );
+        }
+
+        dateEffet = request.getDateEffet();
+
+        if (dateEffet.isBefore(participant.getDateDebutStage())
+                || dateEffet.isAfter(participant.getDateFinStage())) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La date d'effet doit appartenir à la période du stage"
+                );
+        }
+
+        if ("SUSPENSION".equals(typeEvenementCode)
+                && (ancienStatut == null
+                        || !"EN_COURS".equals(ancienStatut.getCode()))) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Seule une participation en cours peut être suspendue"
+                );
+        }
+
+        if ("REPRISE".equals(typeEvenementCode)
+                && (ancienStatut == null
+                        || !"SUSPENDUE".equals(ancienStatut.getCode()))) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Seule une participation suspendue peut reprendre"
+                );
+        }
+
+        if (dateEffet.isAfter(LocalDate.now(
+                java.time.ZoneId.of("Indian/Antananarivo")))) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La date d'effet ne peut pas être dans le futur"
+                );
+        }
+
+        var evenementsPrecedents = stageParticipantEvenementRepository
+                .findByStageParticipant_IdOrderByDateEvenementAscIdAsc(
+                        participationId
+                );
+
+        LocalDate derniereDateEffet = evenementsPrecedents.stream()
+                .filter(e -> e.getTypeEvenement() != null)
+                .filter(e -> "SUSPENSION".equals(e.getTypeEvenement().getCode())
+                        || "REPRISE".equals(e.getTypeEvenement().getCode()))
+                .map(StageParticipantEvenement::getDateEffet)
+                .filter(java.util.Objects::nonNull)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+
+        if (derniereDateEffet != null
+                && !dateEffet.isAfter(derniereDateEffet)) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "La date d'effet doit être postérieure à celle du dernier événement de suspension ou de reprise"
+                        );
+                }
+        }
+
+
         StageParticipantEvenement evenement = new StageParticipantEvenement();
 
         evenement.setStageParticipant(participant);
         evenement.setTypeEvenement(typeEvenement);
         evenement.setDateEvenement(LocalDateTime.now());
+        evenement.setDateEffet(dateEffet);
         evenement.setMotif(request != null ? request.getMotif() : null);
         evenement.setResponsable(responsable);
 
