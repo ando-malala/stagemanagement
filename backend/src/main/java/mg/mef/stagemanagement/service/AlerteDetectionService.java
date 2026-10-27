@@ -16,9 +16,23 @@ import mg.mef.stagemanagement.repository.RapportActiviteRepository;
 import mg.mef.stagemanagement.model.RapportActivite;
 import mg.mef.stagemanagement.model.enums.AlertePriorite;
 import mg.mef.stagemanagement.model.enums.AlerteStatut;
+import mg.mef.stagemanagement.model.Encadreur;
+import mg.mef.stagemanagement.repository.EncadreurRepository;
+import mg.mef.stagemanagement.model.TypePieceJointe;
+import mg.mef.stagemanagement.repository.TypePieceJointeRepository;
+import mg.mef.stagemanagement.repository.StageParticipantFichierRepository;
+import mg.mef.stagemanagement.repository.ParametresSuiviRepository;
+import mg.mef.stagemanagement.model.ParametresSuivi;
+import mg.mef.stagemanagement.model.Soutenance;
+import mg.mef.stagemanagement.repository.SoutenanceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -34,6 +48,10 @@ import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.time.LocalDateTime;
 
 @Service
 public class AlerteDetectionService {
@@ -44,6 +62,11 @@ public class AlerteDetectionService {
         private final SeuilAlerteRepository seuilAlerteRepository;
         private final RapportActiviteRepository rapportActiviteRepository;
         private final CalculPeriodesRapportService calculPeriodesRapportService;
+        private final ParametresSuiviRepository parametresSuiviRepository;
+        private final TypePieceJointeRepository typePieceJointeRepository;
+        private final StageParticipantFichierRepository stageParticipantFichierRepository;
+        private final EncadreurRepository encadreurRepository;
+        private final SoutenanceRepository soutenanceRepository;
 
         public AlerteDetectionService(
                 AlerteRepository alerteRepository,
@@ -51,7 +74,12 @@ public class AlerteDetectionService {
                 TypeAlerteRepository typeAlerteRepository,
                 SeuilAlerteRepository seuilAlerteRepository,
                 RapportActiviteRepository rapportActiviteRepository,
-                CalculPeriodesRapportService calculPeriodesRapportService
+                CalculPeriodesRapportService calculPeriodesRapportService,
+                ParametresSuiviRepository parametresSuiviRepository,
+                TypePieceJointeRepository typePieceJointeRepository,
+                StageParticipantFichierRepository stageParticipantFichierRepository,
+                EncadreurRepository encadreurRepository,
+                SoutenanceRepository soutenanceRepository
         ) {
                 this.alerteRepository = alerteRepository;
                 this.participationRepository = participationRepository;
@@ -59,6 +87,11 @@ public class AlerteDetectionService {
                 this.seuilAlerteRepository = seuilAlerteRepository;
                 this.rapportActiviteRepository = rapportActiviteRepository;
                 this.calculPeriodesRapportService = calculPeriodesRapportService;
+                this.parametresSuiviRepository = parametresSuiviRepository;
+                this.typePieceJointeRepository = typePieceJointeRepository;
+                this.stageParticipantFichierRepository = stageParticipantFichierRepository;
+                this.encadreurRepository = encadreurRepository;
+                this.soutenanceRepository = soutenanceRepository;
         }
 
         public void detecterToutesLesAlertes() {
@@ -412,6 +445,431 @@ public class AlerteDetectionService {
                                 && alerte.getStatut() == AlerteStatut.A_TRAITER) {
 
                         alerte.setStatut(AlerteStatut.TRAITEE);
+                        alerte.setDateTraitement(LocalDateTime.now());
+                        alerte.setTraitePar(null);
+
+                        alerteRepository.save(alerte);
+                        }
+                }
+
+                return nouvellesAlertes;
+        }
+
+        
+        @Transactional
+        public int detecterValidationsEnRetard() {
+
+                LocalDate aujourdHui = LocalDate.now(
+                        ZoneId.of("Indian/Antananarivo")
+                );
+
+                ParametresSuivi parametres = parametresSuiviRepository
+                        .findById((short) 1)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Paramètres de suivi introuvables"
+                        ));
+
+                int delai = parametres.getDelaiValidationRapportJours();
+
+                TypeAlerte type = typeAlerteRepository
+                        .findByCodeIgnoreCaseAndActifTrue("VALIDATION_EN_RETARD")
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Type VALIDATION_EN_RETARD introuvable ou inactif"
+                        ));
+
+                List<RapportActivite> rapports =
+                        rapportActiviteRepository.findAll();
+
+                Set<String> clesActives = new HashSet<>();
+                int nouvellesAlertes = 0;
+
+                for (RapportActivite rapport : rapports) {
+
+                        if (rapport.getStatut() == null
+                                || !"SOUMIS".equals(rapport.getStatut().getCode())
+                                || rapport.getDateSoumission() == null) {
+                        continue;
+                        }
+
+                        LocalDate dateLimite = rapport.getDateSoumission()
+                                .toLocalDate()
+                                .plusDays(delai);
+
+                        // La validation reste possible jusqu'à la fin
+                        // du dernier jour autorisé.
+                        if (!aujourdHui.isAfter(dateLimite)) {
+                        continue;
+                        }
+
+                        String cle = "VALIDATION_EN_RETARD_RAPPORT_"
+                                + rapport.getId();
+
+                        clesActives.add(cle);
+
+                        Alerte alerte = alerteRepository
+                                .findByCleDeduplication(cle)
+                                .orElse(null);
+
+                        if (alerte == null) {
+
+                        alerte = new Alerte();
+
+                        alerte.setTypeAlerte(type);
+                        alerte.setRapport(rapport);
+                        alerte.setStageParticipant(
+                                rapport.getStageParticipant()
+                        );
+                        alerte.setCleDeduplication(cle);
+                        alerte.setDateDetection(LocalDateTime.now());
+
+                        nouvellesAlertes++;
+
+                        } else if (alerte.getStatut()
+                                != AlerteStatut.A_TRAITER) {
+
+                        alerte.setDateTraitement(null);
+                        alerte.setTraitePar(null);
+                        }
+
+                        alerte.setStatut(AlerteStatut.A_TRAITER);
+                        alerte.setPriorite(AlertePriorite.AVERTISSEMENT);
+                        alerte.setDateEcheance(dateLimite);
+
+                        alerte.setMessage(
+                                "Validation en retard pour le rapport n° "
+                                + rapport.getId()
+                                + " de la participation n° "
+                                + rapport.getStageParticipant().getId()
+                                + ". Soumis le "
+                                + rapport.getDateSoumission().toLocalDate()
+                                + ". Date limite de validation : "
+                                + dateLimite
+                        );
+
+                        alerteRepository.save(alerte);
+                }
+
+                // Résoudre les alertes dont la cause
+                // n'est plus présente.
+                List<Alerte> alertesExistantes =
+                        alerteRepository.findByTypeAlerte_Code(
+                                "VALIDATION_EN_RETARD"
+                        );
+
+                for (Alerte alerte : alertesExistantes) {
+
+                        String cle = alerte.getCleDeduplication();
+
+                        if (cle != null
+                                && cle.startsWith("VALIDATION_EN_RETARD_RAPPORT_")
+                                && !clesActives.contains(cle)
+                                && alerte.getStatut() == AlerteStatut.A_TRAITER) {
+
+                        alerte.setStatut(AlerteStatut.TRAITEE);
+                        alerte.setDateTraitement(LocalDateTime.now());
+                        alerte.setTraitePar(null);
+
+                        alerteRepository.save(alerte);
+                        }
+                }
+
+                return nouvellesAlertes;
+        }
+
+        
+        @Transactional
+        public int detecterDossiersIncomplets() {
+
+                TypeAlerte type = typeAlerteRepository
+                        .findByCodeIgnoreCaseAndActifTrue("DOSSIER_INCOMPLET")
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Type DOSSIER_INCOMPLET introuvable ou inactif"
+                        ));
+
+                List<TypePieceJointe> piecesObligatoires =
+                        typePieceJointeRepository
+                                .findByPourParticipationTrueAndObligatoireClotureTrueAndActifTrue();
+
+                Set<String> clesActives = new HashSet<>();
+                int nouvellesAlertes = 0;
+
+                List<StageParticipant> participations =
+                        participationRepository.findAll();
+
+                for (StageParticipant participation : participations) {
+
+                        if (participation.getStatut() == null
+                                || !"A_CLOTURER".equals(
+                                        participation.getStatut().getCode())) {
+                        continue;
+                        }
+
+                        List<String> documentsManquants = piecesObligatoires.stream()
+                                .filter(piece ->
+                                        !stageParticipantFichierRepository
+                                                .existsByStageParticipant_IdAndTypePieceJointe_Id(
+                                                        participation.getId(),
+                                                        piece.getId()
+                                                )
+                                )
+                                .map(TypePieceJointe::getLibelle)
+                                .toList();
+
+                        String cle = "DOSSIER_INCOMPLET_PARTICIPATION_"
+                                + participation.getId();
+
+                        if (documentsManquants.isEmpty()) {
+                        continue;
+                        }
+
+                        clesActives.add(cle);
+
+                        Alerte alerte = alerteRepository
+                                .findByCleDeduplication(cle)
+                                .orElse(null);
+
+                        if (alerte == null) {
+                        alerte = new Alerte();
+                        alerte.setTypeAlerte(type);
+                        alerte.setStageParticipant(participation);
+                        alerte.setCleDeduplication(cle);
+                        alerte.setDateDetection(LocalDateTime.now());
+
+                        nouvellesAlertes++;
+                        } else if (alerte.getStatut() != AlerteStatut.A_TRAITER) {
+                        alerte.setDateTraitement(null);
+                        alerte.setTraitePar(null);
+                        }
+
+                        alerte.setStatut(AlerteStatut.A_TRAITER);
+                        alerte.setPriorite(AlertePriorite.AVERTISSEMENT);
+                        alerte.setDateEcheance(participation.getDateFinStage());
+
+                        alerte.setMessage(
+                                "Dossier incomplet pour la participation n° "
+                                + participation.getId()
+                                + ". Documents obligatoires manquants : "
+                                + String.join(", ", documentsManquants)
+                        );
+
+                        alerteRepository.save(alerte);
+                }
+
+                // Clôturer les alertes dont la cause a disparu.
+                List<Alerte> alertesExistantes =
+                        alerteRepository.findByTypeAlerte_Code(
+                                "DOSSIER_INCOMPLET"
+                        );
+
+                for (Alerte alerte : alertesExistantes) {
+
+                        String cle = alerte.getCleDeduplication();
+
+                        if (cle != null
+                                && cle.startsWith("DOSSIER_INCOMPLET_PARTICIPATION_")
+                                && !clesActives.contains(cle)
+                                && alerte.getStatut() == AlerteStatut.A_TRAITER) {
+
+                        alerte.setStatut(AlerteStatut.EXPIREE);
+                        alerte.setDateTraitement(LocalDateTime.now());
+                        alerte.setTraitePar(null);
+
+                        alerteRepository.save(alerte);
+                        }
+                }
+
+                return nouvellesAlertes;
+        }
+
+        
+        @Transactional
+        public int detecterEncadreursSurcharges() {
+
+                TypeAlerte type = typeAlerteRepository
+                        .findByCodeIgnoreCaseAndActifTrue("ENCADREUR_SURCHARGE")
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Type ENCAdREUR_SURCHARGE introuvable ou inactif"
+                        ));
+
+                List<Object[]> resultats =
+                        encadreurRepository.findEncadreursSurcharges();
+
+                Set<String> clesActives = new HashSet<>();
+                int nouvellesAlertes = 0;
+
+                for (Object[] ligne : resultats) {
+
+                        Integer encadreurId = ((Number) ligne[0]).intValue();
+                        int capaciteMax = ((Number) ligne[1]).intValue();
+                        int participationsActives = ((Number) ligne[2]).intValue();
+
+                        Encadreur encadreur = encadreurRepository
+                                .findById(encadreurId)
+                                .orElseThrow(() -> new IllegalStateException(
+                                        "Encadreur introuvable : " + encadreurId
+                                ));
+
+                        String cle = "ENCADREUR_SURCHARGE_"
+                                + encadreurId;
+
+                        clesActives.add(cle);
+
+                        Alerte alerte = alerteRepository
+                                .findByCleDeduplication(cle)
+                                .orElse(null);
+
+                        if (alerte == null) {
+
+                        alerte = new Alerte();
+                        alerte.setTypeAlerte(type);
+                        alerte.setEncadreur(encadreur);
+                        alerte.setCleDeduplication(cle);
+                        alerte.setDateDetection(LocalDateTime.now());
+
+                        nouvellesAlertes++;
+
+                        } else if (alerte.getStatut()
+                                != AlerteStatut.A_TRAITER) {
+
+                        alerte.setDateTraitement(null);
+                        alerte.setTraitePar(null);
+                        }
+
+                        alerte.setStatut(AlerteStatut.A_TRAITER);
+                        alerte.setPriorite(AlertePriorite.AVERTISSEMENT);
+                        alerte.setDateEcheance(null);
+
+                        alerte.setMessage(
+                                "Encadreur en surcharge : "
+                                + encadreur.getNom() + " "
+                                + encadreur.getPrenoms()
+                                + ". Participations actives : "
+                                + participationsActives
+                                + ". Capacité maximale : "
+                                + capaciteMax
+                        );
+
+                        alerteRepository.save(alerte);
+                }
+
+                // Résoudre les alertes dont la surcharge
+                // n'est plus présente.
+                List<Alerte> alertesExistantes =
+                        alerteRepository.findByTypeAlerte_Code(
+                                "ENCADREUR_SURCHARGE"
+                        );
+
+                for (Alerte alerte : alertesExistantes) {
+
+                        String cle = alerte.getCleDeduplication();
+
+                        if (cle != null
+                                && cle.startsWith("ENCADREUR_SURCHARGE_")
+                                && !clesActives.contains(cle)
+                                && alerte.getStatut() == AlerteStatut.A_TRAITER) {
+
+                        alerte.setStatut(AlerteStatut.TRAITEE);
+                        alerte.setDateTraitement(LocalDateTime.now());
+                        alerte.setTraitePar(null);
+
+                        alerteRepository.save(alerte);
+                        }
+                }
+
+                return nouvellesAlertes;
+        }
+
+        
+        @Transactional
+        public int detecterSoutenancesProches() {
+
+                TypeAlerte type = typeAlerteRepository
+                        .findByCodeIgnoreCaseAndActifTrue("SOUTENANCE_PROCHE")
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Type SOUTENANCE_PROCHE introuvable ou inactif"
+                        ));
+
+                List<Object[]> resultats =
+                        soutenanceRepository.findSoutenancesProches();
+
+                Set<String> clesActives = new HashSet<>();
+                int nouvellesAlertes = 0;
+
+                for (Object[] ligne : resultats) {
+
+                        Integer soutenanceId = ((Number) ligne[0]).intValue();
+                        Integer participationId = ((Number) ligne[1]).intValue();
+                        int joursRestants = ((Number) ligne[3]).intValue();
+                        String niveau = ligne[4].toString();
+
+                        Soutenance soutenance = soutenanceRepository
+                                .findById(soutenanceId)
+                                .orElseThrow(() -> new IllegalStateException(
+                                        "Soutenance introuvable : " + soutenanceId
+                                ));
+
+                        String cle = "SOUTENANCE_PROCHE_" + soutenanceId;
+                        clesActives.add(cle);
+
+                        Alerte alerte = alerteRepository
+                                .findByCleDeduplication(cle)
+                                .orElse(null);
+
+                        if (alerte == null) {
+                        alerte = new Alerte();
+                        alerte.setTypeAlerte(type);
+                        alerte.setSoutenance(soutenance);
+                        alerte.setStageParticipant(
+                                soutenance.getStageParticipant()
+                        );
+                        alerte.setCleDeduplication(cle);
+                        alerte.setDateDetection(LocalDateTime.now());
+
+                        nouvellesAlertes++;
+                        } else if (alerte.getStatut() != AlerteStatut.A_TRAITER) {
+                        alerte.setDateTraitement(null);
+                        alerte.setTraitePar(null);
+                        }
+
+                        AlertePriorite priorite = switch (niveau) {
+                        case "URGENT" -> AlertePriorite.URGENT;
+                        case "AVERTISSEMENT" -> AlertePriorite.AVERTISSEMENT;
+                        default -> AlertePriorite.INFORMATION;
+                        };
+
+                        alerte.setStatut(AlerteStatut.A_TRAITER);
+                        alerte.setPriorite(priorite);
+                        alerte.setDateEcheance(
+                                soutenance.getDateSoutenance().toLocalDate()
+                        );
+
+                        alerte.setMessage(
+                                "Soutenance proche pour la participation n° "
+                                + participationId
+                                + " : dans " + joursRestants + " jour(s). "
+                                + "Niveau : " + niveau
+                        );
+
+                        alerteRepository.save(alerte);
+                }
+
+                // Expirer les alertes des soutenances qui ne
+                // sont plus dans la fenêtre de surveillance.
+                List<Alerte> alertesExistantes =
+                        alerteRepository.findByTypeAlerte_Code(
+                                "SOUTENANCE_PROCHE"
+                        );
+
+                for (Alerte alerte : alertesExistantes) {
+
+                        String cle = alerte.getCleDeduplication();
+
+                        if (cle != null
+                                && cle.startsWith("SOUTENANCE_PROCHE_")
+                                && !clesActives.contains(cle)
+                                && alerte.getStatut() == AlerteStatut.A_TRAITER) {
+
+                        alerte.setStatut(AlerteStatut.EXPIREE);
                         alerte.setDateTraitement(LocalDateTime.now());
                         alerte.setTraitePar(null);
 
