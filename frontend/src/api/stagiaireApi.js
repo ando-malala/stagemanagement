@@ -21,3 +21,11 @@ export function updateStagiaire(id, payload) {
 export function getStagiaire(id, options = {}) {
   return apiRequest(`/api/stagiaires/${id}`, options);
 }
+
+export function listAcademiques(id, options = {}) {
+  return apiRequest(`/api/stagiaires/${id}/academiques`, options);
+}
+
+export function createAcademique(id, payload) {
+  return apiRequest(`/api/stagiaires/${id}/academiques`, { method: 'POST', body: JSON.stringify(payload) });
+}

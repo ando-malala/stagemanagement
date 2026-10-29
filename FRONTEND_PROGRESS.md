@@ -4,7 +4,7 @@ Dernière mise à jour : 29 octobre 2026.
 
 ## Statut réel
 
-**Phases 1 et 2 : audit, socle, authentification, navigation et consultation des détails implémentés et vérifiés localement.** Validation HTTP/PostgreSQL non effectuée : le backend n’était pas joignable sur localhost:8080. Les phases 3 à 6 restent à réaliser ou à compléter. L’application complète n’est pas déclarée opérationnelle.
+**Phases 1 et 2 implémentées; phase 3 intégrée pour les opérations compatibles avec les API autorisées.** Édition des ressources principales, profils académiques, sélecteurs et actions de participation vérifiés localement. Validation HTTP/PostgreSQL non effectuée : le backend n’était pas joignable lors des sondes précédentes. Les limites de phase 3 et les phases 4 à 6 restent à traiter. L’application complète n’est pas déclarée opérationnelle.
 
 Préférence utilisateur : effectuer les vérifications sans Chrome ni pilotage de navigateur. Utiliser les tests locaux, le rendu React SSR, le lint et le build; signaler les limites de vérification visuelle.
 
@@ -69,14 +69,35 @@ Endpoints intégrés : `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/au
 
 Vérifications de phase 2 : **50 tests réussis sur 50**, build réussi (87 modules), lint réussi. Les tests SSR désactivent le serveur WebSocket Vite pour éviter les conflits de ports entre fichiers de tests. Backend toujours inaccessible lors de la sonde de cette phase. Pas de validation visuelle réussie : la tentative initiale n’a pas abouti; le pilotage du navigateur a été arrêté à la demande de l’utilisateur. Le rendu SSR ne vérifie pas les interactions clavier, la mise en page mobile réelle ni les parcours avec PostgreSQL.
 
-Prochaine étape : **phase 3**, formulaires métier alimentés par les référentiels autorisés, édition des ressources principales, profils académiques et actions de participation avec dateEffet. Les historiques bloqués et l’écart de clôture restent documentés dans l’audit; aucun changement backend n’a été effectué.
+### Phase 3 — Ressources principales et participations
+
+Implémentation réalisée :
+
+- Création et édition des stagiaires, encadreurs, stages et participations depuis les listes et fiches. Formulaires communs avec limites de texte, champs obligatoires, entiers positifs, dates valides et fin de stage non antérieure au début. Les PATCH envoient les champs du DTO complet, avec `null` pour effacer les valeurs optionnelles; les champs de réponse et de navigation sont exclus.
+- Choix chargés depuis les API autorisées : départements, structures, cadres de stage, établissements, filières, niveaux d’étude, stages, encadreurs et stagiaires. Les choix affichent leurs libellés et identifiants pour distinguer les homonymes; les références explicitement inactives sont signalées. Aucune référence fictive ni calcul de charge locale.
+- Association compte/encadreur : sélecteur des utilisateurs pour ADMIN seulement. Le RESPONSABLE_STAGE n’appelle pas `/api/utilisateurs`; son édition conserve l’association existante. L’association d’un nouveau compte depuis cette interface nécessite un administrateur, malgré le droit backend plus large d’écriture d’un encadreur.
+- Profils académiques : consultation et ajout depuis la fiche stagiaire, année au format `AAAA-AAAA`. Aucune édition/suppression exposée, ces opérations n’étant pas autorisées par le backend. Pour une participation, les profils sont chargés uniquement pour le stagiaire choisi; changer de stagiaire efface le profil sélectionné et le formulaire vérifie son appartenance avant l’envoi.
+- Fiche stage : liste des participants avec liens vers leurs dossiers. Les chargements de choix et de profils transmettent le signal d’annulation; erreurs et réponses malformées bloquent l’enregistrement et proposent une reprise. Les rôles de consultation ne montent pas les formulaires d’écriture.
+- Participation : démarrage, suspension, reprise, prolongation, abandon et annulation avec préparation, récapitulatif, confirmation et motif. Le démarrage utilise le PATCH de statut existant pour `PLANIFIEE → EN_COURS`, transition attestée par le SQL. Les autres actions utilisent leurs endpoints dédiés. Les boutons sont filtrés selon les transitions présentes dans le code/SQL; le serveur reste l’autorité pour la configuration installée.
+- Suspension/reprise : date d’effet obligatoire, comprise dans le stage, au plus égale au jour courant à Madagascar. La chronologie par rapport aux événements précédents reste contrôlée par le serveur, leur historique étant inaccessible. Prolongation : fin strictement postérieure. Abandon/annulation : pas de date d’effet affichée ou envoyée, car le service actuel ne la conserve que pour suspension/reprise.
+- Messages de succès après réponse de mutation, rechargement du dossier, restitution des erreurs de validation et conflits serveur. L’échec d’une relecture ne rejoue pas la mutation.
+
+Fichiers principaux : `api/{businessChoices,stageApi,stagiaireApi}.js`, `utils/{businessForms,participationEvents,dateUtils}.js`, `components/common/{BusinessForm,BusinessEditor,EntityPage,ResourceDetail}.jsx`, pages des stagiaires/encadreurs/stages, `AcademiquesPanel.jsx`, `StageParticipantsPanel.jsx`, `ParticipationActions.jsx`, styles et quatre fichiers de tests métier.
+
+Endpoints intégrés : PATCH `/api/stagiaires/{id}`, `/api/encadreurs/{id}`, `/api/stages/{id}`, `/api/stage-participants/{id}`; GET/POST `/api/stagiaires/{id}/academiques`; GET `/api/stages/{id}/participants`; PATCH `/api/stage-participants/{id}/statut`; POST `/api/stage-participants/{id}/{suspendre,reprendre,prolonger,abandonner,annuler}`. Les créations existantes passent par les nouveaux formulaires.
+
+Vérifications : **63 tests réussis sur 63**, lint réussi, build réussi. Couverture ajoutée : contrats de champs contre les DTO Java, requêtes/permissions contre l’inventaire, effacement des champs optionnels, conservation du compte, validation des dates, fuseau Madagascar, états d’action, erreurs de listes et rendu SSR des sélecteurs/droits. Pas de navigateur utilisé, pas de nouvel essai avec serveur réel ni PostgreSQL; les interactions, le rendu responsive et les contraintes installées restent à vérifier.
+
+Limites restantes : historique des participations/encadreurs inaccessible, changement libre de statut encadreur non exposé faute de catalogue autorisé, clôture toujours indisponible en raison de l’écart Java/SQL, préparation de clôture et charge non exposées. Les formulaires de participation restent alignés sur le PATCH existant, qui permet de modifier directement ses dates; les contraintes de modification d’un dossier terminé doivent être renforcées côté serveur si ce comportement doit être interdit.
+
+Prochaine étape : **phase 4**, workflows des rapports d’activité, évaluations et soutenances. Les documents et la clôture conservent les limites de contrat décrites dans l’audit. Aucun changement backend n’a été effectué.
 
 ### Reste à réaliser
 
 | Phase | État et prochaine action |
 |---|---|
 | 2 — Authentification/structure | Implémentée et vérifiée localement; validation avec serveur réel et vérification visuelle restent non effectuées. Voir le compte rendu ci-dessus. |
-| 3 — Ressources principales | Listes/créations existantes et fiches de consultation raccordées. Compléter édition, sélecteurs alimentés par API, profils académiques et actions de participation avec dateEffet. Historique dépend des API manquantes. |
+| 3 — Ressources principales | Édition, choix par API, profils académiques, participants et événements intégrés et vérifiés localement. Historique/statuts encadreur dépendent des API manquantes; essais réels à effectuer. |
 | 4 — Suivi métier | Compléter brouillon/soumission/correction/validation des rapports, édition/finalisation évaluations, soutenances, documents. Traiter séparément le contrat de clôture avec accord utilisateur. |
 | 5 — Administration/pilotage | Compléter détails/filtres/liens d’alertes, utilisateurs/rôles/départements, référentiels modifiables, audit et dashboard sans chiffres fictifs. |
 | 6 — Finalisation | Tests d’intégration réels avec backend/PostgreSQL et comptes habilités, contrôle visuel/responsive/accessibilité, harmonisation et build final. |

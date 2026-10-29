@@ -1,5 +1,9 @@
 // LocalDate and LocalDateTime contain no offset: preserve their wall date/time.
 // Explicit instants are displayed in Madagascar, independently of the browser zone.
+export function isLocalDate(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+}
+
 function parseDate(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}(?:$|T)/.test(value)) return null;
   const hasOffset = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);

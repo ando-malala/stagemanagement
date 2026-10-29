@@ -21,7 +21,8 @@ export default function EntityPage({
   createLabel = 'Enregistrer',
   renderActions,
   afterCreate,
-  emptyForm
+  emptyForm,
+  renderCreate
 }) {
   const initialForm = useMemo(() => buildInitialForm(fields, emptyForm), [emptyForm, fields]);
   const { data, loading, error: loadError, reload: load } = useFetch(fetcher);
@@ -70,7 +71,8 @@ export default function EntityPage({
           <Button variant="secondary" onClick={load} disabled={loading}>Actualiser</Button>
         </div>
 
-        {canCreate && creator && (
+        {canCreate && renderCreate?.(load)}
+        {canCreate && creator && !renderCreate && (
           <form className="entity-form" onSubmit={handleSubmit}>
             {fields.map((field) => (
               <Input

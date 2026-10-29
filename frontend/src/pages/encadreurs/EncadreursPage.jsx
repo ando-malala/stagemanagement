@@ -1,5 +1,6 @@
 import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
+import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import { createEncadreur, listEncadreurs } from '../../api/encadreurApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { hasAnyRole } from '../../utils/roleUtils.js';
@@ -14,19 +15,6 @@ const columns = [
   { key: 'statut', label: 'Statut' }
 ];
 
-const fields = [
-  { name: 'utilisateurId', label: 'ID utilisateur', type: 'number' },
-  { name: 'nom', label: 'Nom', required: true },
-  { name: 'prenoms', label: 'Prénoms', required: true },
-  { name: 'fonction', label: 'Fonction' },
-  { name: 'localite', label: 'Localité' },
-  { name: 'porte', label: 'Porte' },
-  { name: 'contact', label: 'Contact' },
-  { name: 'courriel', label: 'Courriel', type: 'email' },
-  { name: 'departementId', label: 'ID département', type: 'number' },
-  { name: 'capaciteMaxStagiaires', label: 'Capacité max', type: 'number' }
-];
-
 export default function EncadreursPage({ navigate }) {
   const { utilisateur } = useAuth();
 
@@ -36,7 +24,7 @@ export default function EncadreursPage({ navigate }) {
       description="Encadreurs, rattachements et capacité d’encadrement."
       renderActions={(row) => <AppLink to={`/encadreurs/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
-      fields={fields}
+      renderCreate={(reload) => <BusinessEditor kind="encadreur" label="Créer l’encadreur" save={createEncadreur} onSaved={reload} />}
       fetcher={listEncadreurs}
       creator={createEncadreur}
       canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE'])}

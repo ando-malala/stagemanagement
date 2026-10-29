@@ -145,4 +145,7 @@
 .detail-grid dt { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 .detail-grid dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .back-link { display: inline-block; margin-top: 24px; }
+.business-form { padding-block: 16px; }
+.business-form .entity-form { margin-bottom: 0; }
+.detail-grid + .row-actions { margin-bottom: 20px; }
 @media (max-width: 720px) { .detail-grid { grid-template-columns: 1fr; } }

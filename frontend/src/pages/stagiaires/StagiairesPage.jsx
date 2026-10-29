@@ -1,5 +1,6 @@
 import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
+import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import { createStagiaire, listStagiaires } from '../../api/stagiaireApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { hasAnyRole } from '../../utils/roleUtils.js';
@@ -13,14 +14,6 @@ const columns = [
   { key: 'statut', label: 'Statut' }
 ];
 
-const fields = [
-  { name: 'nom', label: 'Nom', required: true },
-  { name: 'prenoms', label: 'Prénoms', required: true },
-  { name: 'adresse', label: 'Adresse' },
-  { name: 'contact', label: 'Contact' },
-  { name: 'email', label: 'Email', type: 'email' }
-];
-
 export default function StagiairesPage({ navigate }) {
   const { utilisateur } = useAuth();
 
@@ -30,7 +23,7 @@ export default function StagiairesPage({ navigate }) {
       description="Dossiers administratifs des stagiaires."
       renderActions={(row) => <AppLink to={`/stagiaires/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
-      fields={fields}
+      renderCreate={(reload) => <BusinessEditor kind="stagiaire" label="Créer le stagiaire" save={createStagiaire} onSaved={reload} />}
       fetcher={listStagiaires}
       creator={createStagiaire}
       canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE'])}

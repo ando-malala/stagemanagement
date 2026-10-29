@@ -1,5 +1,6 @@
 import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
+import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import { createParticipation, createStage, listParticipations, listStages } from '../../api/stageApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { hasAnyRole } from '../../utils/roleUtils.js';
@@ -10,11 +11,6 @@ const stageColumns = [
   { key: 'structureAccueil', label: 'Structure' },
   { key: 'departement', label: 'Département' },
   { key: 'dateCreation', label: 'Créé le' }
-];
-
-const stageFields = [
-  { name: 'libelle', label: 'Libellé', required: true },
-  { name: 'structureAccueilId', label: 'ID structure d’accueil', type: 'number', required: true }
 ];
 
 const participationColumns = [
@@ -28,15 +24,6 @@ const participationColumns = [
   { key: 'statut', label: 'Statut' }
 ];
 
-const participationFields = [
-  { name: 'stageId', label: 'ID stage', type: 'number', required: true },
-  { name: 'stagiaireAcademiqueId', label: 'ID dossier académique', type: 'number', required: true },
-  { name: 'cadreStageId', label: 'ID cadre de stage', type: 'number', required: true },
-  { name: 'encadreurId', label: 'ID encadreur', type: 'number', required: true },
-  { name: 'dateDebutStage', label: 'Début stage', type: 'date', required: true },
-  { name: 'dateFinStage', label: 'Fin stage', type: 'date', required: true }
-];
-
 export default function StagesPage({ navigate }) {
   const { utilisateur } = useAuth();
   const canWrite = hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE']);
@@ -48,7 +35,7 @@ export default function StagesPage({ navigate }) {
         description="Stages ouverts par structure d’accueil."
         renderActions={(row) => <AppLink to={`/stages/${row.id}`} navigate={navigate}>Consulter</AppLink>}
         columns={stageColumns}
-        fields={stageFields}
+        renderCreate={(reload) => <BusinessEditor kind="stage" label="Créer le stage" save={createStage} onSaved={reload} />}
         fetcher={listStages}
         creator={createStage}
         canCreate={canWrite}
@@ -60,7 +47,7 @@ export default function StagesPage({ navigate }) {
         description="Affectations des stagiaires aux stages."
         renderActions={(row) => <AppLink to={`/participations/${row.id}`} navigate={navigate}>Consulter</AppLink>}
         columns={participationColumns}
-        fields={participationFields}
+        renderCreate={(reload) => <BusinessEditor kind="participation" label="Créer la participation" save={createParticipation} onSaved={reload} />}
         fetcher={listParticipations}
         creator={createParticipation}
         canCreate={canWrite}

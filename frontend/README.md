@@ -51,3 +51,11 @@ python scripts/audit_backend.py
 - `useFetch.reload()` affiche les erreurs dans l’état du hook et retourne undefined en cas d’échec; les mutations doivent gérer leurs propres erreurs et afficher le succès seulement après confirmation serveur.
 - Les fonctions de permissions guident l’interface; Spring Security reste l’autorité.
 - Préserver les dates sans offset renvoyées par le serveur; utiliser les fonctions de date communes pour l’affichage.
+
+## Ressources principales
+
+Les listes proposent la création et les fiches proposent la modification aux rôles ADMIN et RESPONSABLE_STAGE. Les formulaires chargent les référentiels autorisés et les choix métier depuis le serveur. Le compte associé à un encadreur est sélectionnable par ADMIN; pour le responsable, l’association existante est conservée.
+
+Depuis la fiche stagiaire, consulter ou ajouter les profils académiques. Pour affecter un stagiaire, le sélectionner puis choisir l’un de ses profils. La fiche stage donne accès à ses participants. La fiche participation propose les actions compatibles avec son état, avec confirmation et contrôles des dates d’effet à Madagascar.
+
+Les historiques et la clôture ne sont pas disponibles dans cette phase. Les changements de statut encadreur attendent un catalogue autorisé. Voir `../FRONTEND_PROGRESS.md` et `../docs/BACKEND_AUDIT.md` pour les limites backend et les vérifications restant à effectuer. Aucun navigateur n’est lancé par les commandes de test, lint ou build.
