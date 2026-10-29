@@ -1,10 +1,12 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect -- Synchronizes History API with session changes. */
+import { useCallback, useEffect, useState } from 'react';
 import AdminLayout from '../components/layout/AdminLayout.jsx';
 import ProtectedRoute from '../components/layout/ProtectedRoute.jsx';
 import Loader from '../components/common/Loader.jsx';
+import Button from '../components/common/Button.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { hasAnyRole } from '../utils/roleUtils.js';
+import { matchRoute, normalizePath, safeReturnTo, loginDestination } from './routeConfig.js';
 import LoginPage from '../pages/auth/LoginPage.jsx';
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx';
 import UtilisateursPage from '../pages/utilisateurs/UtilisateursPage.jsx';
@@ -22,111 +24,59 @@ import JournalAuditPage from '../pages/audit/JournalAuditPage.jsx';
 import FichiersPage from '../pages/fichiers/FichiersPage.jsx';
 import ForbiddenPage from '../pages/errors/ForbiddenPage.jsx';
 import NotFoundPage from '../pages/errors/NotFoundPage.jsx';
+import EncadreurDetailPage from '../pages/encadreurs/EncadreurDetailPage.jsx';
+import EvaluationDetailPage from '../pages/evaluations/EvaluationDetailPage.jsx';
+import RapportDetailPage from '../pages/rapports/RapportDetailPage.jsx';
+import SoutenanceDetailPage from '../pages/soutenances/SoutenanceDetailPage.jsx';
+import ParticipationDetailPage from '../pages/stages/ParticipationDetailPage.jsx';
+import StageDetailPage from '../pages/stages/StageDetailPage.jsx';
+import StagiaireDetailPage from '../pages/stagiaires/StagiaireDetailPage.jsx';
+import UtilisateurDetailPage from '../pages/utilisateurs/UtilisateurDetailPage.jsx';
 
-const BUSINESS_ROLES = ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR'];
-
-const ROUTES = [
-  { path: '/dashboard', title: 'Dashboard', component: DashboardPage, roles: BUSINESS_ROLES },
-  { path: '/utilisateurs', title: 'Utilisateurs', component: UtilisateursPage, roles: ['ADMIN'] },
-  { path: '/utilisateurs/:id', title: 'Détail utilisateur', component: UtilisateursPage, roles: ['ADMIN'] },
-  { path: '/referentiels', title: 'Référentiels', component: ReferentielsPage, roles: ['ADMIN'] },
-  { path: '/referentiels/academiques', title: 'Référentiels académiques', component: AcademiquesPage, roles: ['ADMIN'] },
-  { path: '/referentiels/organisation', title: 'Référentiels organisation', component: OrganisationPage, roles: ['ADMIN'] },
-  { path: '/stagiaires', title: 'Stagiaires', component: StagiairesPage, roles: BUSINESS_ROLES },
-  { path: '/stagiaires/:id', title: 'Détail stagiaire', component: StagiairesPage, roles: BUSINESS_ROLES },
-  { path: '/encadreurs', title: 'Encadreurs', component: EncadreursPage, roles: BUSINESS_ROLES },
-  { path: '/encadreurs/:id', title: 'Détail encadreur', component: EncadreursPage, roles: BUSINESS_ROLES },
-  { path: '/stages', title: 'Stages', component: StagesPage, roles: BUSINESS_ROLES },
-  { path: '/stages/:id', title: 'Détail stage', component: StagesPage, roles: BUSINESS_ROLES },
-  { path: '/participations/:id', title: 'Détail participation', component: StagesPage, roles: BUSINESS_ROLES },
-  { path: '/rapports', title: 'Rapports', component: RapportsPage, roles: BUSINESS_ROLES },
-  { path: '/rapports/:id', title: 'Détail rapport', component: RapportsPage, roles: BUSINESS_ROLES },
-  { path: '/fichiers', title: 'Fichiers', component: FichiersPage, roles: BUSINESS_ROLES },
-  { path: '/soutenances', title: 'Soutenances', component: SoutenancesPage, roles: BUSINESS_ROLES },
-  { path: '/evaluations', title: 'Évaluations', component: EvaluationsPage, roles: BUSINESS_ROLES },
-  { path: '/evaluations/:id', title: 'Détail évaluation', component: EvaluationsPage, roles: BUSINESS_ROLES },
-  { path: '/alertes', title: 'Alertes', component: AlertesPage, roles: BUSINESS_ROLES },
-  { path: '/journal-audit', title: 'Journal d’audit', component: JournalAuditPage, roles: ['ADMIN'] }
-];
+const pages = { DashboardPage, UtilisateursPage, ReferentielsPage, AcademiquesPage, OrganisationPage, StagiairesPage, EncadreursPage, StagesPage, RapportsPage, SoutenancesPage, EvaluationsPage, AlertesPage, JournalAuditPage, FichiersPage, EncadreurDetailPage, EvaluationDetailPage, RapportDetailPage, SoutenanceDetailPage, ParticipationDetailPage, StageDetailPage, StagiaireDetailPage, UtilisateurDetailPage };
 
 export default function AppRoutes() {
-  const { estConnecte, initialisation, utilisateur } = useAuth();
-  const [path, setPath] = useState(() => normalizePath(window.location.pathname));
-
+  const { estConnecte, initialisation, utilisateur, status, erreur, retrySession, logout } = useAuth();
+  const [location, setLocation] = useState(() => window.location.pathname + window.location.search + window.location.hash);
   const navigate = useCallback((to, options = {}) => {
-    if (options.replace) {
-      window.history.replaceState({}, '', to);
-    } else {
-      window.history.pushState({}, '', to);
-    }
-    setPath(normalizePath(window.location.pathname));
+    if (!to.startsWith('/') || to.startsWith('//') || to.includes('\\')) return;
+    if (options.replace) window.history.replaceState({}, '', to);
+    else window.history.pushState({}, '', to);
+    setLocation(window.location.pathname + window.location.search + window.location.hash);
   }, []);
-
   useEffect(() => {
-    function handlePopState() {
-      setPath(normalizePath(window.location.pathname));
-    }
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    const update = () => setLocation(window.location.pathname + window.location.search + window.location.hash);
+    window.addEventListener('popstate', update);
+    return () => window.removeEventListener('popstate', update);
   }, []);
-
+  const url = new URL(location, window.location.origin);
+  const path = normalizePath(url.pathname);
+  const route = matchRoute(path);
+  const title = path === '/login' ? 'Connexion' : route?.title ?? 'Page introuvable';
+  const returnTo = safeReturnTo(url.searchParams.get('retour'));
   useEffect(() => {
-    if (initialisation) return;
-
-    if (path === '/') {
-      navigate(estConnecte ? '/dashboard' : '/login', { replace: true });
-      return;
+    if (initialisation || status === 'unavailable') return;
+    if (!estConnecte && path !== '/login') {
+      navigate(loginDestination(location), { replace: true });
+    } else if (estConnecte && (path === '/login' || path === '/')) {
+      navigate(returnTo, { replace: true });
     }
+  }, [estConnecte, initialisation, status, path, location, navigate, returnTo]);
+  useEffect(() => {
+    document.title = `${title} · MEF–SIIGFP`;
+    if (estConnecte) document.getElementById('main-content')?.focus();
+  }, [title, path, estConnecte]);
 
-    if (path === '/login' && estConnecte) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [estConnecte, initialisation, navigate, path]);
-
-  const match = useMemo(() => findRoute(path), [path]);
-
-  if (initialisation) {
-    return (
-      <main className="center-screen">
-        <Loader label="Préparation de l’application..." />
-      </main>
-    );
-  }
-
-  if (path === '/login') {
-    return <LoginPage navigate={navigate} />;
-  }
-
-  const Component = match?.component ?? NotFoundPage;
-  const title = match?.title ?? 'Page introuvable';
-  const allowed = !match || hasAnyRole(utilisateur, match.roles);
-
-  return (
-    <ProtectedRoute navigate={navigate}>
-      <AdminLayout currentPath={path} navigate={navigate} title={title}>
-        {allowed ? <Component navigate={navigate} /> : <ForbiddenPage />}
-      </AdminLayout>
-    </ProtectedRoute>
-  );
-}
-
-function normalizePath(path) {
-  if (!path || path === '/') return '/';
-  return path.endsWith('/') ? path.slice(0, -1) : path;
-}
-
-function findRoute(path) {
-  return ROUTES.find((route) => route.path === path || matchesDynamic(route.path, path));
-}
-
-function matchesDynamic(pattern, path) {
-  if (!pattern.includes(':')) return false;
-
-  const patternParts = pattern.split('/');
-  const pathParts = path.split('/');
-
-  if (patternParts.length !== pathParts.length) return false;
-
-  return patternParts.every((part, index) => part.startsWith(':') || part === pathParts[index]);
+  if (initialisation) return <main className="center-screen"><Loader label="Vérification de la session…" /></main>;
+  if (status === 'unavailable') return <main className="center-screen"><section className="auth-card">
+    <h1>Session à vérifier</h1><p role="alert">{erreur}</p><p>Votre session est conservée. Réessayez lorsque le serveur est accessible.</p>
+    <Button onClick={retrySession}>Réessayer</Button>
+    <Button variant="secondary" onClick={() => { navigate('/login', { replace: true }); void logout(); }}>Fermer la session locale</Button>
+  </section></main>;
+  if (path === '/login') return estConnecte ? null : <LoginPage />;
+  const Component = route ? pages[route.page] : NotFoundPage;
+  const allowed = !route || hasAnyRole(utilisateur, route.roles);
+  return <ProtectedRoute><AdminLayout currentPath={path} navigate={navigate} title={title} route={route}>
+    {allowed ? <Component key={path} params={route?.params ?? {}} navigate={navigate} /> : <ForbiddenPage />}
+  </AdminLayout></ProtectedRoute>;
 }

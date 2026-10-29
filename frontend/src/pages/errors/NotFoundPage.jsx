@@ -6,7 +6,7 @@ export default function NotFoundPage({ navigate }) {
     <Card className="message-card">
       <h2>Page introuvable</h2>
       <p>La page demandée n’existe pas dans l’application.</p>
-      <Button onClick={() => navigate('/dashboard')}>Retour au dashboard</Button>
+      <Button onClick={() => navigate('/dashboard')}>Retour au tableau de bord</Button>
     </Card>
   );
 }

@@ -1,17 +1,26 @@
+import { useEffect, useId, useRef } from 'react';
 import Button from './Button.jsx';
 
 export default function Modal({ open, title, children, onClose }) {
-  if (!open) return null;
-
+  const dialog = useRef(null);
+  const titleId = useId();
+  useEffect(() => {
+    const element = dialog.current;
+    if (!open) return;
+    const previousFocus = document.activeElement;
+    element.showModal();
+    return () => {
+      element.close();
+      previousFocus?.focus();
+    };
+  }, [open]);
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section className="modal" role="dialog" aria-modal="true" aria-label={title}>
-        <header className="modal-header">
-          <h2>{title}</h2>
-          <Button variant="ghost" onClick={onClose}>Fermer</Button>
-        </header>
-        {children}
-      </section>
-    </div>
+    <dialog ref={dialog} className="modal" aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); onClose(); }}>
+      <header className="modal-header">
+        <h2 id={titleId}>{title}</h2>
+        <Button variant="ghost" onClick={onClose}>Fermer</Button>
+      </header>
+      {open && children}
+    </dialog>
   );
 }

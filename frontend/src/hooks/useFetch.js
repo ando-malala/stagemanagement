@@ -1,50 +1,43 @@
-/* eslint-disable react-hooks/set-state-in-effect, react-hooks/use-memo */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-export function useFetch(fetcher, deps = []) {
+// The optional signal is forwarded by API functions that support cancellation.
+// The generation guard also protects callers whose fetcher ignores that signal.
+export function useFetch(fetcher) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const request = useRef({ generation: 0, controller: null });
 
   const reload = useCallback(async () => {
+    request.current.controller?.abort();
+    const controller = new AbortController();
+    const generation = ++request.current.generation;
+    request.current.controller = controller;
     setLoading(true);
     setError('');
-
+    setData(null);
     try {
-      const result = await fetcher();
-      setData(result);
+      const result = await fetcher({ signal: controller.signal });
+      if (generation === request.current.generation) setData(result);
       return result;
-    } catch (e) {
-      setError(e.message);
-      throw e;
+    } catch (failure) {
+      if (generation === request.current.generation && failure.name !== 'AbortError') setError(failure.message);
+      return undefined;
     } finally {
-      setLoading(false);
+      if (generation === request.current.generation) setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [fetcher]);
 
   useEffect(() => {
-    let ignore = false;
-
-    setLoading(true);
-    setError('');
-
-    fetcher()
-      .then((result) => {
-        if (!ignore) setData(result);
-      })
-      .catch((e) => {
-        if (!ignore) setError(e.message);
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
-      });
-
+    // Loading/error state belongs to the request lifecycle started by this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void reload();
+    const active = request.current;
     return () => {
-      ignore = true;
+      active.generation += 1;
+      active.controller?.abort();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [reload]);
 
   return { data, loading, error, reload };
 }

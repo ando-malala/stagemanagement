@@ -1,3 +1,4 @@
+import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
 import { createUtilisateur, listUtilisateurs } from '../../api/utilisateurApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -22,13 +23,14 @@ const fields = [
   }
 ];
 
-export default function UtilisateursPage() {
+export default function UtilisateursPage({ navigate }) {
   const { utilisateur } = useAuth();
 
   return (
     <EntityPage
       title="Utilisateurs"
       description="Création et consultation des comptes applicatifs."
+      renderActions={(row) => <AppLink to={`/utilisateurs/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
       fields={fields}
       fetcher={listUtilisateurs}

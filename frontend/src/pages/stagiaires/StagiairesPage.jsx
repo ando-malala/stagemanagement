@@ -1,3 +1,4 @@
+import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
 import { createStagiaire, listStagiaires } from '../../api/stagiaireApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -20,13 +21,14 @@ const fields = [
   { name: 'email', label: 'Email', type: 'email' }
 ];
 
-export default function StagiairesPage() {
+export default function StagiairesPage({ navigate }) {
   const { utilisateur } = useAuth();
 
   return (
     <EntityPage
       title="Stagiaires"
       description="Dossiers administratifs des stagiaires."
+      renderActions={(row) => <AppLink to={`/stagiaires/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
       fields={fields}
       fetcher={listStagiaires}

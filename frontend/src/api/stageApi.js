@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listStages() {
-  return apiRequest('/api/stages');
+export function listStages(options = {}) {
+  return apiRequest('/api/stages', options);
 }
 
 export function createStage(payload) {
@@ -11,8 +11,8 @@ export function createStage(payload) {
   });
 }
 
-export function listParticipations() {
-  return apiRequest('/api/stage-participants');
+export function listParticipations(options = {}) {
+  return apiRequest('/api/stage-participants', options);
 }
 
 export function createParticipation(payload) {
@@ -20,4 +20,12 @@ export function createParticipation(payload) {
     method: 'POST',
     body: JSON.stringify(payload)
   });
+}
+
+export function getStage(id, options = {}) {
+  return apiRequest(`/api/stages/${id}`, options);
+}
+
+export function getParticipation(id, options = {}) {
+  return apiRequest(`/api/stage-participants/${id}`, options);
 }

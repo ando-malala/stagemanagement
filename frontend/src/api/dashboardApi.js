@@ -1,5 +1,5 @@
 import { apiRequest } from './apiClient.js';
 
-export function getDashboardResume() {
-  return apiRequest('/api/dashboard/resume');
+export function getDashboardResume(options = {}) {
+  return apiRequest('/api/dashboard/resume', options);
 }

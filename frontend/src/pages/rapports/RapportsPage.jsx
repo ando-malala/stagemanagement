@@ -1,3 +1,4 @@
+import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
 import { createRapport, listRapports } from '../../api/rapportApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -23,13 +24,14 @@ const fields = [
   { name: 'moisStageId', label: 'ID mois stage', type: 'number' }
 ];
 
-export default function RapportsPage() {
+export default function RapportsPage({ navigate }) {
   const { utilisateur } = useAuth();
 
   return (
     <EntityPage
       title="Rapports d’activité"
       description="Rapports hebdomadaires et suivi de validation."
+      renderActions={(row) => <AppLink to={`/rapports/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
       fields={fields}
       fetcher={listRapports}

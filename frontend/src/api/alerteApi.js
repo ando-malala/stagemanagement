@@ -1,11 +1,11 @@
 import { apiRequest } from './apiClient.js';
 
-export function listAlertesNonLues() {
-  return apiRequest('/api/alertes/non-lues');
+export function listAlertesNonLues(options = {}) {
+  return apiRequest('/api/alertes/non-lues', options);
 }
 
-export function listAlertes() {
-  return apiRequest('/api/alertes');
+export function listAlertes(options = {}) {
+  return apiRequest('/api/alertes', options);
 }
 
 export function createAlerte(payload) {

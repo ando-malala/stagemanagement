@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listUtilisateurs() {
-  return apiRequest('/api/utilisateurs');
+export function listUtilisateurs(options = {}) {
+  return apiRequest('/api/utilisateurs', options);
 }
 
 export function createUtilisateur(payload) {
@@ -11,6 +11,6 @@ export function createUtilisateur(payload) {
   });
 }
 
-export function getUtilisateur(id) {
-  return apiRequest(`/api/utilisateurs/${id}`);
+export function getUtilisateur(id, options = {}) {
+  return apiRequest(`/api/utilisateurs/${id}`, options);
 }

@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listSoutenances() {
-  return apiRequest('/api/soutenances');
+export function listSoutenances(options = {}) {
+  return apiRequest('/api/soutenances', options);
 }
 
 export function createSoutenance(payload) {
@@ -16,4 +16,8 @@ export function updateSoutenance(id, payload) {
     method: 'PATCH',
     body: JSON.stringify(payload)
   });
+}
+
+export function getSoutenance(id, options = {}) {
+  return apiRequest(`/api/soutenances/${id}`, options);
 }

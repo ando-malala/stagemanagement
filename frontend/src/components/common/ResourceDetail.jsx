@@ -1,0 +1,28 @@
+import { useCallback } from 'react';
+import { useFetch } from '../../hooks/useFetch.js';
+import { formatDateTime } from '../../utils/dateUtils.js';
+import Card from './Card.jsx';
+import Button from './Button.jsx';
+import AppLink from './AppLink.jsx';
+import ErrorMessage from './ErrorMessage.jsx';
+import Loader from './Loader.jsx';
+
+export default function ResourceDetail({ id, title, fetcher, fields, links = [], navigate, backTo }) {
+  const load = useCallback((options) => fetcher(id, options), [fetcher, id]);
+  const { data, loading, error, reload } = useFetch(load);
+  return <Card>
+    <div className="section-heading"><h2>{title} n° {id}</h2><Button variant="secondary" onClick={reload} disabled={loading}>Actualiser</Button></div>
+    {loading ? <Loader label="Chargement du dossier…" /> : error ? <ErrorMessage error={error} /> : !data || Array.isArray(data) || typeof data !== 'object' ? <ErrorMessage error="Le serveur n’a pas renvoyé le dossier attendu." /> : <>
+      <dl className="detail-grid">{fields.map(([key, label, type]) => <div key={key}><dt>{label}</dt><dd>{format(data[key], type)}</dd></div>)}</dl>
+      <nav className="row-actions" aria-label="Dossiers liés">{links.filter((link) => data[link.key] != null).map((link) => <AppLink className="btn btn-secondary" key={link.key} to={`${link.path}/${data[link.key]}`} navigate={navigate}>{link.label}</AppLink>)}</nav>
+    </>}
+    <AppLink className="back-link" to={backTo} navigate={navigate}>Retour à la liste</AppLink>
+  </Card>;
+}
+
+function format(value, type) {
+  if (value == null || value === '') return 'Non renseigné';
+  if (type === 'date') return formatDateTime(value);
+  if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
+  return String(value);
+}

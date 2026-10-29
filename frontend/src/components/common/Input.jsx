@@ -1,57 +1,22 @@
-export default function Input({
-  label,
-  name,
-  value,
-  onChange,
-  type = 'text',
-  placeholder,
-  required,
-  options,
-  minLength
-}) {
-  if (type === 'textarea') {
-    return (
-      <label className="field">
-        <span>{label}</span>
-        <textarea
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          required={required}
-        />
-      </label>
-    );
-  }
+import { useId } from 'react';
 
-  if (type === 'select') {
-    return (
-      <label className="field">
-        <span>{label}</span>
-        <select name={name} value={value} onChange={onChange} required={required}>
+export default function Input({ label, name, type = 'text', options, error, hint, ...props }) {
+  const id = useId();
+  const describedBy = [error && `${id}-error`, hint && `${id}-hint`].filter(Boolean).join(' ') || undefined;
+  const controlProps = { ...props, id, name, 'aria-invalid': Boolean(error), 'aria-describedby': describedBy };
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}{props.required ? ' *' : ''}</label>
+      {type === 'textarea' ? <textarea {...controlProps} /> : type === 'select' ? (
+        <select {...controlProps}>
           <option value="">Sélectionner</option>
           {options?.map((option) => (
-            <option key={option.value ?? option} value={option.value ?? option}>
-              {option.label ?? option}
-            </option>
+            <option key={option.value ?? option} value={option.value ?? option}>{option.label ?? option}</option>
           ))}
         </select>
-      </label>
-    );
-  }
-
-  return (
-    <label className="field">
-      <span>{label}</span>
-      <input
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        minLength={minLength}
-      />
-    </label>
+      ) : <input {...controlProps} type={type} />}
+      {hint && <small id={`${id}-hint`}>{hint}</small>}
+      {error && <small id={`${id}-error`} className="field-error" role="alert">{error}</small>}
+    </div>
   );
 }

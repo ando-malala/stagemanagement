@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listRapports() {
-  return apiRequest('/api/rapports-activite');
+export function listRapports(options = {}) {
+  return apiRequest('/api/rapports-activite', options);
 }
 
 export function createRapport(payload) {
@@ -9,4 +9,8 @@ export function createRapport(payload) {
     method: 'POST',
     body: JSON.stringify(payload)
   });
+}
+
+export function getRapport(id, options = {}) {
+  return apiRequest(`/api/rapports-activite/${id}`, options);
 }

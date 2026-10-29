@@ -1,4 +1,4 @@
-import { apiRequest, getStoredToken } from './apiClient.js';
+import { apiRequest } from './apiClient.js';
 
 export function listFichiersStagiaire(stagiaireId) {
   return apiRequest(`/api/stagiaires/${stagiaireId}/fichiers`);
@@ -27,23 +27,16 @@ export function getFichierDownloadUrl(id) {
 }
 
 export async function downloadFichier(id) {
-  const token = getStoredToken();
-  const response = await fetch(getFichierDownloadUrl(id), {
-    headers: token ? { Authorization: `Bearer ${token}` } : {}
-  });
-
-  if (!response.ok) {
-    throw new Error(`Téléchargement impossible (${response.status}).`);
-  }
-
-  const blob = await response.blob();
-  const disposition = response.headers.get('content-disposition') ?? '';
+  const { blob, headers } = await apiRequest(getFichierDownloadUrl(id), { responseType: 'blob' });
+  const disposition = headers.get('content-disposition') ?? '';
   const match = disposition.match(/filename="(.+)"/);
   const filename = match?.[1] ?? `fichier-${id}`;
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
+  document.body.append(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

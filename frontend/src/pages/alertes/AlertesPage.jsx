@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import Button from '../../components/common/Button.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
-import { createAlerte, listAlertes, marquerAlerteLue, marquerToutesAlertesLues } from '../../api/alerteApi.js';
+import { createAlerte, listAlertes, marquerAlerteLue } from '../../api/alerteApi.js';
+import { canTreatAlert } from '../../utils/permissions.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { hasAnyRole } from '../../utils/roleUtils.js';
 
@@ -34,18 +37,15 @@ const fields = [
 export default function AlertesPage() {
   const { utilisateur } = useAuth();
   const canCreate = hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE']);
+  const [confirmation, setConfirmation] = useState(null);
 
   async function markRead(row, reload) {
     await marquerAlerteLue(row.id);
     await reload();
   }
 
-  async function markAllRead(reload) {
-    await marquerToutesAlertesLues();
-    await reload();
-  }
-
   return (
+    <>
     <EntityPage
       title="Alertes"
       description="Alertes à traiter, échéances et priorités."
@@ -57,10 +57,13 @@ export default function AlertesPage() {
       createLabel="Créer l’alerte"
       renderActions={(row, reload) => (
         <div className="row-actions">
-          <Button variant="secondary" onClick={() => markRead(row, reload)}>Marquer lue</Button>
-          <Button variant="ghost" onClick={() => markAllRead(reload)}>Tout lire</Button>
+          {canTreatAlert(utilisateur, row) && <Button variant="secondary" onClick={() => setConfirmation({ row, reload })}>Traiter</Button>}
         </div>
       )}
     />
+    <ConfirmDialog open={Boolean(confirmation)} title="Traiter cette alerte" onClose={() => setConfirmation(null)} onConfirm={() => markRead(confirmation.row, confirmation.reload)}>
+      <p>Confirmez que la situation signalée a été vérifiée avant de marquer l’alerte comme traitée.</p>
+    </ConfirmDialog>
+    </>
   );
 }

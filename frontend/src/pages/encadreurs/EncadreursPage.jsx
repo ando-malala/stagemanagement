@@ -1,3 +1,4 @@
+import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
 import { createEncadreur, listEncadreurs } from '../../api/encadreurApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -26,13 +27,14 @@ const fields = [
   { name: 'capaciteMaxStagiaires', label: 'Capacité max', type: 'number' }
 ];
 
-export default function EncadreursPage() {
+export default function EncadreursPage({ navigate }) {
   const { utilisateur } = useAuth();
 
   return (
     <EntityPage
       title="Encadreurs"
       description="Encadreurs, rattachements et capacité d’encadrement."
+      renderActions={(row) => <AppLink to={`/encadreurs/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
       fields={fields}
       fetcher={listEncadreurs}

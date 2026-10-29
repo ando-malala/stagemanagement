@@ -121,7 +121,7 @@ export default function FichiersPage() {
         data={data}
         loading={loading}
         renderActions={(row) => (
-          <Button variant="secondary" onClick={() => downloadFichier(row.id)}>Télécharger</Button>
+          <Button variant="secondary" onClick={() => downloadFichier(row.id).catch((failure) => setError(failure.message))}>Télécharger</Button>
         )}
       />
     </Card>

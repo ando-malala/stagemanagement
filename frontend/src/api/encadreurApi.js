@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listEncadreurs() {
-  return apiRequest('/api/encadreurs');
+export function listEncadreurs(options = {}) {
+  return apiRequest('/api/encadreurs', options);
 }
 
 export function createEncadreur(payload) {
@@ -16,4 +16,8 @@ export function updateEncadreur(id, payload) {
     method: 'PATCH',
     body: JSON.stringify(payload)
   });
+}
+
+export function getEncadreur(id, options = {}) {
+  return apiRequest(`/api/encadreurs/${id}`, options);
 }

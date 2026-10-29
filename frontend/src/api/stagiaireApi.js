@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listStagiaires() {
-  return apiRequest('/api/stagiaires');
+export function listStagiaires(options = {}) {
+  return apiRequest('/api/stagiaires', options);
 }
 
 export function createStagiaire(payload) {
@@ -16,4 +16,8 @@ export function updateStagiaire(id, payload) {
     method: 'PATCH',
     body: JSON.stringify(payload)
   });
+}
+
+export function getStagiaire(id, options = {}) {
+  return apiRequest(`/api/stagiaires/${id}`, options);
 }

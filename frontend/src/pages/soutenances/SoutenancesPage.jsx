@@ -1,3 +1,4 @@
+import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
 import { createSoutenance, listSoutenances } from '../../api/soutenanceApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -19,13 +20,14 @@ const fields = [
   { name: 'observation', label: 'Observation', type: 'textarea' }
 ];
 
-export default function SoutenancesPage() {
+export default function SoutenancesPage({ navigate }) {
   const { utilisateur } = useAuth();
 
   return (
     <EntityPage
       title="Soutenances"
       description="Planification facultative des soutenances."
+      renderActions={(row) => <AppLink to={`/soutenances/${row.id}`} navigate={navigate}>Consulter</AppLink>}
       columns={columns}
       fields={fields}
       fetcher={listSoutenances}

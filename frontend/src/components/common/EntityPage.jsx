@@ -1,15 +1,20 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useFetch } from '../../hooks/useFetch.js';
+import { buildInitialForm, normalizePayload } from '../../utils/formUtils.js';
+import ErrorMessage from './ErrorMessage.jsx';
 import Button from './Button.jsx';
 import Card from './Card.jsx';
 import Input from './Input.jsx';
 import Table from './Table.jsx';
 
+const EMPTY_FIELDS = Object.freeze([]);
+
 export default function EntityPage({
   title,
   description,
   columns,
-  fields = [],
+  fields = EMPTY_FIELDS,
   fetcher,
   creator,
   canCreate = false,
@@ -19,34 +24,15 @@ export default function EntityPage({
   emptyForm
 }) {
   const initialForm = useMemo(() => buildInitialForm(fields, emptyForm), [emptyForm, fields]);
-  const [data, setData] = useState([]);
+  const { data, loading, error: loadError, reload: load } = useFetch(fetcher);
   const [form, setForm] = useState(initialForm);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await fetcher();
-      setData(Array.isArray(result) ? result : []);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetcher]);
 
   useEffect(() => {
     setForm(initialForm);
   }, [initialForm]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -65,9 +51,9 @@ export default function EntityPage({
       setForm(initialForm);
       setMessage('Enregistrement effectué.');
       await load();
-      afterCreate?.();
+      await afterCreate?.();
     } catch (e) {
-      setError(e.message);
+      setError(e);
     } finally {
       setSaving(false);
     }
@@ -97,6 +83,14 @@ export default function EntityPage({
                 placeholder={field.placeholder}
                 required={field.required}
                 minLength={field.minLength}
+                maxLength={field.maxLength}
+                min={field.min}
+                max={field.max}
+                step={field.step}
+                pattern={field.pattern}
+                autoComplete={field.autoComplete}
+                disabled={saving || field.disabled}
+                error={error?.fieldErrors?.[field.name]}
                 options={field.options}
               />
             ))}
@@ -109,39 +103,18 @@ export default function EntityPage({
         )}
 
         {message && <p className="alert alert-success" role="status">{message}</p>}
-        {error && <p className="alert alert-danger" role="alert">{error}</p>}
+        <ErrorMessage error={error || loadError} />
+        {!loading && !loadError && data != null && !Array.isArray(data) && <ErrorMessage error="Le serveur n’a pas renvoyé la liste attendue." />}
 
         <Table
           columns={columns}
-          data={data}
+          data={Array.isArray(data) ? data : []}
+          error={loadError || (data != null && !Array.isArray(data))}
+          caption={title}
           loading={loading}
           renderActions={renderActions ? (row) => renderActions(row, load) : undefined}
         />
       </Card>
     </div>
   );
-}
-
-function buildInitialForm(fields, emptyForm) {
-  if (emptyForm) return emptyForm;
-
-  return fields.reduce((acc, field) => {
-    acc[field.name] = field.defaultValue ?? '';
-    return acc;
-  }, {});
-}
-
-function normalizePayload(form, fields) {
-  return fields.reduce((payload, field) => {
-    const value = form[field.name];
-    if (value === '' || value === null || value === undefined) return payload;
-    if (field.type === 'number') {
-      payload[field.name] = Number(value);
-    } else if (field.valueType === 'boolean') {
-      payload[field.name] = value === true || value === 'true';
-    } else {
-      payload[field.name] = value;
-    }
-    return payload;
-  }, {});
 }

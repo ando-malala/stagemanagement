@@ -1,15 +1,8 @@
-import { useEffect } from 'react';
 import Loader from '../common/Loader.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 
-export default function ProtectedRoute({ children, navigate }) {
+export default function ProtectedRoute({ children }) {
   const { estConnecte, initialisation } = useAuth();
-
-  useEffect(() => {
-    if (!initialisation && !estConnecte) {
-      navigate('/login', { replace: true });
-    }
-  }, [estConnecte, initialisation, navigate]);
 
   if (initialisation) {
     return (

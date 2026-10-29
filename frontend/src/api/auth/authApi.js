@@ -1,58 +1,11 @@
-const AUTH_URL = '/api/auth';
+import { apiRequest } from '../apiClient.js';
 
-async function lireResponse(response) {
-  if (!response.ok) {
-    const error = new Error(
-      response.status === 401
-        ? 'Identifiant, mot de passe ou session invalide.'
-        : response.status === 403
-          ? 'Accès refusé.'
-          : `Erreur serveur (${response.status}).`
-    );
-
-    error.status = response.status;
-    throw error;
-  }
-
-  if (response.status === 204) {
-    return null;
-  }
-
-  return response.json();
+export function login(identifiant, motDePasse) {
+  return apiRequest('/api/auth/login', { method: 'POST', auth: false, body: JSON.stringify({ identifiant, motDePasse }) });
 }
-
-export async function login(identifiant, motDePasse) {
-  const response = await fetch(`${AUTH_URL}/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      identifiant,
-      motDePasse
-    })
-  });
-
-  return lireResponse(response);
+export function me(token) {
+  return apiRequest('/api/auth/me', { token });
 }
-
-export async function me(token) {
-  const response = await fetch(`${AUTH_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  return lireResponse(response);
-}
-
-export async function logout(token) {
-  const response = await fetch(`${AUTH_URL}/logout`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  return lireResponse(response);
+export function logout(token) {
+  return apiRequest('/api/auth/logout', { method: 'POST', token });
 }

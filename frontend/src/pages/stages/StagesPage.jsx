@@ -1,3 +1,4 @@
+import AppLink from '../../components/common/AppLink.jsx';
 import EntityPage from '../../components/common/EntityPage.jsx';
 import { createParticipation, createStage, listParticipations, listStages } from '../../api/stageApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -36,7 +37,7 @@ const participationFields = [
   { name: 'dateFinStage', label: 'Fin stage', type: 'date', required: true }
 ];
 
-export default function StagesPage() {
+export default function StagesPage({ navigate }) {
   const { utilisateur } = useAuth();
   const canWrite = hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE']);
 
@@ -45,6 +46,7 @@ export default function StagesPage() {
       <EntityPage
         title="Stages"
         description="Stages ouverts par structure d’accueil."
+        renderActions={(row) => <AppLink to={`/stages/${row.id}`} navigate={navigate}>Consulter</AppLink>}
         columns={stageColumns}
         fields={stageFields}
         fetcher={listStages}
@@ -56,6 +58,7 @@ export default function StagesPage() {
       <EntityPage
         title="Participations"
         description="Affectations des stagiaires aux stages."
+        renderActions={(row) => <AppLink to={`/participations/${row.id}`} navigate={navigate}>Consulter</AppLink>}
         columns={participationColumns}
         fields={participationFields}
         fetcher={listParticipations}

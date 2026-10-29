@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react';
+import AppLink from '../../components/common/AppLink.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { addNoteEvaluation, createEvaluation, finaliserEvaluation, listCriteresEvaluation, listEvaluations } from '../../api/evaluationApi.js';
 import Button from '../../components/common/Button.jsx';
 import Card from '../../components/common/Card.jsx';
@@ -32,8 +34,9 @@ const noteInitiale = {
   commentaire: ''
 };
 
-export default function EvaluationsPage() {
+export default function EvaluationsPage({ navigate }) {
   const { utilisateur } = useAuth();
+  const [confirmation, setConfirmation] = useState(null);
   const canWrite = hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR']);
 
   return (
@@ -48,16 +51,16 @@ export default function EvaluationsPage() {
         canCreate={canWrite}
         createLabel="Créer l’évaluation"
         renderActions={(row, reload) => (
-          <Button variant="secondary" onClick={async () => {
-            await finaliserEvaluation(row.id);
-            await reload();
-          }}>
-            Finaliser
-          </Button>
+          <div className="row-actions"><AppLink to={`/evaluations/${row.id}`} navigate={navigate}>Consulter</AppLink>
+            {canWrite && !row.estFinalisee && <Button variant="secondary" onClick={() => setConfirmation({ row, reload })}>Finaliser</Button>}
+          </div>
         )}
       />
 
       <NotesEvaluationPanel canWrite={canWrite} />
+      <ConfirmDialog open={Boolean(confirmation)} title="Finaliser l’évaluation" onClose={() => setConfirmation(null)} onConfirm={async () => { await finaliserEvaluation(confirmation.row.id); await confirmation.reload(); }}>
+        <p>Une évaluation finalisée ne peut plus être modifiée.</p>
+      </ConfirmDialog>
     </div>
   );
 }

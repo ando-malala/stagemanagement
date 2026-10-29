@@ -3,8 +3,8 @@ import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 
-export default function LoginPage({ navigate }) {
-  const { login } = useAuth();
+export default function LoginPage() {
+  const { login, erreur } = useAuth();
   const [form, setForm] = useState({
     identifiant: '',
     motDePasse: ''
@@ -27,7 +27,6 @@ export default function LoginPage({ navigate }) {
         identifiant: form.identifiant.trim(),
         motDePasse: form.motDePasse
       });
-      navigate('/dashboard', { replace: true });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -47,6 +46,7 @@ export default function LoginPage({ navigate }) {
           name="identifiant"
           value={form.identifiant}
           onChange={updateField}
+          autoComplete="username"
           required
         />
 
@@ -56,10 +56,11 @@ export default function LoginPage({ navigate }) {
           type="password"
           value={form.motDePasse}
           onChange={updateField}
+          autoComplete="current-password"
           required
         />
 
-        {error && <p className="alert alert-danger" role="alert">{error}</p>}
+        {(error || erreur) && <p className="alert alert-danger" role="alert">{error || erreur}</p>}
 
         <Button type="submit" disabled={loading}>
           {loading ? 'Connexion...' : 'Se connecter'}

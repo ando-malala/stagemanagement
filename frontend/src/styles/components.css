@@ -176,11 +176,23 @@ tr:last-child td {
 }
 
 .modal {
+  border: 1px solid var(--border);
+  max-height: 90vh;
+  overflow-y: auto;
   width: min(620px, 100%);
   border-radius: 8px;
   background: white;
   padding: 20px;
 }
+
+.modal::backdrop { background: rgba(15, 23, 42, .45); }
+.field-error { color: #991b1b; }
+.field [aria-invalid="true"] { border-color: #991b1b; }
+:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.table-tools, .pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0; }
+.table-tools .field { flex: 1; min-width: 180px; }
+.pagination { justify-content: flex-end; }
+.table-wrap caption { padding: 12px; text-align: left; font-weight: 700; }
 
 .modal-header {
   display: flex;
