@@ -2,11 +2,11 @@
 
 ## Périmètre
 
-Audit des sources locales, sans modification du backend ni exécution du SQL. L’[inventaire](API_INVENTORY.md) couvre 50 contrôleurs et 276 opérations : signatures, paramètres, DTO, réponses, succès HTTP déclarés, permissions Spring et erreurs explicites des services. La [version JSON](api-inventory.json) permet les contrôles de contrat. 103 opérations sont admises par SecurityConfig, dont quatre routes techniques de détection. Une opération admise peut encore être refusée par le service ou PostgreSQL.
+Audit des sources locales, sans modification du code de production backend ni application de script SQL. L’[inventaire](API_INVENTORY.md) couvre 50 contrôleurs et 276 opérations : signatures, paramètres, DTO, réponses, succès HTTP déclarés, permissions Spring et erreurs explicites des services. La [version JSON](api-inventory.json) permet les contrôles de contrat. 103 opérations sont admises par SecurityConfig, dont quatre routes techniques de détection. Une opération admise peut encore être refusée par le service ou PostgreSQL.
 
 Sources : controller, dto, model/enums, service, repository, config, security, scheduler, application.properties, pom.xml et conception/Conception2.sql. Le générateur relit tous les mappings, DTO, champs des modèles et erreurs explicites des services; les conclusions métier ci-dessous résultent de l’inspection des services de gestion et du SQL.
 
-Le backend n’a pas répondu à `GET http://localhost:8080/api/auth/me`. L’état des tables, triggers et vues PostgreSQL reste non vérifié. Aucun compte ni dossier de test n’a été créé.
+Les sondes initiales sur `http://localhost:8080` n’ont pas répondu. En phase 6, le contexte Spring a été chargé avec PostgreSQL 15.15 et Hibernate `validate`; deux tests passent sur un serveur HTTP temporaire : six routes protégées refusent les accès anonymes et `/api/auth/me` refuse un jeton inconnu. Les tests neutralisent l’orchestration planifiée. Cela ne valide pas les parcours authentifiés, les triggers ni les vues métier. Aucun compte ni dossier de test n’a été créé. Voir le [guide de validation](FRONTEND_VALIDATION.md).
 
 ## État initial du frontend
 
@@ -41,7 +41,7 @@ Listes : tableaux JSON directs, sans enveloppe data, pagination, recherche ou fi
 | Observation | Commentaire obligatoire; type de l’enum, défaut OBSERVATION; visibleStagiaire par défaut true. Auteur issu de la session. |
 | Évaluation | Une par participation; participation/encadreur obligatoires. Critère actif, note obligatoire de 0 à 20. POST note crée ou remplace. Finalisation exige les critères actifs obligatoires notés et rend l’évaluation non modifiable. Pas de score global exposé. |
 | Soutenance | Participation/dateSoutenance obligatoires, lieu ≤150, observation facultative. LocalDateTime sans offset. |
-| Utilisateur | Identifiant unique ≤50, mot de passe ≥12 caractères; rôle initial actif. Réinitialisation avec nouveauMotDePasse. Retrait du dernier rôle interdit. Pas de PATCH général du profil. |
+| Utilisateur | Identifiant unique ≤50, mot de passe initial ≥6 caractères dans le service actuel; rôle initial actif. Réinitialisation avec nouveauMotDePasse ≥12 caractères. Retrait du dernier rôle interdit. Pas de PATCH général du profil. |
 | Référentiels | DTO dédiés pour établissements/filières/niveaux/mois/départements/structures/cadres. Lecture authentifiée; création/modification ADMIN. Rôles en lecture ADMIN seulement. |
 
 Les champs exacts figurent dans l’inventaire. Les colonnes SQL apportent des contraintes supplémentaires et ne sont pas toutes des champs de requête HTTP.
@@ -91,6 +91,6 @@ Audit : lecture ADMIN globale, par utilisateur, par entité/id; utilisateur, act
 | Profil session minimal et rôle STAGIAIRE non habilité | Ne pas inventer département, nom ou portail stagiaire. |
 | Aucun périmètre métier individuel | Les filtres locaux ne protègent pas les ressources. |
 | Pas de contrat uniforme d’erreurs SQL | Message serveur si disponible, repli HTTP sinon. |
-| Backend indisponible | Reprendre les essais réels quand le serveur et des comptes autorisés seront disponibles. |
+| Parcours authentifiés non vérifiés | Spring/PostgreSQL et refus HTTP vérifiés; utiliser le contrôle des lectures avec des sessions de test, puis valider les écritures et triggers sur une base dédiée. |
 
-Aucun changement backend n’est inclus. Les phases suivantes peuvent intégrer les opérations autorisées et documenter séparément les propositions de contrat à soumettre à l’utilisateur.
+Aucun changement du code de production backend n’est inclus; seuls ses tests ont été étendus en phase 6. Les phases suivantes peuvent intégrer les opérations autorisées et documenter séparément les propositions de contrat à soumettre à l’utilisateur.

@@ -21,6 +21,8 @@ export function downloadFilename(disposition, id) {
     const match = /(?:^|;)\s*filename\s*=\s*(?:"((?:\\.|[^"\\])*)"|([^;\r\n]+))/i.exec(disposition);
     name = match?.[1]?.replace(/\\(.)/g, '$1') ?? match?.[2]?.trim();
   }
+  // Strip control characters from server-provided filenames deliberately.
+  // eslint-disable-next-line no-control-regex
   name = name?.split(/[\\/]/).pop()?.replace(/[\x00-\x1f\x7f]/g, '').trim();
   return !name || name === '.' || name === '..' ? `fichier-${id}` : name;
 }

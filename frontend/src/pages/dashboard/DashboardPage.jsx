@@ -1,89 +1,39 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useState } from 'react';
 import { listAlertesNonLues } from '../../api/alerteApi.js';
 import { getDashboardResume } from '../../api/dashboardApi.js';
+import { useFetch } from '../../hooks/useFetch.js';
+import { requireList } from '../../utils/businessForms.js';
+import { dashboardCards, requireDashboard } from '../../utils/pilotage.js';
+import { formatNumber } from '../../utils/formatUtils.js';
 import Card from '../../components/common/Card.jsx';
+import Button from '../../components/common/Button.jsx';
+import AppLink from '../../components/common/AppLink.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import Loader from '../../components/common/Loader.jsx';
-import { formatNumber } from '../../utils/formatUtils.js';
+import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 
-const STAT_CARDS = [
-  ['totalStagiaires', 'Stagiaires'],
-  ['totalStages', 'Stages'],
-  ['totalParticipations', 'Participations'],
-  ['totalRapports', 'Rapports'],
-  ['totalAlertesATraiter', 'Alertes à traiter'],
-  ['totalAlertesTraitees', 'Alertes traitées']
-];
+const fetchSummary = async (options) => requireDashboard(await getDashboardResume(options));
+const fetchAlerts = async (options) => requireList(await listAlertesNonLues(options));
+export default function DashboardPage({ navigate }) {
+  const summary = useFetch(fetchSummary);
+  const alerts = useFetch(fetchAlerts);
+  return <div className="page-stack">
+    <div className="section-heading"><h2>Tableau de bord</h2><Button variant="secondary" disabled={summary.loading || alerts.loading}
+      onClick={() => { void summary.reload(); void alerts.reload(); }}>Actualiser</Button></div>
+    <p className="small">Totaux fournis par le serveur pour l’ensemble des dossiers accessibles.</p>
+    {summary.loading ? <Loader label="Chargement des compteurs…" /> : summary.error ? <ErrorMessage error={summary.error} /> : <DashboardSummary resume={summary.data} navigate={navigate} />}
+    <Card><div className="section-heading"><h3>Alertes à traiter</h3><AppLink to="/alertes?statut=A_TRAITER" navigate={navigate}>Voir toutes les alertes à traiter</AppLink></div>
+      {alerts.loading ? <Loader /> : alerts.error ? <ErrorMessage error={alerts.error} /> : alerts.data.length === 0 ? <EmptyState message="Aucune alerte à traiter." /> : <div className="alert-list">
+        {alerts.data.slice(0, 6).map((alerte) => <article className="alert-card" key={alerte.id}>
+          <strong>{alerte.typeAlerteLibelle ?? alerte.typeAlerteCode}</strong><p>{alerte.message}</p><p>{alerte.priorite} · {alerte.natureAlerte}</p>
+          <AppLink to={`/alertes?alerte=${alerte.id}`} navigate={navigate}>Consulter l’alerte</AppLink>
+        </article>)}
+      </div>}
+    </Card>
+  </div>;
+}
 
-export default function DashboardPage() {
-  const [resume, setResume] = useState(null);
-  const [alertes, setAlertes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let ignore = false;
-    setLoading(true);
-    setError('');
-
-    Promise.all([
-      getDashboardResume(),
-      listAlertesNonLues()
-    ])
-      .then(([resumeData, alertesData]) => {
-        if (ignore) return;
-        setResume(resumeData);
-        setAlertes(Array.isArray(alertesData) ? alertesData : []);
-      })
-      .catch((e) => {
-        if (!ignore) setError(e.message);
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  if (loading) return <Loader label="Chargement du tableau de bord..." />;
-  if (error) return <p className="alert alert-danger" role="alert">{error}</p>;
-
-  return (
-    <div className="page-stack">
-      <section className="stat-grid">
-        {STAT_CARDS.map(([key, label]) => (
-          <Card className="stat-card" key={key}>
-            <span>{label}</span>
-            <strong>{formatNumber(resume?.[key])}</strong>
-          </Card>
-        ))}
-      </section>
-
-      <Card>
-        <div className="section-heading">
-          <div>
-            <h2>Alertes non lues</h2>
-            <p className="small">Alertes encore visibles pour votre rôle.</p>
-          </div>
-        </div>
-
-        {alertes.length === 0 ? (
-          <EmptyState message="Aucune alerte non lue." />
-        ) : (
-          <div className="alert-list">
-            {alertes.slice(0, 6).map((alerte) => (
-              <article className="alert-card" key={alerte.id}>
-                <strong>{alerte.typeAlerteLibelle ?? alerte.typeAlerteCode ?? 'Alerte'}</strong>
-                <p>{alerte.message}</p>
-                <span>{alerte.priorite ?? 'Priorité non définie'} · {alerte.statut ?? '-'}</span>
-              </article>
-            ))}
-          </div>
-        )}
-      </Card>
-    </div>
-  );
+export function DashboardSummary({ resume, navigate }) {
+  return <section className="stat-grid">{dashboardCards.map(([key, label, path]) => <Card className="stat-card" key={key}>
+    <span>{label}</span><strong>{formatNumber(resume[key])}</strong><AppLink to={path} navigate={navigate}>Consulter</AppLink>
+  </Card>)}</section>;
 }

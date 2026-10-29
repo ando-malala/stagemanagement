@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient.js';
 
-export function listReferentiel(path) {
-  return apiRequest(path);
+export function listReferentiel(path, options = {}) {
+  return apiRequest(path, options);
 }
 
 export function createReferentiel(path, payload) {

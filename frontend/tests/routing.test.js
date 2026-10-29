@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { breadcrumbItems, loginDestination, matchRoute, safeReturnTo, visibleNavigation } from '../src/routes/routeConfig.js';
+import { breadcrumbItems, loginDestination, matchRoute, pageInstanceKey, safeReturnTo, visibleNavigation } from '../src/routes/routeConfig.js';
+
+test('un changement de filtre URL réinitialise la page, une ancre seule conserve son état', () => {
+  assert.notEqual(pageInstanceKey('/alertes?statut=A_TRAITER'), pageInstanceKey('/alertes?statut=TRAITEE'));
+  assert.notEqual(pageInstanceKey('/alertes?statut=TRAITEE'), pageInstanceKey('/alertes'));
+  assert.equal(pageInstanceKey('/alertes/?statut=TRAITEE#liste'), pageInstanceKey('/alertes?statut=TRAITEE'));
+  assert.equal(pageInstanceKey('/participations/12#documents'), pageInstanceKey('/participations/12#rapports'));
+});
 
 test('routes de détail : ID Java Integer positif, pas de correspondance ambiguë', () => {
   assert.equal(matchRoute('/participations/12/').page, 'ParticipationDetailPage');

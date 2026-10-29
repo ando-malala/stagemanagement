@@ -6,7 +6,7 @@ import Loader from '../components/common/Loader.jsx';
 import Button from '../components/common/Button.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { hasAnyRole } from '../utils/roleUtils.js';
-import { matchRoute, normalizePath, safeReturnTo, loginDestination } from './routeConfig.js';
+import { matchRoute, normalizePath, pageInstanceKey, safeReturnTo, loginDestination } from './routeConfig.js';
 import LoginPage from '../pages/auth/LoginPage.jsx';
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx';
 import UtilisateursPage from '../pages/utilisateurs/UtilisateursPage.jsx';
@@ -77,6 +77,6 @@ export default function AppRoutes() {
   const Component = route ? pages[route.page] : NotFoundPage;
   const allowed = !route || hasAnyRole(utilisateur, route.roles);
   return <ProtectedRoute><AdminLayout currentPath={path} navigate={navigate} title={title} route={route}>
-    {allowed ? <Component key={path} params={route?.params ?? {}} navigate={navigate} /> : <ForbiddenPage />}
+    {allowed ? <Component key={pageInstanceKey(location)} params={route?.params ?? {}} navigate={navigate} /> : <ForbiddenPage />}
   </AdminLayout></ProtectedRoute>;
 }

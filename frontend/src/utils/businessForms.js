@@ -10,8 +10,21 @@ const choice = (name, label, path, labelKeys = ['libelle'], required = true) => 
 const ref = (group, name) => `/api/referentiels/${group}/${name}`;
 const participant = () => choice('stageParticipantId', 'Participation', '/api/stage-participants', ['stagiaireNomComplet', 'stage', 'dateDebutStage', 'dateFinStage']);
 const paragraph = (name, label, required = false) => ({ name, label, type: 'textarea', required });
+const activeField = () => ({ name: 'actif', label: 'Actif', type: 'select', valueType: 'boolean', required: true,
+  options: [{ value: 'true', label: 'Oui' }, { value: 'false', label: 'Non' }] });
 
 export const businessFields = {
+  reference: [text('libelle', 'Libellé', 150, true), activeField()],
+  departement: [text('libelle', 'Libellé', 250, true), { name: 'statutCode', label: 'Statut', type: 'hidden' }],
+  structure: [choice('departementId', 'Département', ref('organisation', 'departements')), text('libelle', 'Libellé', 150, true),
+    text('localite', 'Localité', 150), text('porte', 'Porte', 30), text('contact', 'Contact', 150), { ...text('courriel', 'Courriel', 150), type: 'email' }, activeField()],
+  cadre: [text('themeStage', 'Thème du stage', 250, true), paragraph('activiteConfieStagiaire', 'Activités confiées'), paragraph('objectifStage', 'Objectif'), activeField()],
+  alerte: [text('typeAlerteCode', 'Code du type d’alerte', undefined, true), paragraph('message', 'Message', true),
+    { name: 'dateEcheance', label: 'Échéance', type: 'date' }, { name: 'priorite', label: 'Priorité', type: 'select', required: true,
+      options: ['INFORMATION', 'AVERTISSEMENT', 'URGENT'].map((value) => ({ value, label: value })) },
+    { ...participant(), required: false }, choice('rapportId', 'Rapport', '/api/rapports-activite', ['stagiaire', 'debutSemaine', 'finSemaine'], false),
+    choice('encadreurId', 'Encadreur', '/api/encadreurs', ['nom', 'prenoms'], false),
+    choice('soutenanceId', 'Soutenance', '/api/soutenances', ['stagiaire', 'dateSoutenance'], false), text('cleDeduplication', 'Clé de déduplication facultative')],
   rapport: [participant(), { name: 'debutSemaine', label: 'Début de période', type: 'date', required: true },
     { name: 'finSemaine', label: 'Fin de période', type: 'date', required: true }, paragraph('activite', 'Activités'),
     paragraph('difficultes', 'Difficultés'), paragraph('solutions', 'Solutions'), choice('moisStageId', 'Mois de stage', ref('academiques', 'mois-stage'))],
@@ -77,6 +90,7 @@ export function businessPayload(kind, values) {
 
 export function canEditBusiness(user, kind, initial) {
   const permissions = { stagiaire: 'gererStagiaires', academique: 'gererStagiaires', encadreur: 'gererEncadreurs', stage: 'gererStages',
+    reference: 'modifierReferentiels', departement: 'modifierReferentiels', structure: 'modifierReferentiels', cadre: 'modifierReferentiels', alerte: 'creerAlertes',
     participation: 'gererStages', rapport: 'gererRapports', observation: 'gererRapports', evaluation: 'gererEvaluations', soutenance: 'gererSoutenances' };
   return can(user, permissions[kind]) && !(kind === 'rapport' && initial?.statut === 'VALIDE') && !(kind === 'evaluation' && initial?.estFinalisee);
 }

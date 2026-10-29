@@ -1,128 +1,47 @@
-import { useCallback, useMemo, useState } from 'react';
-import EntityPage from '../../components/common/EntityPage.jsx';
-import { createReferentiel, listReferentiel } from '../../api/referentielApi.js';
+import { useCallback, useState } from 'react';
+import { createReferentiel, listReferentiel, updateReferentiel } from '../../api/referentielApi.js';
+import { useFetch } from '../../hooks/useFetch.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { can } from '../../utils/permissions.js';
+import { requireList } from '../../utils/businessForms.js';
+import { referentiels } from '../../utils/referentiels.js';
+import BusinessForm from '../../components/common/BusinessForm.jsx';
+import Button from '../../components/common/Button.jsx';
+import Card from '../../components/common/Card.jsx';
+import Table from '../../components/common/Table.jsx';
+import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 
-const simpleFields = [
-  { name: 'libelle', label: 'Libellé', required: true },
-  {
-    name: 'actif',
-    label: 'Actif',
-    type: 'select',
-    valueType: 'boolean',
-    defaultValue: 'true',
-    options: [
-      { value: 'true', label: 'Oui' },
-      { value: 'false', label: 'Non' }
-    ]
-  }
-];
-
-const simpleColumns = [
-  { key: 'id', label: 'ID' },
-  { key: 'libelle', label: 'Libellé' },
-  { key: 'actif', label: 'Actif', render: (row) => row.actif ? 'Oui' : 'Non' }
-];
-
-const REFERENTIELS = [
-  {
-    id: 'departements',
-    title: 'Départements',
-    endpoint: '/api/referentiels/organisation/departements',
-    fields: [
-      { name: 'libelle', label: 'Libellé', required: true },
-      { name: 'statutCode', label: 'Statut', defaultValue: 'ACTIF', required: true }
-    ],
-    columns: [
-      { key: 'id', label: 'ID' },
-      { key: 'libelle', label: 'Libellé' },
-      { key: 'statut', label: 'Statut' }
-    ]
-  },
-  {
-    id: 'structures',
-    title: 'Structures d’accueil',
-    endpoint: '/api/referentiels/organisation/structures-accueil',
-    fields: [
-      { name: 'departementId', label: 'ID département', type: 'number', required: true },
-      { name: 'libelle', label: 'Libellé', required: true },
-      { name: 'localite', label: 'Localité' },
-      { name: 'porte', label: 'Porte' },
-      { name: 'contact', label: 'Contact' },
-      { name: 'courriel', label: 'Courriel', type: 'email' },
-      ...simpleFields.slice(1)
-    ],
-    columns: [
-      { key: 'id', label: 'ID' },
-      { key: 'libelle', label: 'Libellé' },
-      { key: 'departement', label: 'Département' },
-      { key: 'localite', label: 'Localité' },
-      { key: 'actif', label: 'Actif', render: (row) => row.actif ? 'Oui' : 'Non' }
-    ]
-  },
-  {
-    id: 'cadres',
-    title: 'Cadres de stage',
-    endpoint: '/api/referentiels/organisation/cadres-stage',
-    fields: [
-      { name: 'themeStage', label: 'Thème du stage', required: true },
-      { name: 'activiteConfieStagiaire', label: 'Activités confiées', type: 'textarea' },
-      { name: 'objectifStage', label: 'Objectif du stage', type: 'textarea' },
-      ...simpleFields.slice(1)
-    ],
-    columns: [
-      { key: 'id', label: 'ID' },
-      { key: 'themeStage', label: 'Thème' },
-      { key: 'objectifStage', label: 'Objectif' },
-      { key: 'actif', label: 'Actif', render: (row) => row.actif ? 'Oui' : 'Non' }
-    ]
-  },
-  { id: 'etablissements', title: 'Établissements', endpoint: '/api/referentiels/academiques/etablissements', fields: simpleFields, columns: simpleColumns },
-  { id: 'filieres', title: 'Filières', endpoint: '/api/referentiels/academiques/filieres', fields: simpleFields, columns: simpleColumns },
-  { id: 'niveaux', title: 'Niveaux d’étude', endpoint: '/api/referentiels/academiques/niveaux-etude', fields: simpleFields, columns: simpleColumns },
-  { id: 'mois', title: 'Mois de stage', endpoint: '/api/referentiels/academiques/mois-stage', fields: simpleFields, columns: simpleColumns }
-];
-
-export default function ReferentielsPage() {
-  const [activeId, setActiveId] = useState(REFERENTIELS[0].id);
-  const active = REFERENTIELS.find((item) => item.id === activeId) ?? REFERENTIELS[0];
-
-  const fetcher = useCallback(() => listReferentiel(active.endpoint), [active.endpoint]);
-  const creator = useCallback((payload) => createReferentiel(active.endpoint, payload), [active.endpoint]);
-  const emptyForm = useMemo(() => buildInitialForm(active.fields), [active.fields]);
-
-  return (
-    <div className="page-stack">
-      <div className="segmented" role="tablist" aria-label="Référentiels">
-        {REFERENTIELS.map((item) => (
-          <button
-            type="button"
-            key={item.id}
-            className={item.id === active.id ? 'active' : ''}
-            onClick={() => setActiveId(item.id)}
-          >
-            {item.title}
-          </button>
-        ))}
-      </div>
-
-      <EntityPage
-        title={active.title}
-        description="Gestion des données de référence utilisées par les modules métier."
-        columns={active.columns}
-        fields={active.fields}
-        fetcher={fetcher}
-        creator={creator}
-        canCreate
-        createLabel="Créer"
-        emptyForm={emptyForm}
-      />
+export default function ReferentielsPage({ group }) {
+  const choices = referentiels.filter((item) => !group || item.group === group);
+  const [activeId, setActiveId] = useState(choices[0].id);
+  const active = choices.find((item) => item.id === activeId) ?? choices[0];
+  return <div className="page-stack">
+    <div className="segmented" role="group" aria-label="Choisir le référentiel">
+      {choices.map((item) => <button type="button" key={item.id} aria-pressed={item.id === active.id} className={item.id === active.id ? 'active' : ''} onClick={() => setActiveId(item.id)}>{item.title}</button>)}
     </div>
-  );
+    <ReferencePanel key={active.id} config={active} />
+  </div>;
 }
 
-function buildInitialForm(fields) {
-  return fields.reduce((acc, field) => {
-    acc[field.name] = field.defaultValue ?? '';
-    return acc;
-  }, {});
+function ReferencePanel({ config }) {
+  const { utilisateur } = useAuth();
+  const writable = can(utilisateur, 'modifierReferentiels');
+  const fetcher = useCallback(async (options) => requireList(await listReferentiel(config.endpoint, options)), [config.endpoint]);
+  const { data, error, loading, reload } = useFetch(fetcher);
+  const [editing, setEditing] = useState(null);
+  const [message, setMessage] = useState('');
+  return <Card>
+    <div className="section-heading"><h2>{config.title}</h2><Button variant="secondary" disabled={loading || Boolean(editing)} onClick={reload}>Actualiser</Button></div>
+    {config.kind === 'departement' && <p className="notice">Le statut existant est conservé lors d’une modification. Les nouveaux départements utilisent le statut par défaut du serveur.</p>}
+    {message && <p className="alert alert-success" role="status">{message}</p>}
+    {writable && !editing && <Button onClick={() => { setMessage(''); setEditing({ actif: 'true' }); }}>Créer</Button>}
+    {writable && editing && <section className="page-stack"><h3>{editing.id ? `Modifier : ${editing.libelle ?? editing.themeStage}` : 'Nouvelle référence'}</h3>
+      <BusinessForm key={editing.id ?? 'new'} kind={config.kind} initial={editing} onCancel={() => setEditing(null)}
+        onSave={(payload) => editing.id ? updateReferentiel(config.endpoint, editing.id, payload) : createReferentiel(config.endpoint, payload)}
+        onSaved={async () => { setEditing(null); setMessage('Référence enregistrée.'); await reload(); }} />
+    </section>}
+    <ErrorMessage error={error} />
+    <Table caption={config.title} columns={config.columns} data={data ?? []} error={error} loading={loading}
+      renderActions={writable && !editing ? (row) => <Button variant="secondary" onClick={() => { setMessage(''); setEditing(row); }}>Modifier</Button> : undefined} />
+  </Card>;
 }

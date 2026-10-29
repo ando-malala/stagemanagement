@@ -56,7 +56,7 @@ export default function BusinessForm({ kind, initial = {}, onSave, onSaved, onCa
       {stagiaireId && !profiles.loading && !profiles.error && profiles.data?.length === 0 && <p className="notice">Ce stagiaire n’a aucun profil académique. Ajoutez-en un depuis sa fiche avant de créer une participation.</p>}
     </>}
     <div className="entity-form">
-      {fields.filter((field) => field.name !== 'utilisateurId' || isAdmin).map((definition) => {
+      {fields.filter((field) => field.type !== 'hidden' && (field.name !== 'utilisateurId' || isAdmin)).map((definition) => {
         const field = Object.fromEntries(Object.entries(definition).filter(([key]) => !['path', 'labelKeys', 'valueType'].includes(key)));
         const rows = field.name === 'stagiaireAcademiqueId' ? profiles.data : choices.data?.[field.name];
         const options = definition.options ?? (field.type === 'select' ? toOptions(rows ?? [], definition.labelKeys) : undefined);

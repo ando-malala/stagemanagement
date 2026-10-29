@@ -8,7 +8,8 @@ test('formulaires métier : tous les champs correspondent exactement aux DTO de 
   const contracts = { stagiaire: 'stagiaire/StagiaireRequest', encadreur: 'encadreur/EncadreurRequest',
     stage: 'stage/StageRequest', academique: 'stagiaire/StagiaireAcademiqueRequest', participation: 'stage/StageParticipantRequest',
     rapport: 'rapport/RapportActiviteRequest', observation: 'rapport/RapportObservationRequest',
-    evaluation: 'evaluation/EvaluationFinaleRequest', soutenance: 'soutenance/SoutenanceRequest' };
+    evaluation: 'evaluation/EvaluationFinaleRequest', soutenance: 'soutenance/SoutenanceRequest', alerte: 'alerte/AlerteRequest',
+    reference: 'referentiel/ReferentielRequest', departement: 'referentiel/DepartementRequest', structure: 'referentiel/StructureAccueilRequest', cadre: 'referentiel/CadreStageRequest' };
   for (const [kind, dto] of Object.entries(contracts)) {
     const source = readFileSync(new URL(`../../backend/src/main/java/mg/mef/stagemanagement/dto/${dto}.java`, import.meta.url), 'utf8');
     const names = [...source.matchAll(/private \w+ (\w+);/g)].map((match) => match[1]);

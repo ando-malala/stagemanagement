@@ -4,11 +4,11 @@ Dernière mise à jour : 29 octobre 2026.
 
 ## Statut réel
 
-**Phases 1 à 3 intégrées dans les limites des API autorisées; phase 4 avancée sur les rapports, évaluations et soutenances.** Vérifications locales réalisées. Validation HTTP/PostgreSQL non effectuée : le backend n’était pas joignable lors des sondes précédentes. Documents, clôture, limites de contrat et phases 5 à 6 restent à traiter. L’application complète n’est pas déclarée opérationnelle.
+**Phases 1 à 5 intégrées pour les opérations couvertes par les API autorisées; phase 6 commencée.** Le contexte Spring se charge avec PostgreSQL et les tests HTTP de refus d’accès passent sur un serveur temporaire. Un contrôle des lectures API par rôle est disponible en ligne de commande. Les parcours authentifiés avec des comptes réels, les écritures métier, les catalogues manquants, les historiques et la clôture restent à valider ou à traiter. L’application complète n’est pas déclarée opérationnelle.
 
 Préférence utilisateur : effectuer les vérifications sans Chrome ni pilotage de navigateur. Utiliser les tests locaux, le rendu React SSR, le lint et le build; signaler les limites de vérification visuelle.
 
-L’arborescence React/Vite JavaScript existante a été conservée. Aucune dépendance ajoutée, aucune modification backend, aucun SQL exécuté et aucun contrat API modifié.
+L’arborescence React/Vite JavaScript existante a été conservée. Aucune dépendance ajoutée, aucun script SQL appliqué et aucun contrat API modifié. La phase 6 étend uniquement les tests du backend, sans modification de son code de production.
 
 ## Livrables de la phase 1
 
@@ -48,7 +48,7 @@ Voir l’[audit](docs/BACKEND_AUDIT.md) pour les preuves et conséquences. Prior
 2. Historiques/événements, types de pièces, statuts/transitions, types d’alertes et paramètres non accessibles via les droits actuels.
 3. Absence d’API de périodes attendues, de préparation de clôture et de charge encadreur; ne pas reproduire les détecteurs côté frontend.
 4. Rôle STAGIAIRE sans accès métier, profil de session minimal, absence de périmètre individuel des listes.
-5. Backend indisponible pour vérifier les workflows et contraintes réellement installées en base.
+5. Contexte backend et accès PostgreSQL vérifiés en phase 6; workflows authentifiés, triggers et contraintes métier réellement installées restent à vérifier.
 
 ## Phases suivantes
 
@@ -110,7 +110,56 @@ Endpoints intégrés ou complétés : PATCH `/api/rapports-activite/{id}`, `/api
 
 Vérifications : **72 tests réussis sur 72**, lint réussi, build réussi (100 modules). Contrats comparés aux DTO/inventaire, transitions comparées au SQL, permissions/états verrouillés, booléens, dates locales, critères obligatoires, bornes des notes, erreurs 409, annulation des lectures et rendu SSR. Aucun navigateur utilisé, aucune dépendance ajoutée, aucune modification backend, aucun essai de mutation sur serveur réel. Le rendu SSR ne prouve pas les interactions clavier ou la mise en page; PostgreSQL et les comptes réels restent à tester.
 
-Prochaine étape : poursuivre les documents dans les limites des API autorisées, puis l’administration et le pilotage (phase 5). Le catalogue des types de pièces, les historiques et la clôture conservent les limitations décrites dans l’audit; aucun contournement de ces contrats n’a été ajouté.
+### Suite phase 4 — Documents
+
+- Documents accessibles dans les fiches stagiaire et participation et dans une page dédiée avec sélection de dossier par libellé. Chaque périmètre conserve son endpoint; changement de dossier réinitialise le panneau, les sélections et les transferts de téléchargement. Les lectures utilisent le signal d’annulation et le garde contre les réponses tardives de `useFetch`.
+- Liste avec nom original, type/code, format, taille lisible et date. Erreur de liste distincte d’un dossier vide; rechargement et erreurs de transfert visibles. Le sélecteur de fichier est réinitialisé après réussite et le message de succès reste visible pendant la relecture.
+- Dépôt multipart pour ADMIN/RESPONSABLE_STAGE, téléchargement pour les rôles métier autorisés. Fichier non vide, code requis et contrôle de taille avant envoi. Le fichier doit rester sous 10 Mio; l’enveloppe multipart peut encore provoquer un 413 près de la limite, le backend limitant aussi la requête entière à 10 MB. Aucun filtre d’extension inventé.
+- Catalogue des types inaccessible : saisie d’un **code connu du service**, sans liste simulée issue du SQL. Le serveur vérifie type actif, périmètre et multiplicité. La sélection dynamique du type et le calcul des pièces obligatoires manquantes restent impossibles sans contrat de lecture autorisé; l’interface le signale. Aucun retrait/suppression ajouté.
+- Téléchargement par le client authentifié, puis lien Blob temporaire. Support du nom UTF-8 de Content-Disposition, repli de nom, suppression de chemins/caractères de contrôle et nettoyage du lien/URL même si le déclenchement DOM échoue.
+
+Fichiers : `pages/fichiers/{FichiersPage,DocumentsPanel}.jsx`, fiches stagiaire/participation, `api/fichierApi.js`, `utils/documentUtils.js`. Endpoints : GET/POST `/api/stagiaires/{id}/fichiers`, GET/POST `/api/stage-participants/{id}/fichiers`, GET `/api/fichiers/{id}/telecharger`.
+
+### Phase 5 — Comptes et attributions
+
+- Création ADMIN depuis la liste utilisateurs : identifiant de 1 à 50 caractères, confirmation du mot de passe, rôle initial sélectionné parmi les rôles actifs de GET `/api/roles`. Aucun rôle fictif ou choix codé en dur. Les valeurs de mot de passe restent intactes, sans trim, stockage persistant ni affichage dans les récapitulatifs.
+- Vérification du service actuel : création avec minimum **6** caractères, réinitialisation avec minimum **12** caractères. Cette différence existante a été corrigée dans l’audit documentaire; aucune règle backend n’a été modifiée.
+- Fiche utilisateur : lecture et ajout/retrait de rôles et de départements avec choix serveur, confirmation nominative et rechargement. Retrait du dernier rôle bloqué dans l’interface et par le serveur. Ajouts déjà attribués exclus des choix; les attributions existantes restent visibles.
+- Modification de ses propres rôles : `/auth/me` est relu avant de poursuivre les lectures ADMIN. Un retrait de son propre rôle ADMIN indique la perte d’accès dans la confirmation. Le backend ne garantit pas la conservation d’un dernier administrateur global; ce contrôle n’est pas simulé côté client.
+- Réinitialisation du mot de passe depuis la fiche avec double saisie, confirmation et effacement des champs après réussite/fermeture du formulaire. Le service actuel ne révoque pas les sessions existantes lors de cette opération; aucune révocation n’est annoncée par l’interface.
+- Statut du compte et historique : consultation du statut actuel, pas de changement proposé faute de catalogue de statuts autorisé, ni de faux historique. Pas d’édition générale de profil inventée. Les composants d’administration sont réservés à ADMIN.
+- Correction ponctuelle d’un caractère `6` isolé dans `EvaluationNotes.jsx`, qui provoquait une erreur de lint.
+
+Fichiers : `api/{utilisateurApi,referentielApi}.js`, `utils/utilisateurForms.js`, `pages/utilisateurs/{CreateAccount,AccountAdministration,ResetPassword,UtilisateursPage,UtilisateurDetailPage}.jsx`. Endpoints : GET `/api/roles`; POST `/api/utilisateurs`; GET/POST `/api/utilisateurs/{id}/roles`, DELETE `/api/utilisateurs/{id}/roles/{roleCode}`; GET/POST `/api/utilisateurs/{id}/departements`, DELETE `/api/utilisateurs/{id}/departements/{departementId}`; PATCH `/api/utilisateurs/{id}/mot-de-passe`. Lecture des départements via le référentiel d’organisation autorisé.
+
+Vérifications documents/administration : **82 tests réussis sur 82**, lint réussi, build réussi (106 modules). Tests ajoutés : contrats DTO/HTTP, codes de rôles encodés, signaux des lectures, erreurs 403/413, limites de transfert, multipart, téléchargement authentifié et nettoyage DOM simulé, mots de passe préservés/confirmation, dernier rôle, permissions et rendu SSR. Aucune mutation sur serveur réel, aucun navigateur utilisé, aucune dépendance ajoutée ni modification backend. Les essais HTTP/PostgreSQL, les interactions et la validation visuelle restent non effectués.
+
+### Suite phase 5 — Référentiels, alertes et pilotage
+
+- Référentiels : création et modification des sept familles autorisées (départements, structures d’accueil, cadres de stage, établissements, filières, niveaux d’étude, mois de stage). Formulaires alignés sur les DTO et limites des services; sélection de département depuis l’API, effacement des valeurs facultatives, conservation du booléen `false`. Les routes académiques et organisation affichent désormais leurs groupes respectifs.
+- Départements : édition du libellé avec `statutCode: null`, qui conserve le statut dans le service existant. La création laisse le serveur choisir son statut par défaut. Aucun catalogue de statuts supposé, ni suppression de référence exposée. Les écritures sont réservées à ADMIN; une nouvelle sélection de référentiel réinitialise le formulaire et la liste.
+- Alertes : filtres locaux combinables par type, nature, priorité et statut, recherche/pagination dans la liste filtrée. Détail en dialogue depuis les données du GET de liste : message, action recommandée, dates, auteur du traitement, liens vers participation/rapport/encadreur/soutenance. Aucun GET de détail inventé. Les liens du dashboard peuvent présélectionner un statut ou ouvrir une alerte reçue dans la liste.
+- Traitement individuel confirmé, disponible uniquement pour nature A_TRAITER et statut A_TRAITER selon les permissions existantes. Pas de traitement global, d’action « ignorer », de détecteur ou de seuil reproduit côté client. La création manuelle utilise des sélecteurs de dossiers réels; le code du type d’alerte reste saisi, son catalogue étant fermé. Le serveur décide de la nature à partir du type.
+- Dashboard : six compteurs strictement issus du DTO, liens vers les modules correspondants et aperçu des six premières alertes renvoyées par `/non-lues`. Libellé corrigé en « Alertes à traiter », conforme au filtre réel du service. Les compteurs absents, négatifs ou de type inattendu provoquent une erreur explicite au lieu d’un zéro fictif. Compteurs et alertes se chargent indépendamment, avec annulation et actualisation; un échec n’efface pas la section ayant réussi.
+- Audit ADMIN : lectures globales, par utilisateur sélectionné et par nom exact d’entité/identifiant; filtres appliqués explicitement et recherche locale dans les résultats. Détail de l’action et des anciennes/nouvelles valeurs avec lien utilisateur. Rendu JSON échappé par React et masquage récursif des valeurs associées aux clés de secrets identifiables. Aucune mutation ou suppression du journal.
+
+Fichiers principaux : `utils/{businessForms,referentiels,pilotage}.js`, `components/common/BusinessForm.jsx`, pages des référentiels/alertes/dashboard/audit, `api/auditApi.js`, styles et `tests/pilotage*.test.js`. Les modifications des phases précédentes ont été conservées.
+
+Endpoints intégrés ou complétés : GET/POST/PATCH des référentiels autorisés `/api/referentiels/{academiques,organisation}/…`; GET/POST `/api/alertes`, PATCH `/api/alertes/{id}/lire`, GET `/api/alertes/non-lues`; GET `/api/dashboard/resume`; GET `/api/journal-audit`, `/api/journal-audit/utilisateur/{utilisateurId}`, `/api/journal-audit/entite/{entite}/{entiteId}`. Les catalogues fermés ne sont pas appelés.
+
+Vérifications : **90 tests réussis sur 90**, lint réussi, build réussi (109 modules). Ajouts : contrats de champs des nouveaux formulaires contre les DTO, sept PATCH de référentiels contre l’inventaire, booléens/limites/statut conservé, filtres d’alertes et liens, six champs du dashboard contre le DTO, absence de zéro de repli, filtres d’audit et encodage des chemins, masquage récursif, rendu SSR des groupes/droits/liens/valeurs. Aucune dépendance ajoutée ni modification backend, aucun navigateur utilisé. Ces tests ne prouvent pas les interactions de dialogue, le rendu mobile ni les transactions PostgreSQL.
+
+### Phase 6 — Premiers contrôles d’intégration
+
+- Correction du routage : un changement des paramètres d’URL remonte la page et réinitialise ses filtres. Passer d’alertes à traiter aux alertes traitées ne conserve plus le filtre précédent. Un changement d’ancre seul conserve les formulaires en cours.
+- `frontend/scripts/{apiReadiness,check-api}.js` et `npm.cmd run check:api` : contrôle HTTP en lecture seule, cible configurable, délai par requête, redirections refusées. Vérification des 401 publics, du profil, des droits métier/ADMIN, des six compteurs, des tableaux et d’un échantillon de fiches/sous-dossiers disponibles. Les résultats affichent chemins, statuts et tailles de listes, jamais les jetons ni le contenu des dossiers.
+- Tests du contrôleur de vérification sur un serveur HTTP Node local simulant les réponses selon l’inventaire : ADMIN, RESPONSABLE_STAGE, ENCADREUR et STAGIAIRE. Ces réponses simulées ne valident pas les droits des comptes PostgreSQL réels.
+- Test Spring existant étendu : serveur HTTP temporaire sur boucle locale, schéma Hibernate en mode `validate`, orchestration planifiée remplacée par un mock. Six GET anonymes refusés et un jeton inconnu refusé; aucune connexion utilisateur ni écriture métier déclenchée par ces tests.
+- Guide reproductible : [validation d’intégration](docs/FRONTEND_VALIDATION.md), avec portée des contrôles, codes de sortie et parcours restants.
+
+Résultats : **97 tests frontend réussis sur 97**, lint réussi, build réussi (109 modules). `mvn.cmd -o test` **réussi, 2 tests**, connexion PostgreSQL 15.15 et validation Hibernate du schéma existant réussies. Cela ne vérifie pas l’installation des triggers, les vues métier ni les transactions d’écriture. Le serveur temporaire s’arrête à la fin du test; aucun service permanent n’est lancé. `npm.cmd run check:api` sur le port 8080 a retourné le code 1 attendu pour une connexion impossible; les lectures authentifiées réelles n’ont pas été exécutées. Aucun navigateur utilisé.
+
+Prochaine étape : exécuter les lectures avec des sessions de test habilitées, puis les parcours d’écriture sur une base dédiée. Préparer ensuite les changements de contrats manquants pour accord utilisateur. Les catalogues manquants, historiques et clôture ne sont pas déclarés opérationnels.
 
 ### Reste à réaliser
 
@@ -118,8 +167,8 @@ Prochaine étape : poursuivre les documents dans les limites des API autorisées
 |---|---|
 | 2 — Authentification/structure | Implémentée et vérifiée localement; validation avec serveur réel et vérification visuelle restent non effectuées. Voir le compte rendu ci-dessus. |
 | 3 — Ressources principales | Édition, choix par API, profils académiques, participants et événements intégrés et vérifiés localement. Historique/statuts encadreur dépendent des API manquantes; essais réels à effectuer. |
-| 4 — Suivi métier | Rapports/observations, édition/notation/finalisation des évaluations et soutenances intégrés, vérifiés localement. Documents à compléter selon les contrats autorisés; clôture à traiter séparément avec accord utilisateur sur le backend. |
-| 5 — Administration/pilotage | Compléter détails/filtres/liens d’alertes, utilisateurs/rôles/départements, référentiels modifiables, audit et dashboard sans chiffres fictifs. |
-| 6 — Finalisation | Tests d’intégration réels avec backend/PostgreSQL et comptes habilités, contrôle visuel/responsive/accessibilité, harmonisation et build final. |
+| 4 — Suivi métier | Rapports, évaluations, soutenances et transferts de documents intégrés, vérifiés localement. Catalogue des types/complétude documentaire et clôture dépendent des écarts backend. |
+| 5 — Administration/pilotage | Comptes, attributions, réinitialisation, sept référentiels modifiables, alertes filtrables avec détail/liens, dashboard et audit intégrés et vérifiés localement. Statuts/catalogues fermés et essais réels restent en attente. |
+| 6 — Finalisation | En cours : Spring/PostgreSQL et refus HTTP vérifiés, outil de contrôle des lectures livré. Comptes réels, écritures métier, triggers et contrôle visuel/responsive/accessibilité restent à valider. |
 
 Une fonctionnalité ne sera marquée terminée qu’après vérification de ses écrans, appels, validations et droits. Les changements de contrat backend doivent faire l’objet d’une proposition concrète et de l’accord de l’utilisateur.

@@ -1,7 +1,7 @@
 # Frontend MEF–SIIGFP
 
 Application React/Vite en JavaScript, adossée au backend Spring Boot du dépôt.
-Voir [le suivi réel](../FRONTEND_PROGRESS.md), [l’audit](../docs/BACKEND_AUDIT.md) et [l’inventaire API](../docs/API_INVENTORY.md). L’authentification, le layout et les fiches de consultation sont raccordés; les workflows métier restent à compléter dans les phases 3 à 6.
+Voir [le suivi réel](../FRONTEND_PROGRESS.md), [l’audit](../docs/BACKEND_AUDIT.md) et [l’inventaire API](../docs/API_INVENTORY.md). Les phases 1 à 5 sont intégrées dans les limites des contrats autorisés; la validation d’intégration de phase 6 est en cours.
 
 ## Lancement local
 
@@ -35,6 +35,8 @@ npm.cmd run build
 
 Les tests Node utilisent les dépendances déjà installées. Ils couvrent le transport et les contrats de services avec fetch intercepté, les utilitaires, les permissions et le rendu SSR React. Ils ne remplacent pas les essais avec PostgreSQL ou dans un navigateur.
 
+`npm.cmd run check:api` contrôle un backend déjà démarré sans navigateur ni écriture. La cible est `http://localhost:8080` par défaut (`MEF_API_URL` pour la changer). Sans `MEF_TEST_TOKEN`, seuls les refus d’accès anonymes sont contrôlés et le code de sortie est 2 si ces contrôles passent. Avec un jeton existant de test, les lectures et droits associés sont vérifiés; une erreur produit le code 1. Voir le [guide d’intégration](../docs/FRONTEND_VALIDATION.md) pour la portée exacte et les parcours restants.
+
 Pour régénérer l’inventaire, depuis la racine du dépôt :
 
 ```powershell
@@ -67,3 +69,17 @@ Les historiques et la clôture ne sont pas disponibles dans cette phase. Les cha
 - Soutenances : sélectionner une participation et saisir la date/heure locale. Le lieu et l’observation sont facultatifs. ADMIN et RESPONSABLE_STAGE peuvent créer ou modifier une soutenance; les encadreurs la consultent.
 
 Rapports et évaluations sont modifiables par les trois rôles métier autorisés. Les listes ne sont pas limitées aux dossiers de l’utilisateur connecté par le backend actuel. Les contrôles frontend ne remplacent jamais les autorisations ni les validations serveur.
+
+## Documents et comptes
+
+Les documents se consultent depuis une fiche stagiaire/participation ou la page Documents. ADMIN et RESPONSABLE_STAGE peuvent déposer un fichier non vide, sous la limite de 10 Mio (requête multipart comprise). Le catalogue des types n’étant pas accessible, le dépôt utilise un code connu du service et validé par le backend. L’interface ne déduit pas les pièces obligatoires manquantes. Les téléchargements restent authentifiés.
+
+ADMIN peut créer un compte avec un rôle actif chargé depuis le serveur, gérer ses rôles/départements depuis sa fiche et réinitialiser son mot de passe avec confirmation. Le backend actuel exige 6 caractères à la création et 12 à la réinitialisation. Aucun secret n’est affiché dans un récapitulatif ou stocké dans le navigateur. Le compte doit conserver au moins un rôle; une modification de ses propres rôles relit la session et actualise les accès.
+
+## Référentiels et pilotage
+
+ADMIN peut créer ou modifier les sept référentiels exposés dans Référentiels. Les structures choisissent leur département par libellé. Les départements conservent leur statut à l’édition; les autres références exposent leur indicateur actif. Les catalogues de statuts, types de pièces et types d’alertes restent indisponibles.
+
+La page Alertes permet de filtrer les données reçues et de consulter le message, l’action recommandée et les dossiers liés. Seules les alertes traitables proposent une confirmation de traitement. Le dashboard affiche les six compteurs serveur et donne accès aux dossiers et alertes; une réponse incomplète reste une erreur visible.
+
+Le journal d’audit est consultable par ADMIN, globalement ou par utilisateur/entité. Le détail affiche les anciennes et nouvelles valeurs, avec masquage des champs de secrets identifiables. Aucune opération d’écriture sur le journal n’est proposée.

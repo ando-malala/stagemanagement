@@ -32,6 +32,10 @@ export const routes = [
 ];
 
 export function normalizePath(path) { return path === '/' ? '/' : path.replace(/\/+$/, ''); }
+export function pageInstanceKey(location) {
+  const url = new URL(location, 'https://local.invalid');
+  return normalizePath(url.pathname) + url.search;
+}
 export function matchRoute(path) {
   const parts = normalizePath(path).split('/');
   for (const route of routes) {
