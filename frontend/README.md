@@ -59,3 +59,11 @@ Les listes proposent la création et les fiches proposent la modification aux r�
 Depuis la fiche stagiaire, consulter ou ajouter les profils académiques. Pour affecter un stagiaire, le sélectionner puis choisir l’un de ses profils. La fiche stage donne accès à ses participants. La fiche participation propose les actions compatibles avec son état, avec confirmation et contrôles des dates d’effet à Madagascar.
 
 Les historiques et la clôture ne sont pas disponibles dans cette phase. Les changements de statut encadreur attendent un catalogue autorisé. Voir `../FRONTEND_PROGRESS.md` et `../docs/BACKEND_AUDIT.md` pour les limites backend et les vérifications restant à effectuer. Aucun navigateur n’est lancé par les commandes de test, lint ou build.
+
+## Suivi métier
+
+- Rapports : créer un brouillon depuis la liste ou une participation, puis ouvrir la fiche pour modifier le contenu, soumettre, demander une correction ou valider. Un rapport validé ne peut plus être modifié. Les observations sont gérées séparément du changement de statut.
+- Évaluations : ouvrir la fiche pour modifier les appréciations et noter les critères actifs. La finalisation est proposée une fois les critères obligatoires notés et nécessite une confirmation; le dossier devient ensuite non modifiable.
+- Soutenances : sélectionner une participation et saisir la date/heure locale. Le lieu et l’observation sont facultatifs. ADMIN et RESPONSABLE_STAGE peuvent créer ou modifier une soutenance; les encadreurs la consultent.
+
+Rapports et évaluations sont modifiables par les trois rôles métier autorisés. Les listes ne sont pas limitées aux dossiers de l’utilisateur connecté par le backend actuel. Les contrôles frontend ne remplacent jamais les autorisations ni les validations serveur.

@@ -4,6 +4,12 @@ export function isLocalDate(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 }
 
+export function isLocalDateTime(value) {
+  if (typeof value !== 'string') return false;
+  const parts = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?$/.exec(value);
+  return Boolean(parts && isLocalDate(parts[1]) && Number(parts[2]) < 24 && Number(parts[3]) < 60 && Number(parts[4] ?? 0) < 60);
+}
+
 function parseDate(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}(?:$|T)/.test(value)) return null;
   const hasOffset = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);

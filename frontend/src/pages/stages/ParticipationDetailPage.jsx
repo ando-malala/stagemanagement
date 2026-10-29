@@ -2,6 +2,8 @@ import ResourceDetail from '../../components/common/ResourceDetail.jsx';
 import { getParticipation, updateParticipation } from '../../api/stageApi.js';
 import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import ParticipationActions from './ParticipationActions.jsx';
+import ParticipationRapports from './ParticipationRapports.jsx';
+import DocumentsPanel from '../fichiers/DocumentsPanel.jsx';
 
 const fields = [["stagiaireNomComplet", "Stagiaire"], ["stage", "Stage"], ["themeStage", "Thème"], ["encadreurNomComplet", "Encadreur"], ["niveauEtude", "Niveau d’étude"], ["filiere", "Filière"], ["etablissement", "Établissement"], ["anneeEtudes", "Année d’études"], ["dateDebutStage", "Début", "date"], ["dateFinStage", "Fin", "date"], ["statut", "Statut"], ["dateCreation", "Création", "date"], ["dateModification", "Modification", "date"], ["dateCloture", "Clôture", "date"]];
 const links = [{"key": "stagiaireId", "path": "/stagiaires", "label": "Dossier stagiaire"}, {"key": "stageId", "path": "/stages", "label": "Stage"}, {"key": "encadreurId", "path": "/encadreurs", "label": "Encadreur"}];
@@ -11,6 +13,8 @@ export default function ParticipationDetailPage({ params, navigate }) {
     {(data, reload) => <div className="page-stack">
       <BusinessEditor kind="participation" initial={data} save={(payload) => updateParticipation(params.id, payload)} onSaved={reload} />
       <ParticipationActions participation={data} onSaved={reload} />
+      <ParticipationRapports participationId={data.id} navigate={navigate} />
+      <DocumentsPanel key={`participation/${data.id}`} scope="participation" ownerId={data.id} ownerLabel={`${data.stagiaireNomComplet} — ${data.stage}`} />
     </div>}
   </ResourceDetail>;
 }

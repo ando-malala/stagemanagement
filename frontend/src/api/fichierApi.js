@@ -1,7 +1,9 @@
 import { apiRequest } from './apiClient.js';
 
-export function listFichiersStagiaire(stagiaireId) {
-  return apiRequest(`/api/stagiaires/${stagiaireId}/fichiers`);
+import { downloadFilename } from '../utils/documentUtils.js';
+
+export function listFichiersStagiaire(stagiaireId, options = {}) {
+  return apiRequest(`/api/stagiaires/${stagiaireId}/fichiers`, options);
 }
 
 export function uploadFichierStagiaire(stagiaireId, formData) {
@@ -11,8 +13,8 @@ export function uploadFichierStagiaire(stagiaireId, formData) {
   });
 }
 
-export function listFichiersParticipation(participationId) {
-  return apiRequest(`/api/stage-participants/${participationId}/fichiers`);
+export function listFichiersParticipation(participationId, options = {}) {
+  return apiRequest(`/api/stage-participants/${participationId}/fichiers`, options);
 }
 
 export function uploadFichierParticipation(participationId, formData) {
@@ -26,17 +28,19 @@ export function getFichierDownloadUrl(id) {
   return `/api/fichiers/${id}/telecharger`;
 }
 
-export async function downloadFichier(id) {
-  const { blob, headers } = await apiRequest(getFichierDownloadUrl(id), { responseType: 'blob' });
+export async function downloadFichier(id, options = {}) {
+  const { blob, headers } = await apiRequest(getFichierDownloadUrl(id), { ...options, responseType: 'blob' });
   const disposition = headers.get('content-disposition') ?? '';
-  const match = disposition.match(/filename="(.+)"/);
-  const filename = match?.[1] ?? `fichier-${id}`;
+  const filename = downloadFilename(disposition, id);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  try {
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+  } finally {
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }

@@ -4,7 +4,7 @@ Dernière mise à jour : 29 octobre 2026.
 
 ## Statut réel
 
-**Phases 1 et 2 implémentées; phase 3 intégrée pour les opérations compatibles avec les API autorisées.** Édition des ressources principales, profils académiques, sélecteurs et actions de participation vérifiés localement. Validation HTTP/PostgreSQL non effectuée : le backend n’était pas joignable lors des sondes précédentes. Les limites de phase 3 et les phases 4 à 6 restent à traiter. L’application complète n’est pas déclarée opérationnelle.
+**Phases 1 à 3 intégrées dans les limites des API autorisées; phase 4 avancée sur les rapports, évaluations et soutenances.** Vérifications locales réalisées. Validation HTTP/PostgreSQL non effectuée : le backend n’était pas joignable lors des sondes précédentes. Documents, clôture, limites de contrat et phases 5 à 6 restent à traiter. L’application complète n’est pas déclarée opérationnelle.
 
 Préférence utilisateur : effectuer les vérifications sans Chrome ni pilotage de navigateur. Utiliser les tests locaux, le rendu React SSR, le lint et le build; signaler les limites de vérification visuelle.
 
@@ -90,7 +90,27 @@ Vérifications : **63 tests réussis sur 63**, lint réussi, build réussi. Couv
 
 Limites restantes : historique des participations/encadreurs inaccessible, changement libre de statut encadreur non exposé faute de catalogue autorisé, clôture toujours indisponible en raison de l’écart Java/SQL, préparation de clôture et charge non exposées. Les formulaires de participation restent alignés sur le PATCH existant, qui permet de modifier directement ses dates; les contraintes de modification d’un dossier terminé doivent être renforcées côté serveur si ce comportement doit être interdit.
 
-Prochaine étape : **phase 4**, workflows des rapports d’activité, évaluations et soutenances. Les documents et la clôture conservent les limites de contrat décrites dans l’audit. Aucun changement backend n’a été effectué.
+### Phase 4 — Rapports, évaluations et soutenances
+
+Implémentation réalisée :
+
+- Rapports : création d’un brouillon et édition depuis la fiche avec participation et mois de stage sélectionnés via les API. Mois obligatoire; activités, difficultés et solutions facultatives conformément au service. Dates réelles et période ordonnée vérifiées. Le contenu d’un rapport validé est verrouillé.
+- Cycle de validation : soumission depuis BROUILLON ou A_CORRIGER, demande de correction et validation depuis SOUMIS. Ces quatre transitions correspondent au SQL existant; l’interface ne propose pas de catalogue de statuts inventé. Chaque mutation présente un récapitulatif et un motif facultatif. Les erreurs serveur restent affichées, notamment si les transitions installées diffèrent du script.
+- Observations : liste par rapport, auteur, type, commentaire, visibilité et date; ajout avec les trois valeurs de l’enum Java. La visibilité `false` est préservée. Une observation de type DEMANDE_CORRECTION ou VALIDATION ne change pas le statut : l’interface explique cette séparation des opérations backend. Pas de double écriture susceptible de réussir partiellement.
+- Participation : accès à la liste de ses rapports, liens vers les fiches et création d’un brouillon avec participation présélectionnée. Aucun calcul de période attendue ni détecteur d’alertes ajouté côté client.
+- Évaluations : création et édition des appréciations avec sélecteurs de participation et d’encadreur. Suppression de l’ancien panneau global exigeant les identifiants d’évaluation et de critère : les notes se gèrent dans la fiche de l’évaluation concernée.
+- Notation : lecture des notes enregistrées et des critères actifs, coefficients et caractère obligatoire; ajout ou modification par critère via le POST existant (upsert serveur). Notes décimales de 0 à 20, zéro conservé et commentaire facultatif. Les anciennes notes restent visibles même si leur critère n’est plus actif. Pas de moyenne ou de score final inventé.
+- Finalisation : liste des critères obligatoires non notés, bouton bloqué pendant une édition de note ou tant que ces critères manquent, confirmation explicite de l’impossibilité de modifier ensuite. En cas d’erreur de chargement des critères/notes, aucune finalisation proposée. Le serveur revérifie les obligations et l’état finalisé. Le dossier est rechargé après réussite; les formulaires et actions d’édition disparaissent lorsqu’il est finalisé.
+- Soutenances : création et modification avec sélection de participation, date/heure locale conservée sans conversion UTC, lieu facultatif limité à 250 caractères et observation facultative. Les conflits d’unicité restent validés par le backend.
+- Droits : ADMIN, RESPONSABLE_STAGE et ENCADREUR pour rapports/observations/évaluations; ADMIN et RESPONSABLE_STAGE pour soutenances. Le composant d’édition applique aussi les états verrouillés. La confirmation asynchrone dispose d’un verrou immédiat contre les doubles soumissions.
+
+Fichiers principaux : `utils/{businessForms,followUpWorkflows,dateUtils}.js`, `components/common/{BusinessEditor,BusinessForm,ConfirmDialog}.jsx`, `api/{rapportApi,evaluationApi}.js`, pages des rapports/évaluations/soutenances, `ParticipationRapports.jsx` et les tests de suivi.
+
+Endpoints intégrés ou complétés : PATCH `/api/rapports-activite/{id}`, `/api/rapports-activite/{id}/statut`; GET/POST `/api/rapports-activite/{id}/observations`; GET `/api/rapports-activite/participation/{stageParticipantId}`; PATCH `/api/evaluations/{id}`; GET `/api/evaluations/criteres`; GET/POST `/api/evaluations/{id}/notes`; POST `/api/evaluations/{id}/finaliser`; PATCH `/api/soutenances/{id}`. Les créations existantes utilisent les nouveaux formulaires et leurs sélecteurs autorisés.
+
+Vérifications : **72 tests réussis sur 72**, lint réussi, build réussi (100 modules). Contrats comparés aux DTO/inventaire, transitions comparées au SQL, permissions/états verrouillés, booléens, dates locales, critères obligatoires, bornes des notes, erreurs 409, annulation des lectures et rendu SSR. Aucun navigateur utilisé, aucune dépendance ajoutée, aucune modification backend, aucun essai de mutation sur serveur réel. Le rendu SSR ne prouve pas les interactions clavier ou la mise en page; PostgreSQL et les comptes réels restent à tester.
+
+Prochaine étape : poursuivre les documents dans les limites des API autorisées, puis l’administration et le pilotage (phase 5). Le catalogue des types de pièces, les historiques et la clôture conservent les limitations décrites dans l’audit; aucun contournement de ces contrats n’a été ajouté.
 
 ### Reste à réaliser
 
@@ -98,7 +118,7 @@ Prochaine étape : **phase 4**, workflows des rapports d’activité, évaluatio
 |---|---|
 | 2 — Authentification/structure | Implémentée et vérifiée localement; validation avec serveur réel et vérification visuelle restent non effectuées. Voir le compte rendu ci-dessus. |
 | 3 — Ressources principales | Édition, choix par API, profils académiques, participants et événements intégrés et vérifiés localement. Historique/statuts encadreur dépendent des API manquantes; essais réels à effectuer. |
-| 4 — Suivi métier | Compléter brouillon/soumission/correction/validation des rapports, édition/finalisation évaluations, soutenances, documents. Traiter séparément le contrat de clôture avec accord utilisateur. |
+| 4 — Suivi métier | Rapports/observations, édition/notation/finalisation des évaluations et soutenances intégrés, vérifiés localement. Documents à compléter selon les contrats autorisés; clôture à traiter séparément avec accord utilisateur sur le backend. |
 | 5 — Administration/pilotage | Compléter détails/filtres/liens d’alertes, utilisateurs/rôles/départements, référentiels modifiables, audit et dashboard sans chiffres fictifs. |
 | 6 — Finalisation | Tests d’intégration réels avec backend/PostgreSQL et comptes habilités, contrôle visuel/responsive/accessibilité, harmonisation et build final. |
 

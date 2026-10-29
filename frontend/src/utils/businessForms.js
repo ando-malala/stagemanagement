@@ -1,4 +1,5 @@
-import { isLocalDate } from './dateUtils.js';
+import { isLocalDate, isLocalDateTime } from './dateUtils.js';
+import { can } from './permissions.js';
 
 // Fields mirror the Gestion request DTOs. Empty optional values must be sent as
 // null on PATCH: these endpoints replace the whole editable resource.
@@ -7,8 +8,21 @@ const choice = (name, label, path, labelKeys = ['libelle'], required = true) => 
   name, label, type: 'select', valueType: 'number', required, path, labelKeys
 });
 const ref = (group, name) => `/api/referentiels/${group}/${name}`;
+const participant = () => choice('stageParticipantId', 'Participation', '/api/stage-participants', ['stagiaireNomComplet', 'stage', 'dateDebutStage', 'dateFinStage']);
+const paragraph = (name, label, required = false) => ({ name, label, type: 'textarea', required });
 
 export const businessFields = {
+  rapport: [participant(), { name: 'debutSemaine', label: 'Début de période', type: 'date', required: true },
+    { name: 'finSemaine', label: 'Fin de période', type: 'date', required: true }, paragraph('activite', 'Activités'),
+    paragraph('difficultes', 'Difficultés'), paragraph('solutions', 'Solutions'), choice('moisStageId', 'Mois de stage', ref('academiques', 'mois-stage'))],
+  evaluation: [participant(), choice('encadreurId', 'Encadreur évaluateur', '/api/encadreurs', ['nom', 'prenoms', 'departement']),
+    paragraph('appreciationGlobale', 'Appréciation globale'), paragraph('observationsFinales', 'Observations finales')],
+  soutenance: [participant(), { name: 'dateSoutenance', label: 'Date et heure de soutenance', type: 'datetime-local', step: 'any', required: true },
+    text('lieu', 'Lieu', 250), paragraph('observation', 'Observation')],
+  observation: [{ name: 'typeObservation', label: 'Type d’observation', type: 'select', required: true,
+    options: [{ value: 'OBSERVATION', label: 'Observation' }, { value: 'DEMANDE_CORRECTION', label: 'Demande de correction' }, { value: 'VALIDATION', label: 'Validation' }] },
+    paragraph('commentaire', 'Commentaire', true), { name: 'visibleStagiaire', label: 'Visibilité stagiaire', type: 'select', valueType: 'boolean', required: true,
+      options: [{ value: 'true', label: 'Visible' }, { value: 'false', label: 'Non visible' }] }],
   stagiaire: [text('nom', 'Nom', 150, true), text('prenoms', 'Prénoms', 250, true),
     text('adresse', 'Adresse', 250), text('contact', 'Contact', 100), { ...text('email', 'Courriel', 150), type: 'email' }],
   encadreur: [choice('utilisateurId', 'Compte associé', '/api/utilisateurs', ['identifiant'], false),
@@ -44,14 +58,27 @@ export function businessPayload(kind, values) {
       if (!Number.isInteger(number) || number < 1 || number > 2147483647) fieldErrors[field.name] = 'Saisissez un entier positif valide.';
       return [field.name, number];
     }
+    if (field.valueType === 'boolean') {
+      if (![true, false, 'true', 'false'].includes(value)) fieldErrors[field.name] = 'Choisissez une valeur valide.';
+      return [field.name, value === true || value === 'true'];
+    }
+    if (field.options && !field.options.some((option) => option.value === value)) fieldErrors[field.name] = 'Choisissez une valeur valide.';
     if (field.maxLength && value.length > field.maxLength) fieldErrors[field.name] = `Maximum : ${field.maxLength} caractères.`;
     if (field.type === 'date' && !isLocalDate(value)) fieldErrors[field.name] = 'Saisissez une date valide.';
+    if (field.type === 'datetime-local' && !isLocalDateTime(value)) fieldErrors[field.name] = 'Saisissez une date et une heure valides.';
     if (field.pattern && !new RegExp(`^${field.pattern}$`).test(value)) fieldErrors[field.name] = 'Format attendu : 2026-2027.';
     return [field.name, value];
   }));
   if (kind === 'participation' && payload.dateFinStage < payload.dateDebutStage) fieldErrors.dateFinStage = 'La fin ne peut pas précéder le début du stage.';
+  if (kind === 'rapport' && payload.finSemaine < payload.debutSemaine) fieldErrors.finSemaine = 'La fin ne peut pas précéder le début de période.';
   if (Object.keys(fieldErrors).length) throw Object.assign(new Error('Vérifiez les champs du formulaire.'), { fieldErrors });
   return payload;
+}
+
+export function canEditBusiness(user, kind, initial) {
+  const permissions = { stagiaire: 'gererStagiaires', academique: 'gererStagiaires', encadreur: 'gererEncadreurs', stage: 'gererStages',
+    participation: 'gererStages', rapport: 'gererRapports', observation: 'gererRapports', evaluation: 'gererEvaluations', soutenance: 'gererSoutenances' };
+  return can(user, permissions[kind]) && !(kind === 'rapport' && initial?.statut === 'VALIDE') && !(kind === 'evaluation' && initial?.estFinalisee);
 }
 
 export function toOptions(rows, keys) {

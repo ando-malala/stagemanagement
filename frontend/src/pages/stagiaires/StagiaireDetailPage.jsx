@@ -2,6 +2,7 @@ import ResourceDetail from '../../components/common/ResourceDetail.jsx';
 import { getStagiaire, updateStagiaire } from '../../api/stagiaireApi.js';
 import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import AcademiquesPanel from './AcademiquesPanel.jsx';
+import DocumentsPanel from '../fichiers/DocumentsPanel.jsx';
 
 const fields = [["nom", "Nom"], ["prenoms", "Prénoms"], ["adresse", "Adresse"], ["contact", "Contact"], ["email", "Courriel"], ["statut", "Statut"], ["dateCreation", "Création", "date"]];
 const links = [];
@@ -11,6 +12,7 @@ export default function StagiaireDetailPage({ params, navigate }) {
     {(data, reload) => <div className="page-stack">
       <BusinessEditor kind="stagiaire" initial={data} save={(payload) => updateStagiaire(params.id, payload)} onSaved={reload} />
       <AcademiquesPanel stagiaireId={params.id} />
+      <DocumentsPanel key={`stagiaire/${data.id}`} scope="stagiaire" ownerId={data.id} ownerLabel={`${data.nom} ${data.prenoms}`} />
     </div>}
   </ResourceDetail>;
 }

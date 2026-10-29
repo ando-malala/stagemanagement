@@ -22,8 +22,8 @@ export function listCriteresEvaluation(options = {}) {
   return apiRequest('/api/evaluations/criteres', options);
 }
 
-export function listNotesEvaluation(id) {
-  return apiRequest(`/api/evaluations/${id}/notes`);
+export function listNotesEvaluation(id, options = {}) {
+  return apiRequest(`/api/evaluations/${id}/notes`, options);
 }
 
 export function addNoteEvaluation(id, payload) {

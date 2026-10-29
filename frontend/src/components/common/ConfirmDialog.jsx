@@ -1,17 +1,21 @@
 ﻿import { useState } from 'react';
 import Modal from './Modal.jsx';
+import { useRef } from 'react';
 import Button from './Button.jsx';
 
 export default function ConfirmDialog({ open, title, children, onConfirm, onClose, confirmLabel = 'Confirmer' }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const close = () => { if (!saving) { setError(''); onClose(); } };
+  const pending = useRef(false);
+  const close = () => { if (!pending.current) { setError(''); onClose(); } };
   async function confirm() {
+    if (pending.current) return;
+    pending.current = true;
     setSaving(true);
     setError('');
     try { await onConfirm(); onClose(); }
     catch (failure) { setError(failure.message); }
-    finally { setSaving(false); }
+    finally { pending.current = false; setSaving(false); }
   }
   return (
     <Modal open={open} title={title} onClose={close}>

@@ -6,7 +6,9 @@ import { loadBusinessChoices } from '../src/api/businessChoices.js';
 
 test('formulaires métier : tous les champs correspondent exactement aux DTO de requête', () => {
   const contracts = { stagiaire: 'stagiaire/StagiaireRequest', encadreur: 'encadreur/EncadreurRequest',
-    stage: 'stage/StageRequest', academique: 'stagiaire/StagiaireAcademiqueRequest', participation: 'stage/StageParticipantRequest' };
+    stage: 'stage/StageRequest', academique: 'stagiaire/StagiaireAcademiqueRequest', participation: 'stage/StageParticipantRequest',
+    rapport: 'rapport/RapportActiviteRequest', observation: 'rapport/RapportObservationRequest',
+    evaluation: 'evaluation/EvaluationFinaleRequest', soutenance: 'soutenance/SoutenanceRequest' };
   for (const [kind, dto] of Object.entries(contracts)) {
     const source = readFileSync(new URL(`../../backend/src/main/java/mg/mef/stagemanagement/dto/${dto}.java`, import.meta.url), 'utf8');
     const names = [...source.matchAll(/private \w+ (\w+);/g)].map((match) => match[1]);
@@ -58,7 +60,7 @@ test('choix : droits ADMIN pour les comptes, références réelles et annulation
   await loadBusinessChoices('encadreur', true, options);
   assert.ok(calls.includes('/api/utilisateurs'));
   calls.length = 0;
-  for (const kind of ['stagiaire', 'stage', 'academique', 'participation']) await loadBusinessChoices(kind, false, options);
+  for (const kind of ['stagiaire', 'stage', 'academique', 'participation', 'rapport', 'evaluation', 'soutenance', 'observation']) await loadBusinessChoices(kind, false, options);
   assert.ok(calls.includes('/api/stagiaires'));
   assert.ok(calls.includes('/api/referentiels/academiques/niveaux-etude'));
   assert.ok(!calls.some((path) => path.includes('/academiques/') && !path.includes('/referentiels/'))); // No N+1 profile loading.

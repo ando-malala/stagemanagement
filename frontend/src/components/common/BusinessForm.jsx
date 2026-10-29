@@ -59,9 +59,9 @@ export default function BusinessForm({ kind, initial = {}, onSave, onSaved, onCa
       {fields.filter((field) => field.name !== 'utilisateurId' || isAdmin).map((definition) => {
         const field = Object.fromEntries(Object.entries(definition).filter(([key]) => !['path', 'labelKeys', 'valueType'].includes(key)));
         const rows = field.name === 'stagiaireAcademiqueId' ? profiles.data : choices.data?.[field.name];
-        const options = field.type === 'select' ? toOptions(rows ?? [], definition.labelKeys) : undefined;
+        const options = definition.options ?? (field.type === 'select' ? toOptions(rows ?? [], definition.labelKeys) : undefined);
         return <Input key={field.name} {...field} options={options} value={values[field.name]} disabled={blocked}
-          min={field.name === 'dateFinStage' ? values.dateDebutStage : field.min}
+          min={field.name === 'dateFinStage' ? values.dateDebutStage : field.name === 'finSemaine' ? values.debutSemaine : field.min}
           error={error?.fieldErrors?.[field.name]} onChange={(event) => setValues((current) => ({ ...current, [field.name]: event.target.value }))} />;
       })}
     </div>
