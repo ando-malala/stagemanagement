@@ -88,7 +88,15 @@ public class SuiviParticipationService {
                 case "ABANDON" -> "abandonner"; case "ANNULATION" -> "annuler"; case "CLOTURE" -> "cloturer";
                 default -> "statut";
             };
-            actions.add(new Action(operation, t.libelle(), t.cible(), Set.of("SUSPENSION", "REPRISE").contains(event)));
+            String label = switch(operation) {
+                case "suspendre" -> "Suspendre"; case "reprendre" -> "Reprendre";
+                case "abandonner" -> "Abandonner"; case "annuler" -> "Annuler la participation";
+                case "cloturer" -> "Clôturer";
+                default -> "A_CLOTURER".equals(t.cible()) ? "Préparer la clôture"
+                        : "EN_COURS".equals(t.cible()) ? ("PLANIFIEE".equals(p.getStatut().getCode()) ? "Démarrer" : "Remettre en cours")
+                        : "Passer à « " + t.libelle() + " »";
+            };
+            actions.add(new Action(operation, label, t.cible(), Set.of("SUSPENSION", "REPRISE").contains(event)));
         }
         if (actifs.contains("PROLONGATION") && List.of("PLANIFIEE", "EN_COURS", "SUSPENDUE", "A_CLOTURER").contains(p.getStatut().getCode()))
             actions.add(new Action("prolonger", "Prolonger", null, false));

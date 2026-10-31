@@ -127,6 +127,22 @@ class CompleteIntegrationTests {
         assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update stage_participant set statut_id=(select s.id from statuts s join types_statut t on t.id=s.type_statut_id where t.code='PARTICIPATION' and s.code='EN_COURS') where id=?", participation));
         assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update stage_participant set date_fin_stage=date_debut_stage-1 where id=?", participation));
         assertTrue(get("/journal-audit").size() > 0);
+        int defaultMentor = create("/encadreurs", Map.of("nom", "Integration", "prenoms", "Default capacity", "departementId", department));
+        assertEquals(5, get("/encadreurs/" + defaultMentor + "/charge").get("capaciteMax").asInt());
+        var extraBody = new HashMap<String, Object>(participationBody);
+        extraBody.put("dateDebutStage", today.minusDays(25).toString());
+        int cancelled = create("/stage-participants", extraBody);
+        request("POST", "/stage-participants/" + cancelled + "/annuler", Map.of(), 200);
+        assertEquals("ANNULEE", get("/stage-participants/" + cancelled).get("statut").asString());
+        extraBody.put("dateDebutStage", today.minusDays(24).toString());
+        int firstActive = create("/stage-participants", extraBody);
+        extraBody.put("dateDebutStage", today.minusDays(23).toString());
+        int secondActive = create("/stage-participants", extraBody);
+        for (int id : List.of(firstActive, secondActive)) request("PATCH", "/stage-participants/" + id + "/statut", Map.of("statutCode", "EN_COURS"), 200);
+        assertTrue(get("/encadreurs/" + mentor + "/charge").get("surcharge").asBoolean());
+        for (int id : List.of(firstActive, secondActive)) request("POST", "/stage-participants/" + id + "/abandonner", Map.of(), 200);
+        assertEquals("ABANDONNEE", get("/stage-participants/" + firstActive).get("statut").asString());
+        assertFalse(get("/encadreurs/" + mentor + "/charge").get("surcharge").asBoolean());
         var mentorStatuses = get("/referentiels/suivi/statuts/ENCADREUR");
         String currentMentorStatus = get("/encadreurs/" + mentor).get("statut").asString();
         for (JsonNode status : mentorStatuses) {

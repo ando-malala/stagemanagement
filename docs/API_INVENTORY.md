@@ -1090,6 +1090,46 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 `id: Integer`, `identifiant: String`, `statut: String`
 
+### [CalculPeriodesRapportService.PeriodeRapport](../backend/src/main/java/mg/mef/stagemanagement/service/CalculPeriodesRapportService.java)
+
+`LocalDate debut`, `LocalDate fin`, `LocalDate dateLimite`
+
+### [DocumentCatalogueService.TypeDocument](../backend/src/main/java/mg/mef/stagemanagement/service/DocumentCatalogueService.java)
+
+`Integer id`, `String code`, `String libelle`, `boolean pourStagiaire`, `boolean pourParticipation`, `boolean obligatoireCloture`, `boolean multipleAutorise`
+
+### [DocumentCatalogueService.DocumentObligatoire](../backend/src/main/java/mg/mef/stagemanagement/service/DocumentCatalogueService.java)
+
+`Integer id`, `String code`, `String libelle`, `boolean present`
+
+### [ReferentielWorkflowService.Reference](../backend/src/main/java/mg/mef/stagemanagement/service/ReferentielWorkflowService.java)
+
+`Integer id`, `String code`, `String libelle`
+
+### [ReferentielWorkflowService.Transition](../backend/src/main/java/mg/mef/stagemanagement/service/ReferentielWorkflowService.java)
+
+`Integer id`, `String source`, `String cible`, `String libelle`
+
+### [SuiviParticipationService.Historique](../backend/src/main/java/mg/mef/stagemanagement/service/SuiviParticipationService.java)
+
+`Integer id`, `String ancienStatut`, `String statut`, `LocalDateTime dateModification`, `String motif`, `Integer responsableId`
+
+### [SuiviParticipationService.Evenement](../backend/src/main/java/mg/mef/stagemanagement/service/SuiviParticipationService.java)
+
+`Integer id`, `String code`, `String libelle`, `LocalDateTime dateEvenement`, `LocalDate dateEffet`, `LocalDate ancienneDateFin`, `LocalDate nouvelleDateFin`, `String motif`, `Integer responsableId`
+
+### [SuiviParticipationService.Periode](../backend/src/main/java/mg/mef/stagemanagement/service/SuiviParticipationService.java)
+
+`LocalDate debut`, `LocalDate fin`, `LocalDate dateLimite`, `Integer rapportId`, `String statutRapport`, `boolean soumise`, `boolean validee`, `boolean exigible`, `boolean manquante`
+
+### [SuiviParticipationService.Action](../backend/src/main/java/mg/mef/stagemanagement/service/SuiviParticipationService.java)
+
+`String code`, `String label`, `String statutCible`, `boolean dateEffet`
+
+### [SuiviParticipationService.Charge](../backend/src/main/java/mg/mef/stagemanagement/service/SuiviParticipationService.java)
+
+`Integer encadreurId`, `Integer capaciteMax`, `Long participationsActives`, `boolean surcharge`
+
 ## Erreurs explicites des services
 
 Catalogue par service, à rapprocher des méthodes appelées par chaque contrôleur. Les exceptions de contraintes PostgreSQL et les erreurs de conversion Spring s’y ajoutent. Les messages dynamiques sont tronqués à leur partie littérale dans ce catalogue.
@@ -1151,7 +1191,7 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : Les informations de l'évaluation sont incomplètes
 - `CONFLICT` : Une évaluation finalisée ne peut plus être modifiée
 - `BAD_REQUEST` : La note est obligatoire
-- `BAD_REQUEST` : La note doit être comprise entre 0 et 20
+- `BAD_REQUEST` : La note doit être comprise entre 0 et 5
 
 ### [FichierGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/FichierGestionService.java)
 

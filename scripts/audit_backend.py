@@ -49,7 +49,8 @@ def access(method, path):
 
 
 endpoints = []
-controllers = sorted((JAVA / 'controller').glob('*.java'))
+controllers = sorted(path for path in (JAVA / 'controller').glob('*.java')
+                     if re.search(r'@(Get|Post|Put|Patch|Delete)Mapping\b', read(path)))
 for path in controllers:
     source = read(path)
     base = re.search(r'@RequestMapping\("([^"]+)"\)', source)[1]
@@ -102,6 +103,10 @@ for path in sorted((JAVA / 'dto').rglob('*.java')):
     fields = re.findall(r'private\s+([\w<>?, .]+?)\s+(\w+)\s*(?:=[^;]*)?;', read(path))
     lines += [f'### [{path.stem}]({link(path)})', '',
               ', '.join(f'`{name}: {kind}`' for kind, name in fields), '']
+for path in sorted((JAVA / 'service').glob('*.java')):
+    for name, fields in re.findall(r'public record (\w+)\((.*?)\)\s*\{', read(path), re.S):
+        lines += [f'### [{path.stem}.{name}]({link(path)})', '',
+                  ', '.join(f'`{compact(field)}`' for field in fields.split(',')), '']
 lines += ['## Erreurs explicites des services', '',
           'Catalogue par service, à rapprocher des méthodes appelées par chaque contrôleur. '
           'Les exceptions de contraintes PostgreSQL et les erreurs de conversion Spring s’y ajoutent. '
