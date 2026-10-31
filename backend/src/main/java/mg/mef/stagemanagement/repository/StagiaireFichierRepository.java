@@ -12,6 +12,8 @@ public interface StagiaireFichierRepository
 
     List<StagiaireFichier> findByStagiaire_Id(Integer stagiaireId);
 
+    List<StagiaireFichier> findByFichier_Id(Integer fichierId);
+
     boolean existsByStagiaire_IdAndTypePieceJointe_Id(
             Integer stagiaireId,
             Integer typePieceJointeId

@@ -36,6 +36,7 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 public class FichierGestionService {
+    private final DossierAccessService access;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -56,7 +57,8 @@ public class FichierGestionService {
             StageParticipantFichierRepository stageParticipantFichierRepository,
             TypePieceJointeRepository typePieceJointeRepository,
             UtilisateurRepository utilisateurRepository
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.fichierRepository = fichierRepository;
         this.stagiaireRepository = stagiaireRepository;
         this.stageParticipantRepository = stageParticipantRepository;
@@ -71,6 +73,7 @@ public class FichierGestionService {
     // =========================
 
     public List<FichierResponse> listerFichiersStagiaire(Integer stagiaireId) {
+        access.trainee(stagiaireId, false);
         if (!stagiaireRepository.existsById(stagiaireId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -91,6 +94,7 @@ public class FichierGestionService {
             MultipartFile multipartFile,
             Integer utilisateurId
     ) {
+        access.trainee(stagiaireId, true);
         Stagiaire stagiaire = stagiaireRepository.findById(stagiaireId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -137,6 +141,7 @@ public class FichierGestionService {
     public List<FichierResponse> listerFichiersParticipation(
             Integer stageParticipantId
     ) {
+        access.participation(stageParticipantId, false);
         if (!stageParticipantRepository.existsById(stageParticipantId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -158,6 +163,7 @@ public class FichierGestionService {
             MultipartFile multipartFile,
             Integer utilisateurId
     ) {
+        access.participation(stageParticipantId, true);
         StageParticipant stageParticipant =
                 stageParticipantRepository.findById(stageParticipantId)
                         .orElseThrow(() ->
@@ -207,6 +213,7 @@ public class FichierGestionService {
     public FichierTelechargementResponse preparerTelechargement(
             Integer fichierId
     ) {
+        access.file(fichierId);
         Fichier fichier = fichierRepository.findById(fichierId)
                 .orElseThrow(() ->
                         new ResponseStatusException(

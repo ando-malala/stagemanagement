@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional(readOnly = true)
 public class SuiviParticipationService {
+    private final DossierAccessService access;
     public record Historique(Integer id, String ancienStatut, String statut, LocalDateTime dateModification, String motif, Integer responsableId) {}
     public record Evenement(Integer id, String code, String libelle, LocalDateTime dateEvenement, LocalDate dateEffet,
             LocalDate ancienneDateFin, LocalDate nouvelleDateFin, String motif, Integer responsableId) {}
@@ -28,7 +29,8 @@ public class SuiviParticipationService {
     private final ReferentielWorkflowService workflow;
     public SuiviParticipationService(StageParticipantRepository participations, StageParticipantEvenementRepository evenements,
             StageParticipantStatutHistoriqueRepository historiques, RapportActiviteRepository rapports,
-            EncadreurRepository encadreurs, CalculPeriodesRapportService calcul, ReferentielWorkflowService workflow) {
+            EncadreurRepository encadreurs, CalculPeriodesRapportService calcul, ReferentielWorkflowService workflow, DossierAccessService access) {
+        this.access = access;
         this.participations = participations; this.evenements = evenements; this.historiques = historiques;
         this.rapports = rapports; this.encadreurs = encadreurs; this.calcul = calcul; this.workflow = workflow;
     }
@@ -36,18 +38,21 @@ public class SuiviParticipationService {
         return participations.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Participation introuvable"));
     }
     public List<Historique> historiques(Integer id) {
+        access.participation(id, false);
         participation(id);
         return historiques.findByStageParticipant_IdOrderByDateModificationAscIdAsc(id).stream()
                 .map(h -> new Historique(h.getId(), h.getAncienStatut() == null ? null : h.getAncienStatut().getCode(), h.getStatut().getCode(),
                         h.getDateModification(), h.getMotif(), h.getResponsable() == null ? null : h.getResponsable().getId())).toList();
     }
     public List<Evenement> evenements(Integer id) {
+        access.participation(id, false);
         participation(id);
         return evenements.findByStageParticipant_IdOrderByDateEvenementAscIdAsc(id).stream()
                 .map(e -> new Evenement(e.getId(), e.getTypeEvenement().getCode(), e.getTypeEvenement().getLibelle(), e.getDateEvenement(),
                         e.getDateEffet(), e.getAncienneDateFin(), e.getNouvelleDateFin(), e.getMotif(), e.getResponsable() == null ? null : e.getResponsable().getId())).toList();
     }
     public List<Periode> periodes(Integer id) {
+        access.participation(id, false);
         return periodes(participation(id), rapports.findByStageParticipant_Id(id), LocalDate.now(ZoneId.of("Indian/Antananarivo")));
     }
     // Same calendar and definition of a submitted report as the existing detector.
@@ -63,12 +68,14 @@ public class SuiviParticipationService {
         }).toList();
     }
     public Charge charge(Integer id) {
+        access.mentor(id, false);
         if (!encadreurs.existsById(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Encadreur introuvable");
         var c = encadreurs.findCharge(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Charge indisponible"));
         if (c.getCapaciteMax() == null) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Capacite non configuree");
         return new Charge(c.getEncadreurId(), c.getCapaciteMax(), c.getParticipationsActives(), Boolean.TRUE.equals(c.getSurcharge()));
     }
     public List<Action> actions(Integer id) {
+        access.participation(id, false);
         var p = participation(id);
         if (p.getDateCloture() != null) return List.of();
         var actifs = workflow.evenements().stream().map(ReferentielWorkflowService.Reference::code).toList();

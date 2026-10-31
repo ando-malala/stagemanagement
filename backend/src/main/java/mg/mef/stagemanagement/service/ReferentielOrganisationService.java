@@ -29,6 +29,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class ReferentielOrganisationService {
+    private final DossierAccessService access;
 
     private final DepartementRepository departementRepository;
     private final StatutRepository statutRepository;
@@ -40,7 +41,8 @@ public class ReferentielOrganisationService {
             StatutRepository statutRepository,
             StructureAccueilRepository structureAccueilRepository,
             CadreStageRepository cadreStageRepository
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.departementRepository = departementRepository;
         this.statutRepository = statutRepository;
         this.structureAccueilRepository = structureAccueilRepository;
@@ -53,7 +55,7 @@ public class ReferentielOrganisationService {
 
     public List<DepartementResponse> listerDepartements() {
         return departementRepository.findAll()
-                .stream()
+                .stream().filter(d -> access.role("ADMIN") || !access.role("RESPONSABLE_STAGE") || access.department(d.getId()))
                 .sorted(Comparator.comparing(Departement::getLibelle))
                 .map(this::toDepartementResponse)
                 .toList();
@@ -131,7 +133,7 @@ public class ReferentielOrganisationService {
 
     public List<StructureAccueilResponse> listerStructuresAccueil() {
         return structureAccueilRepository.findAll()
-                .stream()
+                .stream().filter(s -> access.role("ADMIN") || !access.role("RESPONSABLE_STAGE") || access.department(s.getDepartement().getId()))
                 .sorted(Comparator.comparing(StructureAccueil::getLibelle))
                 .map(this::toStructureAccueilResponse)
                 .toList();

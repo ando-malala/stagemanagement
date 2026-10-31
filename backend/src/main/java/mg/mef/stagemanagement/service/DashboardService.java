@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class DashboardService {
+    private final DossierAccessService access;
 
     private final StagiaireRepository stagiaireRepository;
     private final StageRepository stageRepository;
@@ -26,7 +27,8 @@ public class DashboardService {
             StageParticipantRepository stageParticipantRepository,
             RapportActiviteRepository rapportActiviteRepository,
             AlerteRepository alerteRepository
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.stagiaireRepository = stagiaireRepository;
         this.stageRepository = stageRepository;
         this.stageParticipantRepository = stageParticipantRepository;
@@ -36,12 +38,12 @@ public class DashboardService {
 
     public DashboardResumeResponse resume() {
         return new DashboardResumeResponse(
-                stagiaireRepository.count(),
-                stageRepository.count(),
-                stageParticipantRepository.count(),
-                rapportActiviteRepository.count(),
-                alerteRepository.countByStatut(AlerteStatut.A_TRAITER),
-                alerteRepository.countByStatut(AlerteStatut.TRAITEE)
+                stagiaireRepository.findAll().stream().filter(access::readTrainee).count(),
+                stageRepository.findAll().stream().filter(access::readStage).count(),
+                stageParticipantRepository.findAll().stream().filter(access::readParticipation).count(),
+                rapportActiviteRepository.findAll().stream().filter(access::readReport).count(),
+                alerteRepository.findByStatutOrderByDateDetectionDesc(AlerteStatut.A_TRAITER).stream().filter(access::readAlert).count(),
+                alerteRepository.findByStatutOrderByDateDetectionDesc(AlerteStatut.TRAITEE).stream().filter(access::readAlert).count()
         );
     }
 }

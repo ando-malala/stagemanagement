@@ -1,4 +1,4 @@
-package mg.mef.stagemanagement;
+﻿package mg.mef.stagemanagement;
 
 import mg.mef.stagemanagement.service.AlerteOrchestrationService;
 import org.junit.jupiter.api.Test;
@@ -160,12 +160,66 @@ class CompleteIntegrationTests {
             for (String path : List.of("/referentiels/suivi/types-documents", "/referentiels/suivi/types-evenements", "/referentiels/suivi/types-alertes",
                     "/referentiels/suivi/statuts/PARTICIPATION", "/referentiels/suivi/transitions/PARTICIPATION/A_CLOTURER",
                     base + "/documents-obligatoires", base + "/evenements", base + "/historique-statuts", base + "/periodes-rapports", base + "/actions", "/encadreurs/" + mentor + "/charge"))
-                request("GET", path, null, expected);
+                request("GET", path, null, path.startsWith("/referentiels/") ? expected : 403);
             request("GET", "/utilisateurs", null, 403);
-            request("POST", base + "/cloturer", Map.of(), "RESPONSABLE_STAGE".equals(role) ? 409 : 403);
+            request("POST", base + "/cloturer", Map.of(), 403);
         }
         request("POST", "/auth/logout", Map.of(), 204);
         request("GET", "/auth/me", null, 401);
+    }
+    @Test void departmentAndAssignmentIsolationOverHttp() throws Exception {
+        String prefix = "scope-" + UUID.randomUUID().toString().substring(0, 8);
+        int admin = seedUser(prefix + "-admin", "ADMIN");
+        token = login(prefix + "-admin");
+        int cadre = create("/referentiels/organisation/cadres-stage", Map.of("themeStage", prefix, "actif", true));
+        int school = create("/referentiels/academiques/etablissements", Map.of("libelle", prefix, "actif", true));
+        int stream = create("/referentiels/academiques/filieres", Map.of("libelle", prefix, "actif", true));
+        int level = create("/referentiels/academiques/niveaux-etude", Map.of("libelle", prefix, "actif", true));
+        int month = create("/referentiels/academiques/mois-stage", Map.of("libelle", prefix, "actif", true));
+        int[] p = new int[2], t = new int[2], e = new int[2], r = new int[2], f = new int[2], a = new int[2], v = new int[2], d = new int[2];
+        for (int i = 0; i < 2; i++) {
+            int department = create("/referentiels/organisation/departements", Map.of("libelle", prefix + i));
+            int manager = seedUser(prefix + "-manager" + i, "RESPONSABLE_STAGE");
+            jdbc.update("insert into responsable_departements(utilisateur_id,departement_id) values (?,?)", manager, department);
+            int mentorUser = seedUser(prefix + "-mentor" + i, "ENCADREUR");
+            int structure = create("/referentiels/organisation/structures-accueil", Map.of("libelle", prefix + i, "departementId", department, "actif", true));
+            int stage = create("/stages", Map.of("libelle", prefix + i, "structureAccueilId", structure));
+            t[i] = create("/stagiaires", Map.of("nom", prefix, "prenoms", "T" + i, "adresse", "test", "departementId", department));
+            int academic = create("/stagiaires/" + t[i] + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
+            e[i] = create("/encadreurs", Map.of("nom", prefix, "prenoms", "E" + i, "departementId", department, "utilisateurId", mentorUser));
+            p[i] = create("/stage-participants", Map.of("stageId", stage, "stagiaireAcademiqueId", academic, "cadreStageId", cadre, "encadreurId", e[i], "dateDebutStage", "2026-10-01", "dateFinStage", "2026-10-31"));
+            r[i] = create("/rapports-activite", Map.of("stageParticipantId", p[i], "moisStageId", month, "debutSemaine", "2026-10-01", "finSemaine", "2026-10-04"));
+            v[i] = create("/evaluations", Map.of("stageParticipantId", p[i], "encadreurId", e[i]));
+            d[i] = create("/soutenances", Map.of("stageParticipantId", p[i], "dateSoutenance", "2026-10-30T14:00:00"));
+            a[i] = create("/alertes", Map.of("typeAlerteCode", "DOSSIER_INCOMPLET", "stageParticipantId", p[i], "message", prefix, "priorite", "AVERTISSEMENT"));
+            upload("/stage-participants/" + p[i] + "/fichiers", "CONVENTION_STAGE", 200);
+            f[i] = get("/stage-participants/" + p[i] + "/fichiers").get(0).get("id").asInt();
+        }
+        for (String role : List.of("manager", "mentor")) for (int i = 0; i < 2; i++) {
+            token = login(prefix + "-" + role + i);
+            for (String list : List.of("/stagiaires", "/stage-participants", "/stages", "/encadreurs", "/rapports-activite", "/evaluations", "/soutenances", "/alertes")) assertEquals(1, get(list).size(), role + list);
+            assertEquals(p[i], get("/stage-participants").get(0).get("id").asInt());
+            assertEquals(1, get("/dashboard/resume").get("totalParticipations").asInt());
+            int other = 1 - i;
+            for (int index : new int[] {i, other}) {
+                int expected = index == i ? 200 : 403;
+                for (String path : List.of("/stagiaires/" + t[index], "/stagiaires/" + t[index] + "/academiques", "/encadreurs/" + e[index] + "/charge",
+                        "/rapports-activite/" + r[index], "/evaluations/" + v[index], "/evaluations/" + v[index] + "/notes", "/soutenances/" + d[index])) request("GET", path, null, expected);
+                for (String suffix : List.of("", "/evenements", "/historique-statuts", "/periodes-rapports", "/documents-obligatoires", "/fichiers")) request("GET", "/stage-participants/" + p[index] + suffix, null, expected);
+                var download = http.send(builder("/fichiers/" + f[index] + "/telecharger").GET().build(), HttpResponse.BodyHandlers.discarding());
+                assertEquals(expected, download.statusCode());
+            }
+            request("PATCH", "/alertes/" + a[other] + "/lire", Map.of(), 403);
+            request("POST", "/stage-participants/" + p[other] + "/annuler", Map.of(), 403);
+            request("PATCH", "/rapports-activite/" + r[other] + "/statut", Map.of("statutCode", "SOUMIS"), 403);
+            request("POST", "/evaluations/" + v[other] + "/finaliser", Map.of(), 403);
+            request("POST", "/rapports-activite", Map.of("stageParticipantId", p[other], "moisStageId", month, "debutSemaine", "2026-10-05", "finSemaine", "2026-10-11"), 403);
+        }
+    }
+    int seedUser(String name, String role) {
+        jdbc.update("insert into utilisateurs(identifiant,mot_de_passe_hash,statut_id) select ?,?,s.id from statuts s join types_statut t on t.id=s.type_statut_id where t.code='UTILISATEUR' and s.code='ACTIF'", name, encoder.encode(PASSWORD));
+        jdbc.update("insert into utilisateurs_role(utilisateur_id,role_id) select u.id,r.id from utilisateurs u cross join roles r where u.identifiant=? and r.code=?", name, role);
+        return jdbc.queryForObject("select id from utilisateurs where identifiant=?", Integer.class, name);
     }
     String login(String name) throws Exception {
         String previous = token; token = null;
@@ -194,3 +248,4 @@ class CompleteIntegrationTests {
         assertEquals(expected, response.statusCode(), "upload " + code);
     }
 }
+

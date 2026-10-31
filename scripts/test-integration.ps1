@@ -28,6 +28,10 @@ try {
     [IO.File]::WriteAllText($schemaFile, $schema, [Text.UTF8Encoding]::new($false))
     & $pgExecutable -X -w -h $sourceUrl.Host -p $sourceUrl.Port -U $settings['username'] -d $testDatabase -v ON_ERROR_STOP=1 -f $schemaFile | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Cannot initialize the isolated test schema.' }
+    Get-ChildItem -LiteralPath (Join-Path $projectRoot 'backend/migrations') -Filter '*.sql' | Sort-Object Name | ForEach-Object {
+        & $pgExecutable -X -w -h $sourceUrl.Host -p $sourceUrl.Port -U $settings['username'] -d $testDatabase -v ON_ERROR_STOP=1 -f $_.FullName | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot apply test migration.' }
+    }
     $env:MEF_TEST_DB_URL = "jdbc:postgresql://$($sourceUrl.Host):$($sourceUrl.Port)/$testDatabase"
     $env:MEF_TEST_DB_USER = $settings['username']
     $env:MEF_TEST_DB_PASSWORD = $settings['password']
@@ -40,11 +44,7 @@ try {
         $testExit = $LASTEXITCODE
     } finally { Pop-Location }
 } finally {
-    if ($created) {
-        # The name is generated and checked above; only this test database is dropped.
-        & $pgExecutable -X -w -h $sourceUrl.Host -p $sourceUrl.Port -U $settings['username'] -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE $testDatabase WITH (FORCE)" | Out-Null
-        if ($LASTEXITCODE -ne 0) { Write-Warning "Cleanup failed for $testDatabase"; $testExit = 1 }
-    }
+    if ($created) { Write-Host "Isolated test database retained: $testDatabase" }
     foreach ($name in $savedEnvironment.Keys) { [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], 'Process') }
     $uploadRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'backend/target/integration-uploads'))
     $uploadDirectory = [IO.Path]::GetFullPath((Join-Path $uploadRoot $testDatabase))

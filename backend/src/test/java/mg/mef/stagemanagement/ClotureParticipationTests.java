@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ClotureParticipationTests {
+    @Mock DossierAccessService access;
     @Mock StageRepository stages;
     @Mock StageParticipantRepository participations;
     @Mock StructureAccueilRepository structures;

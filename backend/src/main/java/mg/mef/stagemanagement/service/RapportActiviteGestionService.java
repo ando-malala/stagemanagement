@@ -35,6 +35,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class RapportActiviteGestionService {
+    private final DossierAccessService access;
 
     private final RapportActiviteRepository rapportActiviteRepository;
     private final RapportObservationRepository rapportObservationRepository;
@@ -54,7 +55,8 @@ public class RapportActiviteGestionService {
             StatutRepository statutRepository,
             UtilisateurRepository utilisateurRepository,
             JournalAuditService journalAuditService
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.rapportActiviteRepository = rapportActiviteRepository;
         this.rapportObservationRepository = rapportObservationRepository;
         this.historiqueRepository = historiqueRepository;
@@ -67,13 +69,14 @@ public class RapportActiviteGestionService {
 
     public List<RapportActiviteResponse> listerRapports() {
         return rapportActiviteRepository.findAll()
-                .stream()
+                .stream().filter(access::readReport)
                 .sorted(Comparator.comparing(RapportActivite::getDebutSemaine).reversed())
                 .map(this::toRapportResponse)
                 .toList();
     }
 
     public RapportActiviteResponse trouverRapport(Integer id) {
+        access.report(id);
         RapportActivite rapport = rapportActiviteRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -88,6 +91,7 @@ public class RapportActiviteGestionService {
     public List<RapportActiviteResponse> listerRapportsParParticipation(
             Integer stageParticipantId
     ) {
+        access.participation(stageParticipantId, false);
         if (!stageParticipantRepository.existsById(stageParticipantId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -107,6 +111,7 @@ public class RapportActiviteGestionService {
     public RapportActiviteResponse creerRapport(
             RapportActiviteRequest request
     ) {
+        if (request != null && request.getStageParticipantId() != null) access.participation(request.getStageParticipantId(), false);
         verifierRapportRequest(request);
 
         if (request.getFinSemaine().isBefore(request.getDebutSemaine())) {
@@ -177,6 +182,7 @@ public class RapportActiviteGestionService {
             Integer id,
             RapportActiviteRequest request
     ) {
+        if (request != null) access.reportContent(id, request.getStageParticipantId());
         verifierRapportRequest(request);
 
         if (request.getFinSemaine().isBefore(request.getDebutSemaine())) {
@@ -240,6 +246,7 @@ public class RapportActiviteGestionService {
     public List<RapportObservationResponse> listerObservations(
             Integer rapportId
     ) {
+        access.report(rapportId);
         if (!rapportActiviteRepository.existsById(rapportId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -249,7 +256,7 @@ public class RapportActiviteGestionService {
 
         return rapportObservationRepository
                 .findByRapport_IdOrderByDateCreationAsc(rapportId)
-                .stream()
+                .stream().filter(o -> !access.traineeOnly() || Boolean.TRUE.equals(o.getVisibleStagiaire()))
                 .map(this::toObservationResponse)
                 .toList();
     }
@@ -260,6 +267,7 @@ public class RapportActiviteGestionService {
             RapportObservationRequest request,
             Integer auteurId
     ) {
+        access.review(access.report(rapportId).getStageParticipant().getId());
         if (request == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -315,6 +323,7 @@ public class RapportActiviteGestionService {
             ChangerStatutRapportRequest request,
             Integer responsableId
     ) {
+        access.reportTransition(rapportId, request == null ? null : request.getStatutCode());
         if (request == null
                 || request.getStatutCode() == null
                 || request.getStatutCode().trim().isEmpty()) {

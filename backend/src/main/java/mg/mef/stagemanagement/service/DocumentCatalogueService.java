@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional(readOnly = true)
 public class DocumentCatalogueService {
+    private final DossierAccessService access;
     public record TypeDocument(Integer id, String code, String libelle, boolean pourStagiaire,
             boolean pourParticipation, boolean obligatoireCloture, boolean multipleAutorise) {}
     public record DocumentObligatoire(Integer id, String code, String libelle, boolean present) {}
@@ -20,7 +21,8 @@ public class DocumentCatalogueService {
     private final StageParticipantRepository participations;
 
     public DocumentCatalogueService(TypePieceJointeRepository types, StageParticipantFichierRepository fichiers,
-            StageParticipantRepository participations) {
+            StageParticipantRepository participations, DossierAccessService access) {
+        this.access = access;
         this.types = types; this.fichiers = fichiers; this.participations = participations;
     }
     public List<TypeDocument> types() {
@@ -31,6 +33,7 @@ public class DocumentCatalogueService {
                         Boolean.TRUE.equals(t.getMultipleAutorise()))).toList();
     }
     public List<DocumentObligatoire> obligatoires(Integer id) {
+        access.participation(id, false);
         if (!participations.existsById(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Participation introuvable");
         var presents = fichiers.findByStageParticipant_Id(id).stream().map(f -> f.getTypePieceJointe().getId()).toList();
         return types.findByPourParticipationTrueAndObligatoireClotureTrueAndActifTrue().stream()

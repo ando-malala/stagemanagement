@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 public class StagiaireResponse {
 
+    private Integer departementId;
+    public Integer getDepartementId() { return departementId; }
+    public void setDepartementId(Integer value) { departementId = value; }
     private Integer id;
     private String nom;
     private String prenoms;

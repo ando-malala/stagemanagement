@@ -41,6 +41,13 @@ public class Stagiaire {
     @Column(name = "date_creation", nullable = false)
     private LocalDateTime dateCreation = LocalDateTime.now();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "departement_id")
+    private Departement departement;
+
+    public Departement getDepartement() { return departement; }
+    public void setDepartement(Departement value) { departement = value; }
+
     public Stagiaire() {
     }
 

@@ -14,6 +14,8 @@ public interface StageParticipantFichierRepository
             Integer stageParticipantId
     );
 
+    List<StageParticipantFichier> findByFichier_Id(Integer fichierId);
+
     boolean existsByStageParticipant_IdAndTypePieceJointe_Id(
             Integer stageParticipantId,
             Integer typePieceJointeId

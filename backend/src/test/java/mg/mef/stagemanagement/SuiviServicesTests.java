@@ -19,7 +19,7 @@ class SuiviServicesTests {
         var required = new TypePieceJointe(); required.setId(4); required.setCode("CONVENTION_STAGE"); required.setLibelle("Convention");
         when(types.findByPourParticipationTrueAndObligatoireClotureTrueAndActifTrue()).thenReturn(List.of(required));
         when(files.findByStageParticipant_Id(1)).thenReturn(List.of());
-        var service = new DocumentCatalogueService(types, files, participants);
+        var service = new DocumentCatalogueService(types, files, participants, mock(DossierAccessService.class));
         assertFalse(service.obligatoires(1).get(0).present());
         assertThrows(ResponseStatusException.class, () -> service.verifierCloture(1));
         var link = new StageParticipantFichier(); link.setTypePieceJointe(required);
@@ -28,7 +28,7 @@ class SuiviServicesTests {
         assertThrows(ResponseStatusException.class, () -> service.obligatoires(99));
     }
     @Test void periodsUseMondayDeadlineAndSubmissionDate() {
-        var service = new SuiviParticipationService(null, null, null, null, null, new CalculPeriodesRapportService(), null);
+        var service = new SuiviParticipationService(null, null, null, null, null, new CalculPeriodesRapportService(), null, mock(DossierAccessService.class));
         var p = new StageParticipant(); p.setDateDebutStage(LocalDate.of(2026, 10, 1)); p.setDateFinStage(LocalDate.of(2026, 10, 4));
         var status = new Statut(); status.setCode("EN_COURS"); p.setStatut(status);
         assertFalse(service.periodes(p, List.of(), LocalDate.of(2026, 10, 5)).get(0).manquante());

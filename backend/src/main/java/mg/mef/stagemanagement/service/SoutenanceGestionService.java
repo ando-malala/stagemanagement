@@ -21,6 +21,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class SoutenanceGestionService {
+    private final DossierAccessService access;
 
     private final SoutenanceRepository soutenanceRepository;
     private final StageParticipantRepository stageParticipantRepository;
@@ -28,20 +29,22 @@ public class SoutenanceGestionService {
     public SoutenanceGestionService(
             SoutenanceRepository soutenanceRepository,
             StageParticipantRepository stageParticipantRepository
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.soutenanceRepository = soutenanceRepository;
         this.stageParticipantRepository = stageParticipantRepository;
     }
 
     public List<SoutenanceResponse> listerSoutenances() {
         return soutenanceRepository.findAll()
-                .stream()
+                .stream().filter(access::readDefense)
                 .sorted(Comparator.comparing(Soutenance::getDateSoutenance))
                 .map(this::toResponse)
                 .toList();
     }
 
     public SoutenanceResponse trouverSoutenance(Integer id) {
+        access.defense(id, false);
         Soutenance soutenance = soutenanceRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -55,6 +58,7 @@ public class SoutenanceGestionService {
 
     @Transactional(readOnly = false)
     public SoutenanceResponse creerSoutenance(SoutenanceRequest request) {
+        if (request != null && request.getStageParticipantId() != null) access.participation(request.getStageParticipantId(), true);
         verifierRequest(request);
 
         if (soutenanceRepository.existsByStageParticipant_Id(
@@ -92,6 +96,7 @@ public class SoutenanceGestionService {
             Integer id,
             SoutenanceRequest request
     ) {
+        access.defense(id, true); if (request != null && request.getStageParticipantId() != null) access.participation(request.getStageParticipantId(), true);
         verifierRequest(request);
 
         Soutenance soutenance = soutenanceRepository.findById(id)

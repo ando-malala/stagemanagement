@@ -28,6 +28,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class EvaluationGestionService {
+    private final DossierAccessService access;
 
     private final EvaluationFinaleRepository evaluationFinaleRepository;
     private final EvaluationCritereRepository evaluationCritereRepository;
@@ -43,7 +44,8 @@ public class EvaluationGestionService {
             StageParticipantRepository stageParticipantRepository,
             EncadreurRepository encadreurRepository,
             JournalAuditService journalAuditService
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.evaluationFinaleRepository = evaluationFinaleRepository;
         this.evaluationCritereRepository = evaluationCritereRepository;
         this.critereEvaluationRepository = critereEvaluationRepository;
@@ -54,12 +56,13 @@ public class EvaluationGestionService {
 
     public List<EvaluationFinaleResponse> listerEvaluations() {
         return evaluationFinaleRepository.findAll()
-                .stream()
+                .stream().filter(access::readEvaluation)
                 .map(this::toEvaluationResponse)
                 .toList();
     }
 
     public EvaluationFinaleResponse trouverEvaluation(Integer id) {
+        access.evaluation(id, false);
         EvaluationFinale evaluation = evaluationFinaleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -74,6 +77,7 @@ public class EvaluationGestionService {
     public EvaluationFinaleResponse trouverEvaluationParParticipation(
             Integer stageParticipantId
     ) {
+        access.participation(stageParticipantId, false);
         EvaluationFinale evaluation = evaluationFinaleRepository
                 .findByStageParticipant_Id(stageParticipantId)
                 .orElseThrow(() ->
@@ -90,6 +94,7 @@ public class EvaluationGestionService {
     public EvaluationFinaleResponse creerEvaluation(
             EvaluationFinaleRequest request
     ) {
+        if (request != null) access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
         verifierEvaluationRequest(request);
 
         if (evaluationFinaleRepository.existsByStageParticipant_Id(
@@ -142,6 +147,7 @@ public class EvaluationGestionService {
             Integer id,
             EvaluationFinaleRequest request
     ) {
+        access.evaluation(id, true); if (request != null) access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
         verifierEvaluationRequest(request);
 
         EvaluationFinale evaluation = evaluationFinaleRepository.findById(id)
@@ -188,6 +194,7 @@ public class EvaluationGestionService {
     }
 
     public List<EvaluationCritereResponse> listerNotes(Integer evaluationId) {
+        access.evaluation(evaluationId, false);
         if (!evaluationFinaleRepository.existsById(evaluationId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -221,6 +228,7 @@ public class EvaluationGestionService {
             Integer evaluationId,
             EvaluationCritereRequest request
     ) {
+        access.evaluation(evaluationId, true);
         if (request == null || request.getCritereId() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -279,6 +287,7 @@ public class EvaluationGestionService {
 
     @Transactional(readOnly = false)
     public EvaluationFinaleResponse finaliserEvaluation(Integer evaluationId) {
+        access.evaluation(evaluationId, true);
         EvaluationFinale evaluation = evaluationFinaleRepository
                 .findById(evaluationId)
                 .orElseThrow(() ->

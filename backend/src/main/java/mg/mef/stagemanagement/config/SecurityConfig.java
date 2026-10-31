@@ -427,17 +427,17 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/alertes/detection/stages-depasses"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/alertes/detection/fins-stages-proches"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/alertes/detection/rapports-manquants"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/alertes/detection/test-orchestration"

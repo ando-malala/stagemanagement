@@ -28,6 +28,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class StagiaireGestionService {
+    private final DossierAccessService access;
 
     private final StagiaireRepository stagiaireRepository;
     private final StagiaireAcademiqueRepository stagiaireAcademiqueRepository;
@@ -43,7 +44,8 @@ public class StagiaireGestionService {
             NiveauEtudeRepository niveauEtudeRepository,
             FiliereRepository filiereRepository,
             EtablissementRepository etablissementRepository
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.stagiaireRepository = stagiaireRepository;
         this.stagiaireAcademiqueRepository = stagiaireAcademiqueRepository;
         this.statutRepository = statutRepository;
@@ -58,7 +60,7 @@ public class StagiaireGestionService {
 
     public List<StagiaireResponse> listerStagiaires() {
         return stagiaireRepository.findAll()
-                .stream()
+                .stream().filter(access::readTrainee)
                 .sorted(Comparator.comparing(Stagiaire::getNom)
                         .thenComparing(Stagiaire::getPrenoms))
                 .map(this::toStagiaireResponse)
@@ -66,6 +68,7 @@ public class StagiaireGestionService {
     }
 
     public StagiaireResponse trouverStagiaire(Integer id) {
+        access.trainee(id, false);
         Stagiaire stagiaire = stagiaireRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -82,6 +85,11 @@ public class StagiaireGestionService {
         Stagiaire stagiaire = new Stagiaire();
 
         remplirStagiaire(stagiaire, request);
+        if (request.getDepartementId() != null) {
+            access.require(access.department(request.getDepartementId()));
+            var dept = new mg.mef.stagemanagement.model.Departement(); dept.setId(request.getDepartementId());
+            stagiaire.setDepartement(dept);
+        } else access.require(access.role("ADMIN") || stagiaire.getDepartement() != null);
 
         Statut statutActif = statutRepository
                 .findStatutByTypeCodeAndStatutCode("STAGIAIRE", "ACTIF")
@@ -105,6 +113,7 @@ public class StagiaireGestionService {
             Integer id,
             StagiaireRequest request
     ) {
+        access.trainee(id, true);
         Stagiaire stagiaire = stagiaireRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -114,6 +123,11 @@ public class StagiaireGestionService {
                 );
 
         remplirStagiaire(stagiaire, request);
+        if (request.getDepartementId() != null) {
+            access.require(access.department(request.getDepartementId()));
+            var dept = new mg.mef.stagemanagement.model.Departement(); dept.setId(request.getDepartementId());
+            stagiaire.setDepartement(dept);
+        } else access.require(access.role("ADMIN") || stagiaire.getDepartement() != null);
 
         Stagiaire enregistre = stagiaireRepository.save(stagiaire);
 
@@ -127,6 +141,7 @@ public class StagiaireGestionService {
     public List<StagiaireAcademiqueResponse> listerAcademiques(
             Integer stagiaireId
     ) {
+        access.trainee(stagiaireId, false);
         verifierStagiaireExiste(stagiaireId);
 
         return stagiaireAcademiqueRepository
@@ -141,6 +156,7 @@ public class StagiaireGestionService {
             Integer stagiaireId,
             StagiaireAcademiqueRequest request
     ) {
+        access.trainee(stagiaireId, true);
         Stagiaire stagiaire = stagiaireRepository.findById(stagiaireId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -229,7 +245,7 @@ public class StagiaireGestionService {
                 ? stagiaire.getStatut().getCode()
                 : null;
 
-        return new StagiaireResponse(
+        var response = new StagiaireResponse(
                 stagiaire.getId(),
                 stagiaire.getNom(),
                 stagiaire.getPrenoms(),
@@ -239,6 +255,8 @@ public class StagiaireGestionService {
                 statut,
                 stagiaire.getDateCreation()
         );
+        response.setDepartementId(stagiaire.getDepartement() == null ? null : stagiaire.getDepartement().getId());
+        return response;
     }
 
     private StagiaireAcademiqueResponse toAcademiqueResponse(

@@ -2,6 +2,9 @@ package mg.mef.stagemanagement.dto.stagiaire;
 
 public class StagiaireRequest {
 
+    private Integer departementId;
+    public Integer getDepartementId() { return departementId; }
+    public void setDepartementId(Integer value) { departementId = value; }
     private String nom;
     private String prenoms;
     private String adresse;

@@ -30,6 +30,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class AlerteGestionService {
+    private final DossierAccessService access;
 
     private final AlerteRepository alerteRepository;
     private final TypeAlerteRepository typeAlerteRepository;
@@ -49,7 +50,8 @@ public class AlerteGestionService {
             SoutenanceRepository soutenanceRepository,
             UtilisateurRepository utilisateurRepository,
             JournalAuditService journalAuditService
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.alerteRepository = alerteRepository;
         this.typeAlerteRepository = typeAlerteRepository;
         this.stageParticipantRepository = stageParticipantRepository;
@@ -62,7 +64,7 @@ public class AlerteGestionService {
 
     public List<AlerteResponse> listerAlertes() {
         return alerteRepository.findAllByOrderByDateDetectionDesc()
-                .stream()
+                .stream().filter(access::readAlert)
                 .map(this::toResponse)
                 .toList();
     }
@@ -70,7 +72,7 @@ public class AlerteGestionService {
     public List<AlerteResponse> listerAlertesATraiter() {
         return alerteRepository
                 .findByStatutOrderByDateDetectionDesc(AlerteStatut.A_TRAITER)
-                .stream()
+                .stream().filter(access::readAlert)
                 .map(this::toResponse)
                 .toList();
     }
@@ -166,6 +168,7 @@ public class AlerteGestionService {
             alerte.setSoutenance(soutenance);
         }
 
+        access.require(access.readAlert(alerte));
         Alerte enregistree = alerteRepository.save(alerte);
 
         return toResponse(enregistree);
@@ -184,6 +187,7 @@ public class AlerteGestionService {
                         )
                 );
 
+        access.require(access.readAlert(alerte));
         if (alerte.getTypeAlerte().getNatureAlerte()
                 == NatureAlerte.INFORMATION) {
 
@@ -213,6 +217,7 @@ public class AlerteGestionService {
         alerte.setDateTraitement(LocalDateTime.now());
         alerte.setTraitePar(utilisateur);
 
+        access.require(access.readAlert(alerte));
         Alerte enregistree = alerteRepository.save(alerte);
 
         journalAuditService.enregistrer(

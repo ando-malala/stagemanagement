@@ -25,6 +25,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class EncadreurGestionService {
+    private final DossierAccessService access;
 
     private final EncadreurRepository encadreurRepository;
     private final EncadreurStatutHistoriqueRepository encadreurStatutHistoriqueRepository;
@@ -38,7 +39,8 @@ public class EncadreurGestionService {
             UtilisateurRepository utilisateurRepository,
             DepartementRepository departementRepository,
             StatutRepository statutRepository
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.encadreurRepository = encadreurRepository;
         this.encadreurStatutHistoriqueRepository = encadreurStatutHistoriqueRepository;
         this.utilisateurRepository = utilisateurRepository;
@@ -48,7 +50,7 @@ public class EncadreurGestionService {
 
     public List<EncadreurResponse> listerEncadreurs() {
         return encadreurRepository.findAll()
-                .stream()
+                .stream().filter(access::readMentor)
                 .sorted(Comparator.comparing(Encadreur::getNom)
                         .thenComparing(Encadreur::getPrenoms))
                 .map(this::toResponse)
@@ -56,6 +58,7 @@ public class EncadreurGestionService {
     }
 
     public EncadreurResponse trouverEncadreur(Integer id) {
+        access.mentor(id, false);
         Encadreur encadreur = encadreurRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -69,6 +72,7 @@ public class EncadreurGestionService {
 
     @Transactional(readOnly = false)
     public EncadreurResponse creerEncadreur(EncadreurRequest request) {
+        if (request != null) access.require(access.department(request.getDepartementId()));
         Encadreur encadreur = new Encadreur();
 
         remplirEncadreur(encadreur, request, true);
@@ -94,6 +98,7 @@ public class EncadreurGestionService {
             Integer id,
             EncadreurRequest request
     ) {
+        access.mentor(id, true); if (request != null) access.require(access.department(request.getDepartementId()));
         Encadreur encadreur = encadreurRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -115,6 +120,7 @@ public class EncadreurGestionService {
             ChangerStatutEncadreurRequest request,
             Integer responsableId
     ) {
+        access.mentor(encadreurId, true);
         if (request == null
                 || request.getStatutCode() == null
                 || request.getStatutCode().trim().isEmpty()) {
@@ -251,6 +257,7 @@ public class EncadreurGestionService {
 
         encadreur.setDepartement(departement);
 
+        if (!access.role("ADMIN")) access.require(java.util.Objects.equals(request.getUtilisateurId(), encadreur.getUtilisateur() == null ? null : encadreur.getUtilisateur().getId()));
         if (request.getUtilisateurId() != null) {
             if (creation
                     && encadreurRepository.existsByUtilisateur_Id(request.getUtilisateurId())) {

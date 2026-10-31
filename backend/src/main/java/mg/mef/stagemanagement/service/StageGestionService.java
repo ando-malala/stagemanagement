@@ -43,6 +43,7 @@ import java.time.LocalDate;
 @Service
 @Transactional(readOnly = true)
 public class StageGestionService {
+    private final DossierAccessService access;
 
     private final StageRepository stageRepository;
     private final StageParticipantRepository stageParticipantRepository;
@@ -72,7 +73,8 @@ public class StageGestionService {
             UtilisateurRepository utilisateurRepository,
             mg.mef.stagemanagement.repository.TransitionStatutRepository transitions,
             DocumentCatalogueService documents
-    ) {
+    , DossierAccessService access) {
+        this.access = access;
         this.stageRepository = stageRepository;
         this.stageParticipantRepository = stageParticipantRepository;
         this.structureAccueilRepository = structureAccueilRepository;
@@ -94,13 +96,14 @@ public class StageGestionService {
 
     public List<StageResponse> listerStages() {
         return stageRepository.findAll()
-                .stream()
+                .stream().filter(access::readStage)
                 .sorted(Comparator.comparing(Stage::getLibelle))
                 .map(this::toStageResponse)
                 .toList();
     }
 
     public StageResponse trouverStage(Integer id) {
+        access.stage(id, false);
         Stage stage = stageRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -114,6 +117,7 @@ public class StageGestionService {
 
     @Transactional(readOnly = false)
     public StageResponse creerStage(StageRequest request) {
+        if (request != null) access.structure(request.getStructureAccueilId());
         if (request == null || request.getStructureAccueilId() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -161,6 +165,7 @@ public class StageGestionService {
             Integer id,
             StageRequest request
     ) {
+        access.stage(id, true); if (request != null) access.structure(request.getStructureAccueilId());
         Stage stage = stageRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -219,13 +224,14 @@ public class StageGestionService {
 
     public List<StageParticipantResponse> listerParticipations() {
         return stageParticipantRepository.findAll()
-                .stream()
+                .stream().filter(access::readParticipation)
                 .sorted(Comparator.comparing(StageParticipant::getDateDebutStage))
                 .map(this::toParticipantResponse)
                 .toList();
     }
 
     public StageParticipantResponse trouverParticipation(Integer id) {
+        access.participation(id, false);
         StageParticipant participant = stageParticipantRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -240,6 +246,7 @@ public class StageGestionService {
     public List<StageParticipantResponse> listerParticipationsParStage(
             Integer stageId
     ) {
+        access.stage(stageId, false);
         if (!stageRepository.existsById(stageId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -248,7 +255,7 @@ public class StageGestionService {
         }
 
         return stageParticipantRepository.findByStage_Id(stageId)
-                .stream()
+                .stream().filter(access::readParticipation)
                 .map(this::toParticipantResponse)
                 .toList();
     }
@@ -257,6 +264,7 @@ public class StageGestionService {
     public StageParticipantResponse creerParticipation(
             StageParticipantRequest request
     ) {
+        if (request != null) access.assignment(request.getStageId(), request.getStagiaireAcademiqueId(), request.getEncadreurId());
         verifierParticipationRequest(request);
 
         if (request.getDateFinStage().isBefore(request.getDateDebutStage())) {
@@ -344,6 +352,7 @@ public class StageGestionService {
             Integer id,
             StageParticipantRequest request
     ) {
+        access.participation(id, true); if (request != null) access.assignment(request.getStageId(), request.getStagiaireAcademiqueId(), request.getEncadreurId());
         verifierParticipationRequest(request);
 
         if (request.getDateFinStage().isBefore(request.getDateDebutStage())) {
@@ -529,6 +538,7 @@ public class StageGestionService {
             ChangerStatutParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
 
         if (request == null
                 || request.getStatutCode() == null
@@ -613,6 +623,7 @@ public class StageGestionService {
             ProlongerParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
 
         if (request == null || request.getNouvelleDateFin() == null) {
             throw new ResponseStatusException(
@@ -681,6 +692,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
         return appliquerEvenementAvecStatut(
                 participationId,
                 "SUSPENSION",
@@ -696,6 +708,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
         return appliquerEvenementAvecStatut(
                 participationId,
                 "REPRISE",
@@ -711,6 +724,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
         return appliquerEvenementAvecStatut(
                 participationId,
                 "ABANDON",
@@ -726,6 +740,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
         return appliquerEvenementAvecStatut(
                 participationId,
                 "ANNULATION",
@@ -741,6 +756,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
+        access.participation(participationId, true);
         return appliquerEvenementAvecStatut(participationId, "CLOTURE", "CLOTUREE", request, responsableId);
     }
 
