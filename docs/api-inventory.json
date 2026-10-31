@@ -8,10 +8,9 @@
     "parameters": "",
     "body": null,
     "success": "200",
-    "access": "hasAnyRole",
+    "access": "hasRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteDetectionController.java",
     "line": 30
@@ -25,10 +24,9 @@
     "parameters": "",
     "body": null,
     "success": "200",
-    "access": "hasAnyRole",
+    "access": "hasRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteDetectionController.java",
     "line": 44
@@ -42,10 +40,9 @@
     "parameters": "",
     "body": null,
     "success": "200",
-    "access": "hasAnyRole",
+    "access": "hasRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteDetectionController.java",
     "line": 59
@@ -508,7 +505,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
     "line": 27
@@ -526,7 +524,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
     "line": 34
@@ -1107,7 +1106,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/FichierGestionController.java",
     "line": 33
@@ -1142,7 +1142,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/FichierGestionController.java",
     "line": 66
@@ -1177,7 +1178,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/FichierGestionController.java",
     "line": 99
@@ -1582,6 +1584,54 @@
   },
   {
     "method": "GET",
+    "path": "/api/stagiaires/{id}/compte",
+    "controller": "PortailStagiaireController",
+    "handler": "compte",
+    "response": "PortailStagiaireService.Compte",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasRole",
+    "roles": [
+      "ADMIN"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/PortailStagiaireController.java",
+    "line": 12
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/stagiaires/{id}/compte",
+    "controller": "PortailStagiaireController",
+    "handler": "associer",
+    "response": "PortailStagiaireService.Compte",
+    "parameters": "@PathVariable Integer id, @RequestBody CompteRequest request",
+    "body": "CompteRequest",
+    "success": "200",
+    "access": "hasRole",
+    "roles": [
+      "ADMIN"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/PortailStagiaireController.java",
+    "line": 14
+  },
+  {
+    "method": "GET",
+    "path": "/api/portail/me",
+    "controller": "PortailStagiaireController",
+    "handler": "me",
+    "response": "PortailStagiaireService.Profil",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasRole",
+    "roles": [
+      "STAGIAIRE"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/PortailStagiaireController.java",
+    "line": 18
+  },
+  {
+    "method": "GET",
     "path": "/api/rapports-activite",
     "controller": "RapportActiviteGestionController",
     "handler": "listerRapports",
@@ -1593,7 +1643,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 29
@@ -1611,7 +1662,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 34
@@ -1629,7 +1681,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 41
@@ -1647,7 +1700,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 50
@@ -1665,7 +1719,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 59
@@ -1683,7 +1738,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 69
@@ -1719,7 +1775,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
     "line": 95
@@ -2553,7 +2610,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 33
@@ -2571,7 +2629,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 40
@@ -2623,10 +2682,30 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 68
+  },
+  {
+    "method": "GET",
+    "path": "/api/stagiaires/{id}/participations",
+    "controller": "StageGestionController",
+    "handler": "participationsStagiaire",
+    "response": "java.util.List<StageParticipantResponse>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR",
+      "STAGIAIRE"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
+    "line": 81
   },
   {
     "method": "GET",
@@ -2641,10 +2720,11 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 81
+    "line": 86
   },
   {
     "method": "GET",
@@ -2659,10 +2739,11 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 88
+    "line": 93
   },
   {
     "method": "POST",
@@ -2679,7 +2760,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 97
+    "line": 102
   },
   {
     "method": "PATCH",
@@ -2696,7 +2777,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 106
+    "line": 111
   },
   {
     "method": "PATCH",
@@ -2713,7 +2794,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 116
+    "line": 121
   },
   {
     "method": "POST",
@@ -2730,7 +2811,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 132
+    "line": 137
   },
   {
     "method": "POST",
@@ -2747,7 +2828,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 148
+    "line": 153
   },
   {
     "method": "POST",
@@ -2764,7 +2845,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 163
+    "line": 168
   },
   {
     "method": "POST",
@@ -2781,7 +2862,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 178
+    "line": 183
   },
   {
     "method": "POST",
@@ -2798,7 +2879,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 193
+    "line": 198
   },
   {
     "method": "POST",
@@ -2815,7 +2896,7 @@
       "RESPONSABLE_STAGE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
-    "line": 208
+    "line": 213
   },
   {
     "method": "GET",
@@ -3180,7 +3261,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StagiaireGestionController.java",
     "line": 26
@@ -3198,7 +3280,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StagiaireGestionController.java",
     "line": 33
@@ -3250,7 +3333,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StagiaireGestionController.java",
     "line": 61
@@ -3495,7 +3579,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 16
@@ -3549,7 +3634,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 22
@@ -3567,7 +3653,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 24
@@ -3585,7 +3672,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 26
@@ -3603,7 +3691,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 28
@@ -3621,7 +3710,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 30
@@ -3639,7 +3729,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 32
@@ -3657,7 +3748,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 34
@@ -3675,7 +3767,8 @@
     "roles": [
       "ADMIN",
       "RESPONSABLE_STAGE",
-      "ENCADREUR"
+      "ENCADREUR",
+      "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
     "line": 36

@@ -44,6 +44,7 @@ import java.time.LocalDate;
 @Transactional(readOnly = true)
 public class StageGestionService {
     private final DossierAccessService access;
+    private final ParticipationRulesService rules;
 
     private final StageRepository stageRepository;
     private final StageParticipantRepository stageParticipantRepository;
@@ -73,8 +74,8 @@ public class StageGestionService {
             UtilisateurRepository utilisateurRepository,
             mg.mef.stagemanagement.repository.TransitionStatutRepository transitions,
             DocumentCatalogueService documents
-    , DossierAccessService access) {
-        this.access = access;
+    , DossierAccessService access, ParticipationRulesService rules) {
+        this.access = access; this.rules = rules;
         this.stageRepository = stageRepository;
         this.stageParticipantRepository = stageParticipantRepository;
         this.structureAccueilRepository = structureAccueilRepository;
@@ -222,6 +223,12 @@ public class StageGestionService {
     // PARTICIPATIONS
     // =========================
 
+    public List<StageParticipantResponse> listerParticipationsStagiaire(Integer id) {
+        access.trainee(id, false);
+        return stageParticipantRepository.findByStagiaireAcademique_Stagiaire_Id(id).stream()
+                .filter(access::readParticipation).map(this::toParticipantResponse).toList();
+    }
+
     public List<StageParticipantResponse> listerParticipations() {
         return stageParticipantRepository.findAll()
                 .stream().filter(access::readParticipation)
@@ -320,6 +327,7 @@ public class StageGestionService {
             );
         }
 
+        rules.dates(null, stagiaireAcademique, request.getDateDebutStage(), request.getDateFinStage());
         Statut statutPlanifie = statutRepository
                 .findStatutByTypeCodeAndStatutCode("PARTICIPATION", "PLANIFIEE")
                 .orElseThrow(() ->
@@ -362,13 +370,14 @@ public class StageGestionService {
             );
         }
 
-        StageParticipant participant = stageParticipantRepository.findById(id)
+        StageParticipant participant = stageParticipantRepository.findForUpdate(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
                                 "Participation introuvable"
                         )
                 );
+        rules.lock(participant);
 
         Stage stage = stageRepository.findById(request.getStageId())
                 .orElseThrow(() ->
@@ -405,6 +414,11 @@ public class StageGestionService {
                                 )
                         );
 
+        if (!"PLANIFIEE".equals(participant.getStatut().getCode()) &&
+                (!participant.getDateDebutStage().equals(request.getDateDebutStage()) || !participant.getDateFinStage().equals(request.getDateFinStage())
+                || !participant.getStage().getId().equals(request.getStageId()) || !participant.getStagiaireAcademique().getId().equals(request.getStagiaireAcademiqueId())))
+            ParticipationRulesService.conflict("Utilisez les evenements dedies pour modifier une participation demarree");
+        rules.dates(id, stagiaireAcademique, request.getDateDebutStage(), request.getDateFinStage());
         participant.setStage(stage);
         participant.setStagiaireAcademique(stagiaireAcademique);
         participant.setCadreStage(cadreStage);
@@ -574,6 +588,10 @@ public class StageGestionService {
 
         String nouveauStatutCode =
                 request.getStatutCode().trim().toUpperCase();
+        if (java.util.Set.of("SUSPENDUE", "ABANDONNEE", "ANNULEE").contains(nouveauStatutCode)
+                || ("EN_COURS".equals(nouveauStatutCode) && "SUSPENDUE".equals(participant.getStatut().getCode())))
+            ParticipationRulesService.conflict("Utilisez l'action metier dediee a cet evenement");
+
 
         Statut nouveauStatut = statutRepository
                 .findStatutByTypeCodeAndStatutCode(
@@ -587,6 +605,7 @@ public class StageGestionService {
                         )
                 );
 
+        rules.lock(participant);
         Statut ancienStatut = participant.getStatut();
 
         if (ancienStatut != null
@@ -632,13 +651,14 @@ public class StageGestionService {
             );
         }
 
-        StageParticipant participant = stageParticipantRepository.findById(participationId)
+        StageParticipant participant = stageParticipantRepository.findForUpdate(participationId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
                                 "Participation introuvable"
                         )
                 );
+        rules.lock(participant);
 
         Utilisateur responsable = utilisateurRepository.findById(responsableId)
                 .orElseThrow(() ->
@@ -655,6 +675,7 @@ public class StageGestionService {
             );
         }
 
+        rules.dates(participationId, participant.getStagiaireAcademique(), participant.getDateDebutStage(), request.getNouvelleDateFin());
         TypeEvenementParticipation typeEvenement =
                 typeEvenementParticipationRepository.findByCode("PROLONGATION")
                         .orElseThrow(() ->
@@ -804,6 +825,7 @@ public class StageGestionService {
                         )
                 );
 
+        rules.lock(participant);
         Statut ancienStatut = participant.getStatut();
         verifierTransition(ancienStatut, nouveauStatut);
         if (!Boolean.TRUE.equals(typeEvenement.getActif())) {
@@ -814,6 +836,7 @@ public class StageGestionService {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Participation deja cloturee");
             }
             documents.verifierCloture(participationId);
+            rules.closureReports(participant);
             participant.setDateCloture(LocalDateTime.now());
         }
 

@@ -54,11 +54,13 @@ export async function runApiChecks({ baseUrl, token, fetchImpl = fetch, timeoutM
     && value.utilisateurId > 0 && typeof value.identifiant === 'string' && Array.isArray(value.roles) && value.roles.every((role) => typeof role === 'string'));
   if (!profile) return report('session-invalid');
   const business = profile.roles.some((role) => businessRoles.includes(role));
+  const personalLists = ['/api/stagiaires', '/api/encadreurs', '/api/stages', '/api/stage-participants', '/api/rapports-activite'];
+  const personal = profile.roles.includes('STAGIAIRE');
   const admin = profile.roles.includes('ADMIN');
   await check('/api/dashboard/resume', business ? 200 : 403, token, (data) => { requireDashboard(data); return true; });
   const samples = new Map();
   for (const path of [...businessLists, ...referenceLists, ...adminLists]) {
-    const expected = adminLists.includes(path) ? (admin ? 200 : 403) : businessLists.includes(path) ? (business ? 200 : 403) : 200;
+    const expected = adminLists.includes(path) ? (admin ? 200 : 403) : businessLists.includes(path) ? (business || (personal && personalLists.includes(path)) ? 200 : 403) : 200;
     const rows = await check(path, expected, token, Array.isArray);
     if (rows?.length && record(rows[0])) samples.set(path, rows[0].id);
   }

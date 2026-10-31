@@ -77,7 +77,7 @@ public class SuiviParticipationService {
     public List<Action> actions(Integer id) {
         access.participation(id, false);
         var p = participation(id);
-        if (p.getDateCloture() != null) return List.of();
+        if (p.getDateCloture() != null || access.traineeOnly() || !access.manageParticipation(p)) return List.of();
         var actifs = workflow.evenements().stream().map(ReferentielWorkflowService.Reference::code).toList();
         var actions = new ArrayList<Action>();
         for (var t : workflow.transitions("PARTICIPATION", p.getStatut().getCode())) {

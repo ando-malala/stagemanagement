@@ -33,6 +33,7 @@ import mg.mef.stagemanagement.repository.UtilisateurStatutHistoriqueRepository;
 
 @Service
 public class UtilisateurGestionService {
+        private final mg.mef.stagemanagement.repository.SessionUtilisateurRepository sessions;
 
         private final UtilisateurRepository utilisateurRepository;
         private final RoleRepository roleRepository;
@@ -51,9 +52,9 @@ public class UtilisateurGestionService {
                 PasswordEncoder passwordEncoder,
                 UtilisateurStatutHistoriqueRepository utilisateurStatutHistoriqueRepository,
                 DepartementRepository departementRepository,
-                ResponsableDepartementRepository responsableDepartementRepository
+                ResponsableDepartementRepository responsableDepartementRepository, mg.mef.stagemanagement.repository.SessionUtilisateurRepository sessions
         ) {
-                this.utilisateurRepository = utilisateurRepository;
+                this.utilisateurRepository = utilisateurRepository; this.sessions = sessions;
                 this.roleRepository = roleRepository;
                 this.statutRepository = statutRepository;
                 this.utilisateurRoleRepository = utilisateurRoleRepository;
@@ -286,6 +287,7 @@ public class UtilisateurGestionService {
                 );
 
                 utilisateurRepository.save(utilisateur);
+                sessions.revokeAll(utilisateurId, LocalDateTime.now());
         }
 
         @Transactional(readOnly = true)

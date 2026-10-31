@@ -75,7 +75,7 @@ public class JournalAuditService {
                 .toList();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void enregistrer(
             Integer utilisateurId,
             String action,

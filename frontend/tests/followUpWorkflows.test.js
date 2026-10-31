@@ -46,7 +46,7 @@ test('permissions d’édition : encadreur habilité au suivi, rapports validés
     assert.equal(canEditBusiness({ roles: [role] }, 'rapport', { statut: 'VALIDE' }), false);
     assert.equal(canEditBusiness({ roles: [role] }, 'evaluation', { estFinalisee: true }), false);
   }
-  assert.equal(canEditBusiness({ roles: ['STAGIAIRE'] }, 'rapport'), false);
+  assert.equal(canEditBusiness({ roles: ['STAGIAIRE'] }, 'rapport'), true);
   assert.equal(canEditBusiness({ roles: ['RESPONSABLE_STAGE'] }, 'soutenance'), true);
 });
 

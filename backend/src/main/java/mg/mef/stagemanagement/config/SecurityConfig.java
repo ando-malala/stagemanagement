@@ -47,6 +47,28 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        .requestMatchers(HttpMethod.GET, "/api/portail/me").hasRole("STAGIAIRE")
+                        .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/compte").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/stagiaires/{id}/compte").hasRole("ADMIN")
+                        // Personal reads reuse the existing APIs and resource policy.
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/stagiaires", "/api/stagiaires/{id}", "/api/stagiaires/{id}/academiques",
+                                "/api/stagiaires/{id}/fichiers", "/api/stagiaires/{id}/participations", "/api/stage-participants", "/api/stage-participants/{id}",
+                                "/api/stage-participants/{id}/fichiers", "/api/stage-participants/{id}/documents-obligatoires",
+                                "/api/stage-participants/{id}/historique-statuts", "/api/stage-participants/{id}/evenements",
+                                "/api/stage-participants/{id}/periodes-rapports", "/api/stage-participants/{id}/actions",
+                                "/api/stages", "/api/stages/{id}", "/api/stages/{id}/participants",
+                                "/api/encadreurs", "/api/encadreurs/{id}", "/api/encadreurs/{id}/charge",
+                                "/api/fichiers/{id}/telecharger", "/api/rapports-activite", "/api/rapports-activite/{id}",
+                                "/api/rapports-activite/participation/{stageParticipantId}", "/api/rapports-activite/{id}/observations",
+                                "/api/referentiels/suivi/types-documents", "/api/referentiels/suivi/statuts/{type}",
+                                "/api/referentiels/suivi/transitions/{type}/{source}")
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .requestMatchers(HttpMethod.POST, "/api/rapports-activite")
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/rapports-activite/{id}", "/api/rapports-activite/{id}/statut")
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+
                         // =========================
                         // AUTHENTIFICATION
                         // =========================

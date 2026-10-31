@@ -17,6 +17,10 @@ public interface StageParticipantRepository
         @Query("select p from StageParticipant p where p.id = :id")
         java.util.Optional<StageParticipant> findForUpdate(@Param("id") Integer id);
 
+        @Query("select count(p) from StageParticipant p where p.stagiaireAcademique.stagiaire.id = :trainee and p.id <> :excluded and p.statut.code not in ('ANNULEE','ABANDONNEE') and p.dateDebutStage <= :finish and p.dateFinStage >= :start")
+        long countOverlapping(@Param("trainee") Integer trainee, @Param("excluded") Integer excluded,
+                @Param("start") LocalDate start, @Param("finish") LocalDate finish);
+
         List<StageParticipant> findByStage_Id(Integer stageId);
 
         List<StageParticipant> findByEncadreur_Id(Integer encadreurId);

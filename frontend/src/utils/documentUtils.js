@@ -1,10 +1,13 @@
-// application.properties limits both the file and the entire multipart request to 10 MB.
+// Server limit: 10 MiB per file, 11 MiB for the multipart envelope.
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export function documentUploadForm(file, code) {
   if (!file || !Number.isFinite(file.size) || file.size <= 0) throw new Error('Sélectionnez un fichier non vide.');
-  if (file.size >= MAX_UPLOAD_BYTES) throw new Error('Le fichier doit faire moins de 10 Mio, enveloppe de transfert comprise.');
+  if (file.size > MAX_UPLOAD_BYTES) throw new Error('Le fichier doit faire moins de 10 Mio, enveloppe de transfert comprise.');
   if (!code?.trim()) throw new Error('Le code du type de pièce est obligatoire.');
+  const formats = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
+  const extension = file.name?.split('.').pop()?.toLowerCase();
+  if (!formats[extension] || formats[extension] !== file.type) throw new Error('Choisissez un PDF, JPEG ou PNG avec un type de fichier valide.');
   const form = new FormData();
   form.append('typePieceJointeCode', code.trim());
   form.append('fichier', file);

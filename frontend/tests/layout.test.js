@@ -32,7 +32,8 @@ test('rendu des routes et du layout : accès, session indisponible, fiches et li
     assert.match(forbidden, /Accès refusé/);
     assert.doesNotMatch(forbidden, /Utilisateur n° 42/);
     const noRole = render('/dashboard', ['STAGIAIRE']);
-    assert.match(noRole, /Aucun module disponible/);
+    assert.match(noRole, /Mon dossier/);
+    assert.doesNotMatch(noRole, /href="\/utilisateurs"/);
     assert.doesNotMatch(noRole, /href="\/alertes"/);
     assert.match(render('/absent', ['ADMIN']), /Page introuvable/);
     const offline = render('/stages/42', [], { estConnecte: false, status: 'unavailable', erreur: 'Réseau indisponible' });

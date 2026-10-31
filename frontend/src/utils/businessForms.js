@@ -1,5 +1,5 @@
 import { isLocalDate, isLocalDateTime } from './dateUtils.js';
-import { can } from './permissions.js';
+import { can, isTraineeOnly } from './permissions.js';
 
 // Fields mirror the Gestion request DTOs. Empty optional values must be sent as
 // null on PATCH: these endpoints replace the whole editable resource.
@@ -91,7 +91,9 @@ export function businessPayload(kind, values) {
 export function canEditBusiness(user, kind, initial) {
   const permissions = { stagiaire: 'gererStagiaires', academique: 'gererStagiaires', encadreur: 'gererEncadreurs', stage: 'gererStages',
     reference: 'modifierReferentiels', departement: 'modifierReferentiels', structure: 'modifierReferentiels', cadre: 'modifierReferentiels', alerte: 'creerAlertes',
-    participation: 'gererStages', rapport: 'gererRapports', observation: 'gererRapports', evaluation: 'gererEvaluations', soutenance: 'gererSoutenances' };
+    participation: 'gererStages', rapport: 'gererRapports', observation: 'validerRapports', evaluation: 'gererEvaluations', soutenance: 'gererSoutenances' };
+  if (kind === 'participation' && (initial?.dateCloture || ['CLOTUREE', 'ANNULEE', 'ABANDONNEE'].includes(initial?.statut))) return false;
+  if (kind === 'rapport' && initial?.id && isTraineeOnly(user) && !['BROUILLON', 'A_CORRIGER'].includes(initial.statut)) return false;
   return can(user, permissions[kind]) && !(kind === 'rapport' && initial?.statut === 'VALIDE') && !(kind === 'evaluation' && initial?.estFinalisee);
 }
 

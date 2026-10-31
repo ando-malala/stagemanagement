@@ -29,6 +29,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class EvaluationGestionService {
     private final DossierAccessService access;
+    private final ParticipationRulesService rules;
 
     private final EvaluationFinaleRepository evaluationFinaleRepository;
     private final EvaluationCritereRepository evaluationCritereRepository;
@@ -44,8 +45,8 @@ public class EvaluationGestionService {
             StageParticipantRepository stageParticipantRepository,
             EncadreurRepository encadreurRepository,
             JournalAuditService journalAuditService
-    , DossierAccessService access) {
-        this.access = access;
+    , DossierAccessService access, ParticipationRulesService rules) {
+        this.access = access; this.rules = rules;
         this.evaluationFinaleRepository = evaluationFinaleRepository;
         this.evaluationCritereRepository = evaluationCritereRepository;
         this.critereEvaluationRepository = critereEvaluationRepository;
@@ -107,7 +108,7 @@ public class EvaluationGestionService {
         }
 
         StageParticipant participant = stageParticipantRepository
-                .findById(request.getStageParticipantId())
+                .findForUpdate(request.getStageParticipantId())
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -115,6 +116,7 @@ public class EvaluationGestionService {
                         )
                 );
 
+        rules.lock(participant);
         Encadreur encadreur = encadreurRepository
                 .findById(request.getEncadreurId())
                 .orElseThrow(() ->
@@ -161,7 +163,7 @@ public class EvaluationGestionService {
         verifierNonFinalisee(evaluation);
 
         StageParticipant participant = stageParticipantRepository
-                .findById(request.getStageParticipantId())
+                .findForUpdate(request.getStageParticipantId())
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -169,6 +171,7 @@ public class EvaluationGestionService {
                         )
                 );
 
+        rules.lock(participant);
         Encadreur encadreur = encadreurRepository
                 .findById(request.getEncadreurId())
                 .orElseThrow(() ->
@@ -327,7 +330,7 @@ public class EvaluationGestionService {
                 evaluationFinaleRepository.save(evaluation);
                 
         journalAuditService.enregistrer(
-                null,
+                access.user().getUtilisateurId(),
                 "FINALISER_EVALUATION",
                 "EvaluationFinale",
                 enregistree.getId(),
@@ -406,6 +409,7 @@ public class EvaluationGestionService {
     }
 
     private void verifierNonFinalisee(EvaluationFinale evaluation) {
+        rules.lockEvaluation(evaluation);
         if (Boolean.TRUE.equals(evaluation.getEstFinalisee())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,

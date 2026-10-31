@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { changeRapportStatus } from '../../api/rapportApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
-import { can } from '../../utils/permissions.js';
+import { can, isTraineeOnly } from '../../utils/permissions.js';
 import { rapportTransitions, rapportStatusPayload } from '../../utils/followUpWorkflows.js';
 import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
@@ -17,7 +17,7 @@ export default function RapportActions({ rapport, onSaved }) {
   const [pending, setPending] = useState(null);
   const fetcher = useCallback((options) => listTransitions('RAPPORT', rapport.statut, options), [rapport.statut]);
   const transitions = useFetch(fetcher);
-  const actions = rapportTransitions(rapport.statut, transitions.data ?? []);
+  const actions = rapportTransitions(rapport.statut, transitions.data ?? []).filter(action => !isTraineeOnly(utilisateur) || action.code === 'SOUMIS');
   if (!can(utilisateur, 'gererRapports')) return null;
   return <section className="page-stack">
     <h3>Validation du rapport</h3>

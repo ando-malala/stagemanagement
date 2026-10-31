@@ -36,6 +36,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class RapportActiviteGestionService {
     private final DossierAccessService access;
+    private final ParticipationRulesService rules;
 
     private final RapportActiviteRepository rapportActiviteRepository;
     private final RapportObservationRepository rapportObservationRepository;
@@ -55,8 +56,8 @@ public class RapportActiviteGestionService {
             StatutRepository statutRepository,
             UtilisateurRepository utilisateurRepository,
             JournalAuditService journalAuditService
-    , DossierAccessService access) {
-        this.access = access;
+    , DossierAccessService access, ParticipationRulesService rules) {
+        this.access = access; this.rules = rules;
         this.rapportActiviteRepository = rapportActiviteRepository;
         this.rapportObservationRepository = rapportObservationRepository;
         this.historiqueRepository = historiqueRepository;
@@ -133,7 +134,7 @@ public class RapportActiviteGestionService {
         }
 
         StageParticipant participant =
-                stageParticipantRepository.findById(request.getStageParticipantId())
+                stageParticipantRepository.findForUpdate(request.getStageParticipantId())
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -141,6 +142,7 @@ public class RapportActiviteGestionService {
                                 )
                         );
 
+        rules.reportPeriod(participant, request.getDebutSemaine(), request.getFinSemaine());
         MoisStage moisStage = moisStageRepository.findById(request.getMoisStageId())
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -182,6 +184,7 @@ public class RapportActiviteGestionService {
             Integer id,
             RapportActiviteRequest request
     ) {
+        rules.lock(stageParticipantRepository.findForUpdate(access.report(id).getStageParticipant().getId()).orElseThrow());
         if (request != null) access.reportContent(id, request.getStageParticipantId());
         verifierRapportRequest(request);
 
@@ -212,7 +215,7 @@ public class RapportActiviteGestionService {
         }
 
         StageParticipant participant =
-                stageParticipantRepository.findById(request.getStageParticipantId())
+                stageParticipantRepository.findForUpdate(request.getStageParticipantId())
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -220,6 +223,7 @@ public class RapportActiviteGestionService {
                                 )
                         );
 
+        rules.reportPeriod(participant, request.getDebutSemaine(), request.getFinSemaine());
         MoisStage moisStage = moisStageRepository.findById(request.getMoisStageId())
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -267,6 +271,7 @@ public class RapportActiviteGestionService {
             RapportObservationRequest request,
             Integer auteurId
     ) {
+        rules.lock(stageParticipantRepository.findForUpdate(access.report(rapportId).getStageParticipant().getId()).orElseThrow());
         access.review(access.report(rapportId).getStageParticipant().getId());
         if (request == null) {
             throw new ResponseStatusException(
@@ -323,6 +328,7 @@ public class RapportActiviteGestionService {
             ChangerStatutRapportRequest request,
             Integer responsableId
     ) {
+        rules.lock(stageParticipantRepository.findForUpdate(access.report(rapportId).getStageParticipant().getId()).orElseThrow());
         access.reportTransition(rapportId, request == null ? null : request.getStatutCode());
         if (request == null
                 || request.getStatutCode() == null

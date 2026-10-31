@@ -1,22 +1,23 @@
-import { BUSINESS_ROLES } from '../utils/permissions.js';
+import { BUSINESS_ROLES, PERSONAL_ROLES } from '../utils/permissions.js';
 import { hasAnyRole } from '../utils/roleUtils.js';
 
 const module = (path, title, page, icon, roles = BUSINESS_ROLES) => ({ path, title, page, icon, roles });
 export const navigation = [
+  module('/mon-dossier', 'Mon dossier', 'MonDossierPage', 'MD', ['STAGIAIRE']),
   module('/dashboard', 'Tableau de bord', 'DashboardPage', 'TB'),
   module('/stagiaires', 'Stagiaires', 'StagiairesPage', 'ST'),
   module('/encadreurs', 'Encadreurs', 'EncadreursPage', 'EN'),
   module('/stages', 'Stages et participations', 'StagesPage', 'SP'),
-  module('/rapports', 'Rapports', 'RapportsPage', 'RA'),
+  module('/rapports', 'Rapports', 'RapportsPage', 'RA', PERSONAL_ROLES),
   module('/evaluations', 'Évaluations', 'EvaluationsPage', 'EV'),
   module('/soutenances', 'Soutenances', 'SoutenancesPage', 'SO'),
-  module('/fichiers', 'Documents', 'FichiersPage', 'DO'),
+  module('/fichiers', 'Documents', 'FichiersPage', 'DO', PERSONAL_ROLES),
   module('/alertes', 'Alertes', 'AlertesPage', 'AL'),
   module('/utilisateurs', 'Utilisateurs', 'UtilisateursPage', 'UT', ['ADMIN']),
   module('/referentiels', 'Référentiels', 'ReferentielsPage', 'RE', ['ADMIN']),
   module('/journal-audit', 'Journal d’audit', 'JournalAuditPage', 'JA', ['ADMIN'])
 ];
-const detail = (path, title, page, parent) => ({ path, title, page, parent, roles: navigation.find((item) => item.path === parent).roles });
+const detail = (path, title, page, parent) => ({ path, title, page, parent, roles: ['/stagiaires/:id', '/participations/:id', '/stages/:id', '/encadreurs/:id'].includes(path) ? PERSONAL_ROLES : navigation.find((item) => item.path === parent).roles });
 export const routes = [
   ...navigation,
   detail('/stagiaires/:id', 'Dossier stagiaire', 'StagiaireDetailPage', '/stagiaires'),

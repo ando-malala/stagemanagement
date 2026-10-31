@@ -1,3 +1,5 @@
+import MonDossierPage from '../pages/stagiaires/MonDossierPage.jsx';
+import { isTraineeOnly } from '../utils/permissions.js';
 /* eslint-disable react-hooks/set-state-in-effect -- Synchronizes History API with session changes. */
 import { useCallback, useEffect, useState } from 'react';
 import AdminLayout from '../components/layout/AdminLayout.jsx';
@@ -33,7 +35,7 @@ import StageDetailPage from '../pages/stages/StageDetailPage.jsx';
 import StagiaireDetailPage from '../pages/stagiaires/StagiaireDetailPage.jsx';
 import UtilisateurDetailPage from '../pages/utilisateurs/UtilisateurDetailPage.jsx';
 
-const pages = { DashboardPage, UtilisateursPage, ReferentielsPage, AcademiquesPage, OrganisationPage, StagiairesPage, EncadreursPage, StagesPage, RapportsPage, SoutenancesPage, EvaluationsPage, AlertesPage, JournalAuditPage, FichiersPage, EncadreurDetailPage, EvaluationDetailPage, RapportDetailPage, SoutenanceDetailPage, ParticipationDetailPage, StageDetailPage, StagiaireDetailPage, UtilisateurDetailPage };
+const pages = { MonDossierPage, DashboardPage, UtilisateursPage, ReferentielsPage, AcademiquesPage, OrganisationPage, StagiairesPage, EncadreursPage, StagesPage, RapportsPage, SoutenancesPage, EvaluationsPage, AlertesPage, JournalAuditPage, FichiersPage, EncadreurDetailPage, EvaluationDetailPage, RapportDetailPage, SoutenanceDetailPage, ParticipationDetailPage, StageDetailPage, StagiaireDetailPage, UtilisateurDetailPage };
 
 export default function AppRoutes() {
   const { estConnecte, initialisation, utilisateur, status, erreur, retrySession, logout } = useAuth();
@@ -59,9 +61,9 @@ export default function AppRoutes() {
     if (!estConnecte && path !== '/login') {
       navigate(loginDestination(location), { replace: true });
     } else if (estConnecte && (path === '/login' || path === '/')) {
-      navigate(returnTo, { replace: true });
+      navigate(isTraineeOnly(utilisateur) && returnTo === '/dashboard' ? '/mon-dossier' : returnTo, { replace: true });
     }
-  }, [estConnecte, initialisation, status, path, location, navigate, returnTo]);
+  }, [estConnecte, initialisation, status, path, location, navigate, returnTo, utilisateur]);
   useEffect(() => {
     document.title = `${title} · MEF–SIIGFP`;
     if (estConnecte) document.getElementById('main-content')?.focus();

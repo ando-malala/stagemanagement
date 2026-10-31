@@ -28,7 +28,7 @@ export default function BusinessForm({ kind, initial = {}, onSave, onSaved, onCa
   const loadPeriods = useCallback((options) => kind === 'rapport' && values.stageParticipantId
     ? listPeriodesRapports(values.stageParticipantId, options) : Promise.resolve([]), [kind, values.stageParticipantId]);
   const periods = useFetch(loadPeriods);
-  const blocked = saving || choices.loading || Boolean(choices.error) || (kind === 'participation' && (profiles.loading || Boolean(profiles.error)));
+  const blocked = (kind === 'rapport' && (periods.loading || Boolean(periods.error))) || saving || choices.loading || Boolean(choices.error) || (kind === 'participation' && (profiles.loading || Boolean(profiles.error)));
 
   async function submit(event) {
     event.preventDefault();
@@ -36,6 +36,7 @@ export default function BusinessForm({ kind, initial = {}, onSave, onSaved, onCa
     setError(null);
     try {
       const payload = businessPayload(kind, values);
+      if (kind === 'rapport' && !periods.data?.some(p => p.debut === payload.debutSemaine && p.fin === payload.finSemaine && (!p.rapportId || p.rapportId === initial.id))) throw new Error('Choisissez une periode attendue disponible.');
       // A dependent profile must belong to the currently selected trainee.
       if (kind === 'participation' && !profiles.data?.some((row) => row.id === payload.stagiaireAcademiqueId)) throw new Error('Sélectionnez un profil académique de ce stagiaire.');
       pending.current = true;
@@ -61,14 +62,14 @@ export default function BusinessForm({ kind, initial = {}, onSave, onSaved, onCa
       {stagiaireId && !profiles.loading && !profiles.error && profiles.data?.length === 0 && <p className="notice">Ce stagiaire n’a aucun profil académique. Ajoutez-en un depuis sa fiche avant de créer une participation.</p>}
     </>}
     <div className="entity-form">
-      {kind === 'rapport' && <div><Input label="Période attendue" type="select" name="periodeAttendue" value="" disabled={saving || periods.loading}
+      {kind === 'rapport' && <div><Input label="Période attendue" type="select" name="periodeAttendue" required value={values.debutSemaine} disabled={saving || periods.loading}
         options={(periods.data ?? []).filter((p) => !p.rapportId || p.rapportId === initial.id).map((p) => ({ value: p.debut, label: `${p.debut} — ${p.fin} (échéance ${p.dateLimite})` }))}
         onChange={(event) => {
           const period = periods.data?.find((p) => p.debut === event.target.value);
           if (period) setValues((current) => ({ ...current, debutSemaine: period.debut, finSemaine: period.fin }));
         }} hint="Sélectionnez une participation pour charger ses périodes calculées par le serveur." />
         <ErrorMessage error={periods.error} />{periods.error && <Button variant="secondary" onClick={periods.reload}>Recharger les périodes</Button>}</div>}
-      {fields.filter((field) => field.type !== 'hidden' && (field.name !== 'utilisateurId' || isAdmin)).map((definition) => {
+      {fields.filter((field) => field.type !== 'hidden' && !(kind === 'rapport' && ['debutSemaine', 'finSemaine'].includes(field.name)) && (field.name !== 'utilisateurId' || isAdmin)).map((definition) => {
         const field = Object.fromEntries(Object.entries(definition).filter(([key]) => !['path', 'labelKeys', 'valueType', 'valueKey'].includes(key)));
         const rows = field.name === 'stagiaireAcademiqueId' ? profiles.data : choices.data?.[field.name];
         const options = definition.options ?? (definition.valueKey ? (rows ?? []).map((r) => ({ value: r[definition.valueKey], label: r.libelle })) : field.type === 'select' ? toOptions(rows ?? [], definition.labelKeys) : undefined);

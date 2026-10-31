@@ -1,9 +1,19 @@
 $ErrorActionPreference = 'Stop'
 # Create a uniquely named empty test database; never restore over the configured database.
 $projectRoot = Split-Path $PSScriptRoot -Parent
+$localSettings = @{}
+$localConfig = Join-Path $projectRoot 'backend/.env.local'
+if (Test-Path -LiteralPath $localConfig) {
+    Get-Content -LiteralPath $localConfig | ForEach-Object {
+        if ($_ -match '^(MEF_DB_URL|MEF_DB_USER|MEF_DB_PASSWORD)=(.*)$') { $localSettings[$Matches[1]] = $Matches[2] }
+    }
+}
 $settings = @{}
-Get-Content -LiteralPath (Join-Path $projectRoot 'backend/src/main/resources/application.properties') | ForEach-Object {
-    if ($_ -match '^spring\.datasource\.(url|username|password)=(.*)$') { $settings[$Matches[1]] = $Matches[2].Trim() }
+foreach ($entry in @(@('url','MEF_DB_URL'),@('username','MEF_DB_USER'),@('password','MEF_DB_PASSWORD'))) {
+    $value = [Environment]::GetEnvironmentVariable($entry[1])
+    if (!$value) { $value = $localSettings[$entry[1]] }
+    if (!$value) { throw 'Configure local PostgreSQL credentials before integration tests.' }
+    $settings[$entry[0]] = $value
 }
 $sourceUrl = [Uri]($settings['url'] -replace '^jdbc:', '')
 if ($sourceUrl.Host -notin @('localhost', '127.0.0.1')) { throw 'Only a local PostgreSQL server is allowed by this test launcher.' }

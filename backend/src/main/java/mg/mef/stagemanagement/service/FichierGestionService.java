@@ -37,6 +37,8 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class FichierGestionService {
     private final DossierAccessService access;
+    private final DocumentContentValidator validator;
+    private final ParticipationRulesService rules;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -57,8 +59,8 @@ public class FichierGestionService {
             StageParticipantFichierRepository stageParticipantFichierRepository,
             TypePieceJointeRepository typePieceJointeRepository,
             UtilisateurRepository utilisateurRepository
-    , DossierAccessService access) {
-        this.access = access;
+    , DossierAccessService access, ParticipationRulesService rules, DocumentContentValidator validator) {
+        this.access = access; this.rules = rules; this.validator = validator;
         this.fichierRepository = fichierRepository;
         this.stagiaireRepository = stagiaireRepository;
         this.stageParticipantRepository = stageParticipantRepository;
@@ -95,7 +97,7 @@ public class FichierGestionService {
             Integer utilisateurId
     ) {
         access.trainee(stagiaireId, true);
-        Stagiaire stagiaire = stagiaireRepository.findById(stagiaireId)
+        Stagiaire stagiaire = stagiaireRepository.findForUpdate(stagiaireId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -165,7 +167,7 @@ public class FichierGestionService {
     ) {
         access.participation(stageParticipantId, true);
         StageParticipant stageParticipant =
-                stageParticipantRepository.findById(stageParticipantId)
+                stageParticipantRepository.findForUpdate(stageParticipantId)
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -173,6 +175,7 @@ public class FichierGestionService {
                                 )
                         );
 
+        rules.lock(stageParticipant);
         TypePieceJointe typePieceJointe =
                 trouverTypePieceJointe(typePieceJointeCode);
 
@@ -231,6 +234,10 @@ public class FichierGestionService {
             );
         }
 
+        try {
+            if (!chemin.toRealPath().startsWith(Paths.get(uploadDir).toRealPath()))
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Fichier hors du stockage autorise");
+        } catch (IOException failure) { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fichier indisponible"); }
         Resource resource = new FileSystemResource(chemin);
 
         return new FichierTelechargementResponse(
@@ -248,21 +255,9 @@ public class FichierGestionService {
             MultipartFile multipartFile,
             Utilisateur utilisateur
     ) {
-        if (multipartFile == null || multipartFile.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le fichier est obligatoire"
-            );
-        }
-
-        String nomOriginal = multipartFile.getOriginalFilename();
-
-        if (nomOriginal == null || nomOriginal.trim().isEmpty()) {
-            nomOriginal = "fichier";
-        }
-
-        String extension = extraireExtension(nomOriginal);
-        String nomStockage = UUID.randomUUID() + extension;
+        var content = validator.validate(multipartFile);
+        String nomOriginal = content.filename();
+        String nomStockage = UUID.randomUUID() + content.extension();
 
         try {
             Path dossierUpload = Paths.get(uploadDir)
@@ -275,13 +270,21 @@ public class FichierGestionService {
                     .resolve(nomStockage)
                     .normalize();
 
-            multipartFile.transferTo(destination.toFile());
+            if (!destination.startsWith(dossierUpload)) throw new IOException("Invalid storage path");
+            Files.write(destination, content.bytes(), java.nio.file.StandardOpenOption.CREATE_NEW);
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override public void afterCompletion(int status) {
+                        if (status != STATUS_COMMITTED) try { Files.deleteIfExists(destination); }
+                        catch (IOException failure) { org.slf4j.LoggerFactory.getLogger(FichierGestionService.class).error("Document temporaire non nettoye apres echec transactionnel"); }
+                    }
+                });
 
             Fichier fichier = new Fichier();
             fichier.setNomOriginal(nomOriginal);
             fichier.setNomStockage(nomStockage);
             fichier.setChemin(destination.toString());
-            fichier.setTypeMime(multipartFile.getContentType());
+            fichier.setTypeMime(content.mime());
             fichier.setTailleOctets(multipartFile.getSize());
             fichier.setUtilisateur(utilisateur);
             fichier.setDateAjout(LocalDateTime.now());

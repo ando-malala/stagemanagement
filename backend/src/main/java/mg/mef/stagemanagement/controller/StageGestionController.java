@@ -78,6 +78,11 @@ public class StageGestionController {
     // PARTICIPATIONS
     // =========================
 
+    @GetMapping("/stagiaires/{id}/participations")
+    public java.util.List<StageParticipantResponse> participationsStagiaire(@PathVariable Integer id) {
+        return stageGestionService.listerParticipationsStagiaire(id);
+    }
+
     @GetMapping("/stage-participants")
     public ResponseEntity<List<StageParticipantResponse>> listerParticipations() {
         return ResponseEntity.ok(

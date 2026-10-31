@@ -7,13 +7,13 @@ import { listFichiersStagiaire, listFichiersParticipation, uploadFichierStagiair
 test('documents : limite du serveur, fichier vide et code obligatoire', () => {
   const config = readFileSync(new URL('../../backend/src/main/resources/application.properties', import.meta.url), 'utf8');
   assert.match(config, /max-file-size=10MB/);
-  assert.match(config, /max-request-size=10MB/);
+  assert.match(config, /max-request-size=11MB/);
   for (const file of [null, new Blob([]), { size: MAX_UPLOAD_BYTES }, { size: MAX_UPLOAD_BYTES + 1 }]) assert.throws(() => documentUploadForm(file, 'CODE_TEST'));
   assert.throws(() => documentUploadForm(new Blob(['test']), ' '), /code/);
-  const form = documentUploadForm(new File(['test'], 'preuve.txt'), ' CODE_TEST ');
+  const form = documentUploadForm(new File(['%PDF-1.4\n%%EOF'], 'preuve.pdf', { type: 'application/pdf' }), ' CODE_TEST ');
   assert.deepEqual([...form.keys()], ['typePieceJointeCode', 'fichier']);
   assert.equal(form.get('typePieceJointeCode'), 'CODE_TEST');
-  assert.equal(form.get('fichier').name, 'preuve.txt');
+  assert.equal(form.get('fichier').name, 'preuve.pdf');
   assert.equal(formatFileSize(1024), '1 Kio');
 });
 
@@ -40,7 +40,7 @@ test('documents : contrats des deux périmètres, multipart et annulation des le
       return Response.json([]);
     });
     assert.deepEqual(await list(42, { signal: controller.signal }), []);
-    const form = documentUploadForm(new Blob(['fixture']), 'CODE_TEST');
+    const form = documentUploadForm(new File(['%PDF-1.4\n%%EOF'], 'fixture.pdf', { type: 'application/pdf' }), 'CODE_TEST');
     context.mock.method(globalThis, 'fetch', async (url, options) => {
       assert.equal(url, `${prefix}/42/fichiers`);
       assert.equal(options.method, 'POST');

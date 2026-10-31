@@ -1,3 +1,5 @@
+import { useAuth } from '../../hooks/useAuth.js';
+import { isTraineeOnly } from '../../utils/permissions.js';
 import { useCallback, useState } from 'react';
 import { useFetch } from '../../hooks/useFetch.js';
 import { formatDateTime } from '../../utils/dateUtils.js';
@@ -8,6 +10,8 @@ import ErrorMessage from './ErrorMessage.jsx';
 import Loader from './Loader.jsx';
 
 export default function ResourceDetail({ id, title, fetcher, fields, links = [], navigate, backTo, children }) {
+  const { utilisateur } = useAuth();
+  const personalBack = isTraineeOnly(utilisateur) && !['/rapports', '/fichiers'].includes(backTo) ? '/mon-dossier' : backTo;
   const load = useCallback((options) => fetcher(id, options), [fetcher, id]);
   const { data, loading, error, reload } = useFetch(load);
   const [message, setMessage] = useState('');
@@ -23,7 +27,7 @@ export default function ResourceDetail({ id, title, fetcher, fields, links = [],
       <nav className="row-actions" aria-label="Dossiers liés">{links.filter((link) => data[link.key] != null).map((link) => <AppLink className="btn btn-secondary" key={link.key} to={`${link.path}/${data[link.key]}`} navigate={navigate}>{link.label}</AppLink>)}</nav>
       {children?.(data, saved)}
     </>}
-    <AppLink className="back-link" to={backTo} navigate={navigate}>Retour à la liste</AppLink>
+    <AppLink className="back-link" to={personalBack} navigate={navigate}>Retour à la liste</AppLink>
   </Card>;
 }
 

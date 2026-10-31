@@ -80,8 +80,8 @@ export default function DocumentsPanel({ scope, ownerId, ownerLabel }) {
     {can(utilisateur, 'televerserDocuments') && <form className="page-stack business-form" onSubmit={upload}>
       <Input label="Type de document" type="select" name="typePieceJointeCode" value={code} onChange={(event) => setCode(event.target.value)} required disabled={saving || types.loading || Boolean(types.error)}
         options={choices.map((t) => ({ value: t.code, label: `${t.libelle}${t.obligatoireCloture ? ' — obligatoire pour la clôture' : ''}` }))} />
-      <Input key={inputVersion} label="Fichier" name="fichier" type="file" required disabled={saving} onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-        hint="Moins de 10 Mio, enveloppe de transfert comprise. Un transfert proche de cette limite peut être refusé." />
+      <Input key={inputVersion} label="Fichier" name="fichier" type="file" accept=".pdf,.png,.jpg,.jpeg" required disabled={saving} onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+        hint="PDF, JPEG ou PNG, maximum 10 Mio. Le contenu est controle par le serveur." />
       {file && <p>Fichier sélectionné : {file.name} ({formatFileSize(file.size)})</p>}
       <Button type="submit" disabled={saving || loading || types.loading || Boolean(types.error) || Boolean(loadError) || !choices.length}>{saving ? 'Envoi en cours…' : 'Envoyer le document'}</Button>
     </form>}

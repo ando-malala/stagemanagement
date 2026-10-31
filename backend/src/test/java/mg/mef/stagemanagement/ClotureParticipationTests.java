@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ClotureParticipationTests {
     @Mock DossierAccessService access;
+    @Mock ParticipationRulesService rules;
     @Mock StageRepository stages;
     @Mock StageParticipantRepository participations;
     @Mock StructureAccueilRepository structures;

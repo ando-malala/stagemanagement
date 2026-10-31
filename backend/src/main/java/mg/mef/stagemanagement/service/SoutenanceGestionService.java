@@ -22,6 +22,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class SoutenanceGestionService {
     private final DossierAccessService access;
+    private final ParticipationRulesService rules;
 
     private final SoutenanceRepository soutenanceRepository;
     private final StageParticipantRepository stageParticipantRepository;
@@ -29,8 +30,8 @@ public class SoutenanceGestionService {
     public SoutenanceGestionService(
             SoutenanceRepository soutenanceRepository,
             StageParticipantRepository stageParticipantRepository
-    , DossierAccessService access) {
-        this.access = access;
+    , DossierAccessService access, ParticipationRulesService rules) {
+        this.access = access; this.rules = rules;
         this.soutenanceRepository = soutenanceRepository;
         this.stageParticipantRepository = stageParticipantRepository;
     }
@@ -71,7 +72,7 @@ public class SoutenanceGestionService {
         }
 
         StageParticipant participant = stageParticipantRepository
-                .findById(request.getStageParticipantId())
+                .findForUpdate(request.getStageParticipantId())
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -79,6 +80,7 @@ public class SoutenanceGestionService {
                         )
                 );
 
+        rules.lock(participant);
         Soutenance soutenance = new Soutenance();
         soutenance.setStageParticipant(participant);
         soutenance.setDateSoutenance(request.getDateSoutenance());
@@ -107,8 +109,9 @@ public class SoutenanceGestionService {
                         )
                 );
 
+        rules.lock(soutenance.getStageParticipant());
         StageParticipant participant = stageParticipantRepository
-                .findById(request.getStageParticipantId())
+                .findForUpdate(request.getStageParticipantId())
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -116,6 +119,7 @@ public class SoutenanceGestionService {
                         )
                 );
 
+        rules.lock(participant);
         soutenanceRepository.findByStageParticipant_Id(participant.getId())
                 .ifPresent(existante -> {
                     if (!existante.getId().equals(id)) {

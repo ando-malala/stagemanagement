@@ -20,8 +20,8 @@ test('destination après connexion : chemins locaux connus seulement', () => {
   const url = new URL(loginDestination(target), 'http://localhost');
   assert.equal(safeReturnTo(url.searchParams.get('retour')), target);
 });
-test('navigation conforme aux rôles et aucune entrée métier pour STAGIAIRE', () => {
-  assert.equal(visibleNavigation({ roles: ['STAGIAIRE'] }).length, 0);
+test('navigation conforme aux rôles et parcours personnel sans entrée métier pour STAGIAIRE', () => {
+  assert.deepEqual(visibleNavigation({ roles: ['STAGIAIRE'] }).map(r => r.path), ['/mon-dossier', '/rapports', '/fichiers']);
   assert.equal(visibleNavigation(null).length, 0);
   const encadreur = visibleNavigation({ roles: ['ENCADREUR'] });
   assert.ok(encadreur.some((r) => r.path === '/rapports'));
