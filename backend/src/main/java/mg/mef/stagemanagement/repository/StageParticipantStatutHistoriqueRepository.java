@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StageParticipantStatutHistoriqueRepository extends JpaRepository<StageParticipantStatutHistorique, Integer> {
+    java.util.List<StageParticipantStatutHistorique> findByStageParticipant_IdOrderByDateModificationAscIdAsc(Integer id);
 }

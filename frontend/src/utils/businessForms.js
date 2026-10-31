@@ -15,11 +15,11 @@ const activeField = () => ({ name: 'actif', label: 'Actif', type: 'select', valu
 
 export const businessFields = {
   reference: [text('libelle', 'Libellé', 150, true), activeField()],
-  departement: [text('libelle', 'Libellé', 250, true), { name: 'statutCode', label: 'Statut', type: 'hidden' }],
+  departement: [text('libelle', 'Libellé', 250, true), { name: 'statutCode', label: 'Statut', type: 'select', path: '/api/referentiels/suivi/statuts/DEPARTEMENT', valueKey: 'code' }],
   structure: [choice('departementId', 'Département', ref('organisation', 'departements')), text('libelle', 'Libellé', 150, true),
     text('localite', 'Localité', 150), text('porte', 'Porte', 30), text('contact', 'Contact', 150), { ...text('courriel', 'Courriel', 150), type: 'email' }, activeField()],
   cadre: [text('themeStage', 'Thème du stage', 250, true), paragraph('activiteConfieStagiaire', 'Activités confiées'), paragraph('objectifStage', 'Objectif'), activeField()],
-  alerte: [text('typeAlerteCode', 'Code du type d’alerte', undefined, true), paragraph('message', 'Message', true),
+  alerte: [{ name: 'typeAlerteCode', label: 'Type d’alerte', type: 'select', required: true, path: '/api/referentiels/suivi/types-alertes', valueKey: 'code' }, paragraph('message', 'Message', true),
     { name: 'dateEcheance', label: 'Échéance', type: 'date' }, { name: 'priorite', label: 'Priorité', type: 'select', required: true,
       options: ['INFORMATION', 'AVERTISSEMENT', 'URGENT'].map((value) => ({ value, label: value })) },
     { ...participant(), required: false }, choice('rapportId', 'Rapport', '/api/rapports-activite', ['stagiaire', 'debutSemaine', 'finSemaine'], false),
@@ -37,7 +37,7 @@ export const businessFields = {
     paragraph('commentaire', 'Commentaire', true), { name: 'visibleStagiaire', label: 'Visibilité stagiaire', type: 'select', valueType: 'boolean', required: true,
       options: [{ value: 'true', label: 'Visible' }, { value: 'false', label: 'Non visible' }] }],
   stagiaire: [text('nom', 'Nom', 150, true), text('prenoms', 'Prénoms', 250, true),
-    text('adresse', 'Adresse', 250), text('contact', 'Contact', 100), { ...text('email', 'Courriel', 150), type: 'email' }],
+    text('adresse', 'Adresse', 250, true), text('contact', 'Contact', 100), { ...text('email', 'Courriel', 150), type: 'email' }],
   encadreur: [choice('utilisateurId', 'Compte associé', '/api/utilisateurs', ['identifiant'], false),
     text('nom', 'Nom', 250, true), text('prenoms', 'Prénoms', 250, true), text('fonction', 'Fonction', 150),
     text('localite', 'Localité', 150), text('porte', 'Porte', 30), text('contact', 'Contact', 150),

@@ -414,10 +414,10 @@ public class EvaluationGestionService {
         }
 
         if (note.compareTo(BigDecimal.ZERO) < 0
-                || note.compareTo(new BigDecimal("20")) > 0) {
+                || note.compareTo(new BigDecimal("5")) > 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "La note doit être comprise entre 0 et 20"
+                    "La note doit être comprise entre 0 et 5"
             );
         }
     }

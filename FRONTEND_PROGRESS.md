@@ -1,14 +1,14 @@
 # Suivi frontend MEF–SIIGFP
 
-Dernière mise à jour : 29 octobre 2026.
+Dernière mise à jour : 31 octobre 2026.
 
 ## Statut réel
 
-**Phases 1 à 5 intégrées pour les opérations couvertes par les API autorisées; phase 6 commencée.** Le contexte Spring se charge avec PostgreSQL et les tests HTTP de refus d’accès passent sur un serveur temporaire. Un contrôle des lectures API par rôle est disponible en ligne de commande. Les parcours authentifiés avec des comptes réels, les écritures métier, les catalogues manquants, les historiques et la clôture restent à valider ou à traiter. L’application complète n’est pas déclarée opérationnelle.
+**Compléments backend/frontend demandés le 31 octobre intégrés.** Clôture corrigée et contrôlée, catalogues actifs, documents obligatoires, historiques, périodes et charge exposés par onze nouvelles routes GET et consommés par React. Le scénario HTTP authentifié a réussi sur une base PostgreSQL temporaire, avec créations, écritures, clôture et vérification des rôles. Les tests ne constituent pas une recette visuelle ni une validation de la configuration de production. Voir le [compte rendu détaillé](docs/INTEGRATION_COMPLEMENTS.md).
 
 Préférence utilisateur : effectuer les vérifications sans Chrome ni pilotage de navigateur. Utiliser les tests locaux, le rendu React SSR, le lint et le build; signaler les limites de vérification visuelle.
 
-L’arborescence React/Vite JavaScript existante a été conservée. Aucune dépendance ajoutée, aucun script SQL appliqué et aucun contrat API modifié. La phase 6 étend uniquement les tests du backend, sans modification de son code de production.
+L’arborescence existante est conservée, sans nouvelle dépendance. Les changements backend sont autorisés par la demande du 31 octobre. Aucun script ni essai d’écriture n’a été exécuté dans la base métier; le schéma de conception est chargé uniquement dans une base temporaire dédiée. Les sections suivantes conservent l’historique des phases du 29 octobre : leurs limites ont été levées lorsqu’indiqué dans le compte rendu du 31 octobre.
 
 ## Livrables de la phase 1
 

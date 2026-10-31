@@ -42,7 +42,7 @@ export function listStageParticipants(id, options = {}) {
   return apiRequest(`/api/stages/${id}/participants`, options);
 }
 
-const eventActions = ['prolonger', 'suspendre', 'reprendre', 'abandonner', 'annuler'];
+const eventActions = ['prolonger', 'suspendre', 'reprendre', 'abandonner', 'annuler', 'cloturer'];
 export function applyParticipationEvent(id, action, payload) {
   if (!eventActions.includes(action)) throw new Error('Action de participation non prise en charge.');
   return apiRequest(`/api/stage-participants/${id}/${action}`, { method: 'POST', body: JSON.stringify(payload) });

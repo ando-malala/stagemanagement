@@ -10,6 +10,14 @@ import java.util.Optional;
 
 @Repository
 public interface EncadreurRepository extends JpaRepository<Encadreur, Integer> {
+    interface Charge {
+        Integer getEncadreurId();
+        Integer getCapaciteMax();
+        Long getParticipationsActives();
+        Boolean getSurcharge();
+    }
+    @Query(value = "select encadreur_id as encadreurId, capacite_max as capaciteMax, participations_actives as participationsActives, surcharge from vue_charge_encadreurs where encadreur_id = :id", nativeQuery = true)
+    Optional<Charge> findCharge(@org.springframework.data.repository.query.Param("id") Integer id);
 
     Optional<Encadreur> findByUtilisateur_Id(Integer utilisateurId);
 

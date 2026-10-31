@@ -1,0 +1,180 @@
+package mg.mef.stagemanagement;
+
+import mg.mef.stagemanagement.service.AlerteOrchestrationService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import java.net.URI;
+import java.net.http.*;
+import java.nio.charset.StandardCharsets;
+import java.time.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@EnabledIfEnvironmentVariable(named = "MEF_TEST_DB_URL", matches = "jdbc:postgresql://(localhost|127\\.0\\.0\\.1):[0-9]+/mef_integration_[a-f0-9]{32}")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "server.address=127.0.0.1", "spring.jpa.hibernate.ddl-auto=validate", "logging.level.root=ERROR",
+        "logging.level.org.springframework=ERROR", "logging.level.mg.mef=ERROR", "spring.jpa.show-sql=false"
+})
+class CompleteIntegrationTests {
+    @DynamicPropertySource static void properties(DynamicPropertyRegistry registry) {
+        String url = System.getenv("MEF_TEST_DB_URL");
+        if (url == null || !url.matches("jdbc:postgresql://(localhost|127\\.0\\.0\\.1):[0-9]+/mef_integration_[a-f0-9]{32}"))
+            throw new IllegalStateException("A dedicated test database is required");
+        registry.add("spring.datasource.url", () -> url);
+        registry.add("spring.datasource.username", () -> System.getenv("MEF_TEST_DB_USER"));
+        registry.add("spring.datasource.password", () -> System.getenv("MEF_TEST_DB_PASSWORD"));
+        registry.add("app.upload.dir", () -> "target/integration-uploads/" + url.substring(url.lastIndexOf('/') + 1));
+    }
+    @Value("${local.server.port}") int port;
+    @Autowired JdbcTemplate jdbc;
+    @Autowired PasswordEncoder encoder;
+    @MockitoBean AlerteOrchestrationService schedulerOnly;
+    final JsonMapper json = JsonMapper.builder().build();
+    final HttpClient http = HttpClient.newHttpClient();
+    String token;
+    static final String PASSWORD = "integration-password-only";
+
+    @Test void fullWorkflowAgainstIsolatedPostgres() throws Exception {
+        // Only the initial administrator is bootstrapped through SQL, in the guarded empty test database.
+        jdbc.update("insert into utilisateurs(identifiant,mot_de_passe_hash,statut_id) select ?,?,s.id from statuts s join types_statut t on t.id=s.type_statut_id where t.code='UTILISATEUR' and s.code='ACTIF'", "integration-admin", encoder.encode(PASSWORD));
+        jdbc.update("insert into utilisateurs_role(utilisateur_id,role_id) select u.id,r.id from utilisateurs u cross join roles r where u.identifiant='integration-admin' and r.code='ADMIN'");
+        request("GET", "/referentiels/suivi/types-documents", null, 401);
+        token = login("integration-admin");
+        assertEquals(5, get("/referentiels/suivi/types-documents").size());
+        assertEquals(6, get("/referentiels/suivi/types-evenements").size());
+        assertTrue(get("/referentiels/suivi/types-alertes").size() > 0);
+        request("GET", "/referentiels/suivi/statuts/INCONNU", null, 404);
+        request("GET", "/stage-participants/99999/evenements", null, 404);
+        int department = create("/referentiels/organisation/departements", Map.of("libelle", "Integration department"));
+        int structure = create("/referentiels/organisation/structures-accueil", Map.of("libelle", "Integration structure", "departementId", department, "actif", true));
+        int cadre = create("/referentiels/organisation/cadres-stage", Map.of("themeStage", "Integration theme", "actif", true));
+        int school = create("/referentiels/academiques/etablissements", Map.of("libelle", "Integration school", "actif", true));
+        int stream = create("/referentiels/academiques/filieres", Map.of("libelle", "Integration stream", "actif", true));
+        int level = create("/referentiels/academiques/niveaux-etude", Map.of("libelle", "Integration level", "actif", true));
+        int month = create("/referentiels/academiques/mois-stage", Map.of("libelle", "Integration month", "actif", true));
+        request("POST", "/stagiaires", Map.of("nom", "Integration", "prenoms", "Trainee"), 400);
+        int trainee = create("/stagiaires", Map.of("nom", "Integration", "prenoms", "Trainee", "adresse", "Integration address"));
+        int academic = create("/stagiaires/" + trainee + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
+        int mentor = create("/encadreurs", Map.of("nom", "Integration", "prenoms", "Mentor", "departementId", department, "capaciteMaxStagiaires", 1));
+        int stage = create("/stages", Map.of("libelle", "Integration stage", "structureAccueilId", structure));
+        LocalDate today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
+        var participationBody = Map.of("stageId", stage, "stagiaireAcademiqueId", academic, "cadreStageId", cadre, "encadreurId", mentor,
+                "dateDebutStage", today.minusDays(21).toString(), "dateFinStage", today.plusDays(7).toString());
+        int participation = create("/stage-participants", participationBody);
+        String base = "/stage-participants/" + participation;
+        request("POST", base + "/cloturer", Map.of(), 409);
+        request("PATCH", base + "/statut", Map.of("statutCode", "EN_COURS"), 200);
+        assertEquals(1, get("/encadreurs/" + mentor + "/charge").get("participationsActives").asInt());
+        assertEquals(1, get("/encadreurs/" + mentor + "/charge").get("capaciteMax").asInt());
+        request("POST", base + "/suspendre", Map.of("dateEffet", today.minusDays(3).toString()), 200);
+        request("POST", base + "/reprendre", Map.of("dateEffet", today.minusDays(4).toString()), 409);
+        request("POST", base + "/reprendre", Map.of("dateEffet", today.minusDays(2).toString()), 200);
+        request("POST", base + "/prolonger", Map.of("nouvelleDateFin", today.plusDays(14).toString()), 200);
+        assertEquals(3, get(base + "/evenements").size());
+        JsonNode period = get(base + "/periodes-rapports").get(0);
+        assertTrue(period.get("manquante").asBoolean());
+        int report = create("/rapports-activite", Map.of("stageParticipantId", participation, "moisStageId", month,
+                "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString(), "activite", "Integration work"));
+        JsonNode conflict = request("POST", "/rapports-activite", Map.of("stageParticipantId", participation, "moisStageId", month,
+                "debutSemaine", period.get("debut").asString(), "finSemaine", LocalDate.parse(period.get("fin").asString()).plusDays(1).toString()), 409);
+        assertFalse(conflict.toString().contains("SQL"));
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "A_CORRIGER"), 200);
+        request("POST", "/rapports-activite/" + report + "/observations", Map.of("typeObservation", "DEMANDE_CORRECTION", "commentaire", "Integration correction", "visibleStagiaire", true), 201);
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "VALIDE"), 200);
+        assertTrue(get(base + "/periodes-rapports").get(0).get("validee").asBoolean());
+        int evaluation = create("/evaluations", Map.of("stageParticipantId", participation, "encadreurId", mentor));
+        request("POST", "/evaluations/" + evaluation + "/finaliser", Map.of(), 409);
+        request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", get("/evaluations/criteres").get(0).get("id").asInt(), "note", 15), 400);
+        for (JsonNode criterion : get("/evaluations/criteres"))
+            request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", criterion.get("id").asInt(), "note", 5), 201);
+        assertTrue(request("POST", "/evaluations/" + evaluation + "/finaliser", Map.of(), 200).get("estFinalisee").asBoolean());
+        request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", get("/evaluations/criteres").get(0).get("id").asInt(), "note", 4), 409);
+        create("/soutenances", Map.of("stageParticipantId", participation, "dateSoutenance", today.atTime(14, 0).toString(), "lieu", "Integration room"));
+        int alert = create("/alertes", Map.of("typeAlerteCode", "DOSSIER_INCOMPLET", "stageParticipantId", participation, "message", "Integration alert", "priorite", "AVERTISSEMENT"));
+        request("PATCH", "/alertes/" + alert + "/lire", Map.of(), 200);
+        request("PATCH", base + "/statut", Map.of("statutCode", "A_CLOTURER"), 200);
+        request("PATCH", base + "/statut", Map.of("statutCode", "CLOTUREE"), 409);
+        assertEquals(3, get(base + "/evenements").size());
+        for (JsonNode doc : get(base + "/documents-obligatoires")) {
+            assertFalse(doc.get("present").asBoolean());
+            upload(base + "/fichiers", doc.get("code").asString(), 200);
+        }
+        upload(base + "/fichiers", "CONVENTION_STAGE", 409);
+        JsonNode file = get(base + "/fichiers").get(0);
+        var binary = http.send(builder("/fichiers/" + file.get("id").asInt() + "/telecharger").GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+        assertEquals(200, binary.statusCode()); assertEquals("integration document", new String(binary.body(), StandardCharsets.UTF_8));
+        JsonNode closed = request("POST", base + "/cloturer", Map.of("motif", "Integration closure"), 200);
+        assertEquals("CLOTUREE", closed.get("statut").asString()); assertFalse(closed.get("dateCloture").isNull());
+        assertEquals("CLOTUREE", get(base).get("statut").asString());
+        assertEquals("CLOTURE", get(base + "/evenements").get(3).get("code").asString());
+        assertEquals(5, get(base + "/historique-statuts").size());
+        assertEquals(0, get(base + "/actions").size());
+        request("POST", base + "/cloturer", Map.of(), 409);
+        assertEquals(0, get("/encadreurs/" + mentor + "/charge").get("participationsActives").asInt());
+        assertNotNull(jdbc.queryForObject("select date_cloture from stage_participant where id=?", java.sql.Timestamp.class, participation));
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update stage_participant set statut_id=(select s.id from statuts s join types_statut t on t.id=s.type_statut_id where t.code='PARTICIPATION' and s.code='EN_COURS') where id=?", participation));
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update stage_participant set date_fin_stage=date_debut_stage-1 where id=?", participation));
+        assertTrue(get("/journal-audit").size() > 0);
+        var mentorStatuses = get("/referentiels/suivi/statuts/ENCADREUR");
+        String currentMentorStatus = get("/encadreurs/" + mentor).get("statut").asString();
+        for (JsonNode status : mentorStatuses) {
+            if (!currentMentorStatus.equals(status.get("code").asString())) {
+                request("PATCH", "/encadreurs/" + mentor + "/statut", Map.of("statutCode", status.get("code").asString(), "motif", "Integration status"), 200);
+                break;
+            }
+        }
+        String adminToken = token;
+        for (String role : List.of("RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")) {
+            token = adminToken;
+            create("/utilisateurs", Map.of("identifiant", "integration-" + role, "motDePasse", PASSWORD, "roleCode", role));
+            token = login("integration-" + role);
+            int expected = "STAGIAIRE".equals(role) ? 403 : 200;
+            for (String path : List.of("/referentiels/suivi/types-documents", "/referentiels/suivi/types-evenements", "/referentiels/suivi/types-alertes",
+                    "/referentiels/suivi/statuts/PARTICIPATION", "/referentiels/suivi/transitions/PARTICIPATION/A_CLOTURER",
+                    base + "/documents-obligatoires", base + "/evenements", base + "/historique-statuts", base + "/periodes-rapports", base + "/actions", "/encadreurs/" + mentor + "/charge"))
+                request("GET", path, null, expected);
+            request("GET", "/utilisateurs", null, 403);
+            request("POST", base + "/cloturer", Map.of(), "RESPONSABLE_STAGE".equals(role) ? 409 : 403);
+        }
+        request("POST", "/auth/logout", Map.of(), 204);
+        request("GET", "/auth/me", null, 401);
+    }
+    String login(String name) throws Exception {
+        String previous = token; token = null;
+        try { return request("POST", "/auth/login", Map.of("identifiant", name, "motDePasse", PASSWORD), 200).get("token").asString(); }
+        finally { token = previous; }
+    }
+    JsonNode get(String path) throws Exception { return request("GET", path, null, 200); }
+    int create(String path, Object body) throws Exception { return request("POST", path, body, 201).get("id").asInt(); }
+    HttpRequest.Builder builder(String path) {
+        var builder = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api" + path)).timeout(Duration.ofSeconds(10));
+        if (token != null) builder.header("Authorization", "Bearer " + token);
+        return builder;
+    }
+    JsonNode request(String method, String path, Object body, int expected) throws Exception {
+        var response = http.send(builder(path).header("Content-Type", "application/json")
+                .method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build(), HttpResponse.BodyHandlers.ofString());
+        assertEquals(expected, response.statusCode(), method + " " + path);
+        return response.body().isBlank() ? json.nullNode() : json.readTree(response.body());
+    }
+    void upload(String path, String code, int expected) throws Exception {
+        String boundary = "integration-boundary";
+        String content = "--" + boundary + "\r\nContent-Disposition: form-data; name=\"typePieceJointeCode\"\r\n\r\n" + code
+                + "\r\n--" + boundary + "\r\nContent-Disposition: form-data; name=\"fichier\"; filename=\"integration.txt\"\r\nContent-Type: text/plain\r\n\r\nintegration document\r\n--" + boundary + "--\r\n";
+        var response = http.send(builder(path).header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                .POST(HttpRequest.BodyPublishers.ofString(content)).build(), HttpResponse.BodyHandlers.discarding());
+        assertEquals(expected, response.statusCode(), "upload " + code);
+    }
+}

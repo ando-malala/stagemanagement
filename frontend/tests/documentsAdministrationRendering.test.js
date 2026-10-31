@@ -19,9 +19,10 @@ test('rendu documents et administration : périmètres, droits et absence de sec
     assert.match(manager, /Documents du stagiaire/);
     assert.match(manager, /name="typePieceJointeCode"/);
     assert.match(manager, /type="file"/);
-    assert.match(manager, /complétude du dossier ne peut pas être vérifiée/);
+    assert.match(manager, /<select[^>]*name="typePieceJointeCode"/);
     const reader = render(Documents, { ...owner, scope: 'participation' }, ['ENCADREUR']);
     assert.match(reader, /dossier de participation/);
+    assert.match(reader, /Pièces obligatoires pour la clôture/);
     assert.doesNotMatch(reader, /type="file"/);
     assert.doesNotMatch(reader, /Supprimer/);
     assert.equal(render(Administration, { account: { id: 42 } }, ['RESPONSABLE_STAGE']), '');

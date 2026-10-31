@@ -26,11 +26,11 @@ test('rendu métier : permissions, champs alimentés par API et actions selon st
     const participation = { id: 3, statut: 'EN_COURS' };
     const readOnly = render(Actions, { participation }, ['ENCADREUR']);
     assert.doesNotMatch(readOnly, /<button/);
-    assert.match(readOnly, /historique des événements n’est pas disponible/);
+    assert.match(readOnly, /Chargement des actions autorisées/);
     const manager = render(Actions, { participation }, ['RESPONSABLE_STAGE']);
-    assert.match(manager, />Suspendre<\/button>/);
+    assert.match(manager, /Chargement des actions autorisées/);
     assert.doesNotMatch(manager, />Reprendre<\/button>/);
     assert.doesNotMatch(manager, />Clôturer<\/button>/);
-    assert.match(render(Actions, { participation: { ...participation, statut: 'SUSPENDUE' } }, ['ADMIN']), />Reprendre<\/button>/);
+    assert.doesNotMatch(render(Actions, { participation: { ...participation, statut: 'SUSPENDUE' } }, ['ADMIN']), />Reprendre<\/button>/);
   } finally { await server.close(); }
 });

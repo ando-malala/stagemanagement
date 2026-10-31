@@ -21,3 +21,7 @@ export function updateEncadreur(id, payload) {
 export function getEncadreur(id, options = {}) {
   return apiRequest(`/api/encadreurs/${id}`, options);
 }
+
+export function changeEncadreurStatus(id, payload) {
+  return apiRequest(`/api/encadreurs/${id}/statut`, { method: 'PATCH', body: JSON.stringify(payload) });
+}

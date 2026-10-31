@@ -25,9 +25,9 @@ test('rendu du suivi : droits, verrouillage et sélecteurs métier', async () =>
     assert.match(report, /<select[^>]*required=""[^>]*name="moisStageId"/);
     assert.match(render(Form, { kind: 'evaluation' }), /<select[^>]*name="encadreurId"/);
     assert.match(render(Form, { kind: 'soutenance' }, ['ADMIN']), /type="datetime-local"/);
-    assert.match(render(Actions, { rapport: { id: 1, statut: 'BROUILLON' } }), />Soumettre<\/button>/);
+    assert.match(render(Actions, { rapport: { id: 1, statut: 'BROUILLON' } }), /Chargement des transitions/);
     assert.doesNotMatch(render(Actions, { rapport: { id: 1, statut: 'VALIDE' } }), />(Soumettre|Valider|Demander une correction)<\/button>/);
-    assert.match(render(Actions, { rapport: { id: 1, statut: 'SOUMIS' } }), />Demander une correction<\/button>/);
+    assert.doesNotMatch(render(Actions, { rapport: { id: 1, statut: 'SOUMIS' } }), />Demander une correction<\/button>/);
     const notes = render(Notes, { evaluation: { id: 1, estFinalisee: true } });
     assert.match(notes, /notes ne sont plus modifiables/);
     assert.doesNotMatch(notes, />Finaliser l’évaluation<\/button>/);

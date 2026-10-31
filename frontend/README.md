@@ -60,26 +60,30 @@ Les listes proposent la création et les fiches proposent la modification aux r�
 
 Depuis la fiche stagiaire, consulter ou ajouter les profils académiques. Pour affecter un stagiaire, le sélectionner puis choisir l’un de ses profils. La fiche stage donne accès à ses participants. La fiche participation propose les actions compatibles avec son état, avec confirmation et contrôles des dates d’effet à Madagascar.
 
-Les historiques et la clôture ne sont pas disponibles dans cette phase. Les changements de statut encadreur attendent un catalogue autorisé. Voir `../FRONTEND_PROGRESS.md` et `../docs/BACKEND_AUDIT.md` pour les limites backend et les vérifications restant à effectuer. Aucun navigateur n’est lancé par les commandes de test, lint ou build.
+La fiche participation affiche les historiques, événements et périodes attendues. Les actions et transitions sont chargées depuis le serveur : passer à « À clôturer », compléter les pièces obligatoires puis confirmer la clôture. La fiche encadreur permet le changement de statut et affiche sa charge réelle; celle-ci apparaît aussi dans le formulaire d’affectation. Aucun navigateur n’est lancé par les commandes de test, lint ou build.
 
 ## Suivi métier
 
 - Rapports : créer un brouillon depuis la liste ou une participation, puis ouvrir la fiche pour modifier le contenu, soumettre, demander une correction ou valider. Un rapport validé ne peut plus être modifié. Les observations sont gérées séparément du changement de statut.
-- Évaluations : ouvrir la fiche pour modifier les appréciations et noter les critères actifs. La finalisation est proposée une fois les critères obligatoires notés et nécessite une confirmation; le dossier devient ensuite non modifiable.
+- Évaluations : ouvrir la fiche pour modifier les appréciations et noter les critères actifs **sur 5**, conformément à PostgreSQL. La finalisation est proposée une fois les critères obligatoires notés et nécessite une confirmation; le dossier devient ensuite non modifiable.
 - Soutenances : sélectionner une participation et saisir la date/heure locale. Le lieu et l’observation sont facultatifs. ADMIN et RESPONSABLE_STAGE peuvent créer ou modifier une soutenance; les encadreurs la consultent.
 
 Rapports et évaluations sont modifiables par les trois rôles métier autorisés. Les listes ne sont pas limitées aux dossiers de l’utilisateur connecté par le backend actuel. Les contrôles frontend ne remplacent jamais les autorisations ni les validations serveur.
 
 ## Documents et comptes
 
-Les documents se consultent depuis une fiche stagiaire/participation ou la page Documents. ADMIN et RESPONSABLE_STAGE peuvent déposer un fichier non vide, sous la limite de 10 Mio (requête multipart comprise). Le catalogue des types n’étant pas accessible, le dépôt utilise un code connu du service et validé par le backend. L’interface ne déduit pas les pièces obligatoires manquantes. Les téléchargements restent authentifiés.
+Les documents se consultent depuis une fiche stagiaire/participation ou la page Documents. ADMIN et RESPONSABLE_STAGE peuvent déposer un fichier non vide, sous la limite de 10 Mio (requête multipart comprise). Le sélecteur utilise le catalogue actif, filtré par périmètre et multiplicité; les pièces obligatoires présentes/manquantes viennent du serveur. La clôture revérifie ces pièces. Les téléchargements restent authentifiés.
 
 ADMIN peut créer un compte avec un rôle actif chargé depuis le serveur, gérer ses rôles/départements depuis sa fiche et réinitialiser son mot de passe avec confirmation. Le backend actuel exige 6 caractères à la création et 12 à la réinitialisation. Aucun secret n’est affiché dans un récapitulatif ou stocké dans le navigateur. Le compte doit conserver au moins un rôle; une modification de ses propres rôles relit la session et actualise les accès.
 
 ## Référentiels et pilotage
 
-ADMIN peut créer ou modifier les sept référentiels exposés dans Référentiels. Les structures choisissent leur département par libellé. Les départements conservent leur statut à l’édition; les autres références exposent leur indicateur actif. Les catalogues de statuts, types de pièces et types d’alertes restent indisponibles.
+ADMIN peut créer ou modifier les sept référentiels exposés dans Référentiels. Les structures choisissent leur département par libellé. Le statut des départements est sélectionnable dans le catalogue serveur; les autres références exposent leur indicateur actif. Les types de pièces, d’alertes, d’événements et les transitions sont accessibles en lecture aux trois rôles métier. Leur administration brute reste fermée.
 
 La page Alertes permet de filtrer les données reçues et de consulter le message, l’action recommandée et les dossiers liés. Seules les alertes traitables proposent une confirmation de traitement. Le dashboard affiche les six compteurs serveur et donne accès aux dossiers et alertes; une réponse incomplète reste une erreur visible.
 
 Le journal d’audit est consultable par ADMIN, globalement ou par utilisateur/entité. Le détail affiche les anciennes et nouvelles valeurs, avec masquage des champs de secrets identifiables. Aucune opération d’écriture sur le journal n’est proposée.
+
+## Tests réels d’intégration
+
+Depuis la racine, `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-integration.ps1` crée une base locale `mef_integration_<identifiant aléatoire>`, charge le schéma, exécute les tests Maven puis supprime cette seule base. Il requiert PostgreSQL local, `psql` et des droits de création de base. Aucune donnée de production n’est copiée. Les [parcours et limites](../docs/INTEGRATION_COMPLEMENTS.md) précisent la validation réalisée.

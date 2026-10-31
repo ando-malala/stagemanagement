@@ -281,7 +281,7 @@ public class StagiaireGestionService {
         );
 
         stagiaire.setAdresse(
-                nettoyerTexteOptionnel(request.getAdresse(), 250)
+                nettoyerTexteObligatoire(request.getAdresse(), "L'adresse est obligatoire", 250)
         );
 
         stagiaire.setContact(

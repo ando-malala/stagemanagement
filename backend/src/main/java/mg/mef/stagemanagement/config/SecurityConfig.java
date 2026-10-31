@@ -444,6 +444,20 @@ public class SecurityConfig {
                         )
                         .hasRole("ADMIN")
                         
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/referentiels/suivi/types-documents",
+                                "/api/referentiels/suivi/types-evenements",
+                                "/api/referentiels/suivi/types-alertes",
+                                "/api/referentiels/suivi/statuts/{type}",
+                                "/api/referentiels/suivi/transitions/{type}/{source}",
+                                "/api/stage-participants/{id}/documents-obligatoires",
+                                "/api/stage-participants/{id}/historique-statuts",
+                                "/api/stage-participants/{id}/evenements",
+                                "/api/stage-participants/{id}/periodes-rapports",
+                                "/api/stage-participants/{id}/actions",
+                                "/api/encadreurs/{id}/charge")
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
                         .anyRequest()
                         .denyAll()
                 )

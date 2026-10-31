@@ -13,6 +13,10 @@ import java.util.List;
 public interface StageParticipantRepository
         extends JpaRepository<StageParticipant, Integer> {
 
+        @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+        @Query("select p from StageParticipant p where p.id = :id")
+        java.util.Optional<StageParticipant> findForUpdate(@Param("id") Integer id);
+
         List<StageParticipant> findByStage_Id(Integer stageId);
 
         List<StageParticipant> findByEncadreur_Id(Integer encadreurId);

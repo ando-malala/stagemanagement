@@ -79,7 +79,7 @@ function NoteForm({ evaluationId, critere, initial, onCancel, onSaved }) {
   }
   return <form onSubmit={save} className="page-stack">
     <h4>Noter : {critere.libelle}</h4>
-    <Input name="note" label="Note sur 20" type="number" min="0" max="20" step="any" required value={values.note} onChange={change} disabled={saving} />
+    <Input name="note" label="Note sur 5" type="number" min="0" max="5" step="0.01" required value={values.note} onChange={change} disabled={saving} />
     <Input name="commentaire" label="Commentaire" type="textarea" value={values.commentaire} onChange={change} disabled={saving} />
     <ErrorMessage error={error} />
     <div className="row-actions"><Button type="submit" disabled={saving}>{saving ? 'Enregistrement…' : 'Enregistrer la note'}</Button>

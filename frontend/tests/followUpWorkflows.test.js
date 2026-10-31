@@ -14,16 +14,18 @@ test('rapport : mois obligatoire, contenu facultatif et période ordonnée', () 
 
 test('rapport : transitions confirmées par le SQL, pas de sortie de VALIDE', () => {
   const sql = readFileSync(new URL('../../conception/Conception2.sql', import.meta.url), 'utf8');
+  const transitions = [...sql.split('WITH etats AS(').at(-1).matchAll(/\('RAPPORT','([^']+)','([^']+)'\)/g)].map((m) => ({ source: m[1], cible: m[2], libelle: m[2] }));
+  assert.deepEqual(rapportTransitions('SOUMIS'), []);
   const actual = [];
   for (const status of ['BROUILLON', 'SOUMIS', 'A_CORRIGER', 'VALIDE', 'INCONNU']) {
-    for (const transition of rapportTransitions(status)) {
+    for (const transition of rapportTransitions(status, transitions)) {
       assert.ok(sql.includes(`('RAPPORT','${status}','${transition.code}')`));
       actual.push([status, transition.code]);
     }
   }
   assert.equal(actual.length, 4);
-  assert.deepEqual(rapportStatusPayload('SOUMIS', 'A_CORRIGER', ' Explication '), { statutCode: 'A_CORRIGER', motif: 'Explication' });
-  assert.deepEqual(rapportStatusPayload('A_CORRIGER', 'SOUMIS', ''), { statutCode: 'SOUMIS', motif: null });
+  assert.deepEqual(rapportStatusPayload('SOUMIS', 'A_CORRIGER', ' Explication ', transitions), { statutCode: 'A_CORRIGER', motif: 'Explication' });
+  assert.deepEqual(rapportStatusPayload('A_CORRIGER', 'SOUMIS', '', transitions), { statutCode: 'SOUMIS', motif: null });
   assert.throws(() => rapportStatusPayload('BROUILLON', 'VALIDE', ''), /Transition indisponible/);
   assert.throws(() => rapportStatusPayload('VALIDE', 'A_CORRIGER', ''), /Transition indisponible/);
 });
@@ -49,9 +51,9 @@ test('permissions d’édition : encadreur habilité au suivi, rapports validés
 });
 
 test('notes : zéro et décimales acceptés, vide et hors bornes refusés', () => {
-  for (const note of [0, '0', '12.5', '20']) assert.equal(evaluationNotePayload(2, { note }).note, Number(note));
-  for (const note of ['', ' ', null, undefined, '-0.1', '20.01', 'NaN', Infinity]) assert.throws(() => evaluationNotePayload(2, { note }), /entre 0 et 20/);
-  assert.deepEqual(evaluationNotePayload(2, { note: '15', commentaire: ' Bien ' }), { critereId: 2, note: 15, commentaire: 'Bien' });
+  for (const note of [0, '0', '2.5', '5']) assert.equal(evaluationNotePayload(2, { note }).note, Number(note));
+  for (const note of ['', ' ', null, undefined, '-0.1', '5.01', '15', 'NaN', Infinity]) assert.throws(() => evaluationNotePayload(2, { note }), /entre 0 et 5/);
+  assert.deepEqual(evaluationNotePayload(2, { note: '5', commentaire: ' Bien ' }), { critereId: 2, note: 5, commentaire: 'Bien' });
 });
 
 test('finalisation : tous les critères actifs obligatoires, y compris une note zéro', () => {

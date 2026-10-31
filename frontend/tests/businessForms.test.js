@@ -18,8 +18,8 @@ test('formulaires métier : tous les champs correspondent exactement aux DTO de 
 });
 
 test('édition complète : effacement explicite des champs optionnels et exclusion des champs de réponse', () => {
-  assert.deepEqual(businessPayload('stagiaire', { id: 44, nom: ' Nom ', prenoms: ' Prénom ', email: ' ', statut: 'ACTIF' }), {
-    nom: 'Nom', prenoms: 'Prénom', adresse: null, contact: null, email: null
+  assert.deepEqual(businessPayload('stagiaire', { id: 44, nom: ' Nom ', prenoms: ' Prénom ', adresse: ' Adresse ', email: ' ', statut: 'ACTIF' }), {
+    nom: 'Nom', prenoms: 'Prénom', adresse: 'Adresse', contact: null, email: null
   });
   const updated = businessPayload('encadreur', { nom: 'Nom', prenoms: 'Prénom', utilisateurId: 17, departementId: '2', capaciteMaxStagiaires: '' });
   assert.equal(updated.utilisateurId, 17); // Preserved even when the account selector is hidden.

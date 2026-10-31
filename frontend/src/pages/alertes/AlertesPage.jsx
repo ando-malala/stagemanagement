@@ -35,7 +35,7 @@ export default function AlertesPage({ navigate }) {
     <div className="section-heading"><div><h2>Alertes</h2><p className="small">Filtres appliqués aux alertes reçues du serveur. Les alertes informatives ne se traitent pas manuellement.</p></div>
       <Button variant="secondary" disabled={loading} onClick={refresh}>Actualiser</Button></div>
     <BusinessEditor kind="alerte" label="Créer une alerte" initial={{ priorite: 'INFORMATION' }} save={createAlerte} onSaved={refresh} />
-    <p className="notice">Le catalogue des types d’alertes n’est pas disponible. Une création manuelle nécessite un code connu du service, vérifié par le serveur.</p>
+    <p className="notice">Les types d’alertes proposés à la création sont chargés depuis le serveur.</p>
     <div className="entity-form">{[['statut', 'Statut'], ['priorite', 'Priorité'], ['natureAlerte', 'Nature'], ['typeAlerteCode', 'Type']].map(([key, label]) => <Input key={key} name={key} label={label} type="select"
       value={filters[key] ?? ''} options={filterOptions(rows, key, filters[key])} onChange={(event) => setFilters((current) => ({ ...current, [key]: event.target.value }))} />)}
       <Button variant="secondary" onClick={() => setFilters({})}>Réinitialiser les filtres</Button></div>

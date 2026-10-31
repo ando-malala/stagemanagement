@@ -20,7 +20,7 @@ test('pilotage SSR : groupes distincts, champs métier, liens des alertes et com
     assert.doesNotMatch(render(References, { group: 'organisation' }), /Filières/);
     assert.doesNotMatch(render(References, {}, ['ENCADREUR']), />Créer<\/button>/);
     assert.match(render(Form, { kind: 'structure' }), /<select[^>]*name="departementId"/);
-    assert.doesNotMatch(render(Form, { kind: 'departement' }), /name="statutCode"/);
+    assert.match(render(Form, { kind: 'departement' }), /<select[^>]*name="statutCode"/);
     const detail = render(Detail, { alerte: { id: 1, stageParticipantId: 7, rapportId: 8, actionRecommandee: '<script>fixture</script>' } });
     assert.match(detail, /href="\/participations\/7"/); assert.match(detail, /href="\/rapports\/8"/);
     assert.doesNotMatch(detail, /<script>/); assert.match(detail, /&lt;script&gt;/);

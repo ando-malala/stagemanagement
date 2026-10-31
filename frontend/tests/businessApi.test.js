@@ -43,5 +43,5 @@ test('édition, profils, participants et événements : contrats HTTP et erreurs
   }
   context.mock.method(globalThis, 'fetch', async () => Response.json({ detail: 'Chronologie refusée' }, { status: 409 }));
   await assert.rejects(applyParticipationEvent(42, 'suspendre', { dateEffet: '2026-10-20' }), (error) => error.status === 409 && error.message.includes('Chronologie refusée'));
-  assert.throws(() => applyParticipationEvent(42, 'cloturer', {}), /non prise en charge/);
+  assert.throws(() => applyParticipationEvent(42, 'supprimer', {}), /non prise en charge/);
 });

@@ -3484,6 +3484,204 @@
   },
   {
     "method": "GET",
+    "path": "/api/referentiels/suivi/types-documents",
+    "controller": "SuiviIntegrationController",
+    "handler": "typesDocuments",
+    "response": "List<DocumentCatalogueService.TypeDocument>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 16
+  },
+  {
+    "method": "GET",
+    "path": "/api/referentiels/suivi/types-evenements",
+    "controller": "SuiviIntegrationController",
+    "handler": "typesEvenements",
+    "response": "List<ReferentielWorkflowService.Reference>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 18
+  },
+  {
+    "method": "GET",
+    "path": "/api/referentiels/suivi/types-alertes",
+    "controller": "SuiviIntegrationController",
+    "handler": "typesAlertes",
+    "response": "List<ReferentielWorkflowService.Reference>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 20
+  },
+  {
+    "method": "GET",
+    "path": "/api/referentiels/suivi/statuts/{type}",
+    "controller": "SuiviIntegrationController",
+    "handler": "statuts",
+    "response": "List<ReferentielWorkflowService.Reference>",
+    "parameters": "@PathVariable String type",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 22
+  },
+  {
+    "method": "GET",
+    "path": "/api/referentiels/suivi/transitions/{type}/{source}",
+    "controller": "SuiviIntegrationController",
+    "handler": "transitions",
+    "response": "List<ReferentielWorkflowService.Transition>",
+    "parameters": "@PathVariable String type, @PathVariable String source",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 24
+  },
+  {
+    "method": "GET",
+    "path": "/api/stage-participants/{id}/documents-obligatoires",
+    "controller": "SuiviIntegrationController",
+    "handler": "documentsObligatoires",
+    "response": "List<DocumentCatalogueService.DocumentObligatoire>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 26
+  },
+  {
+    "method": "GET",
+    "path": "/api/stage-participants/{id}/historique-statuts",
+    "controller": "SuiviIntegrationController",
+    "handler": "historique",
+    "response": "List<SuiviParticipationService.Historique>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 28
+  },
+  {
+    "method": "GET",
+    "path": "/api/stage-participants/{id}/evenements",
+    "controller": "SuiviIntegrationController",
+    "handler": "evenements",
+    "response": "List<SuiviParticipationService.Evenement>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 30
+  },
+  {
+    "method": "GET",
+    "path": "/api/stage-participants/{id}/periodes-rapports",
+    "controller": "SuiviIntegrationController",
+    "handler": "periodes",
+    "response": "List<SuiviParticipationService.Periode>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 32
+  },
+  {
+    "method": "GET",
+    "path": "/api/stage-participants/{id}/actions",
+    "controller": "SuiviIntegrationController",
+    "handler": "actions",
+    "response": "List<SuiviParticipationService.Action>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 34
+  },
+  {
+    "method": "GET",
+    "path": "/api/encadreurs/{id}/charge",
+    "controller": "SuiviIntegrationController",
+    "handler": "charge",
+    "response": "SuiviParticipationService.Charge",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
+    "line": 36
+  },
+  {
+    "method": "GET",
     "path": "/api/transitions-statut",
     "controller": "TransitionStatutController",
     "handler": "findAll",

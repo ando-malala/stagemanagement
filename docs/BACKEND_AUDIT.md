@@ -1,4 +1,6 @@
-# Audit d’intégration — 29 octobre 2026
+# Audit d’intégration — actualisé le 31 octobre 2026
+
+Les écarts initiaux et leurs corrections sont détaillés dans [INTEGRATION_COMPLEMENTS.md](INTEGRATION_COMPLEMENTS.md). Onze endpoints de lecture ont été ajoutés et les parcours HTTP ont été exécutés sur PostgreSQL isolé, sans modification des données métier de production.
 
 ## Périmètre
 
@@ -32,14 +34,14 @@ Listes : tableaux JSON directs, sans enveloppe data, pagination, recherche ou fi
 
 | Domaine | Règles confirmées dans les services |
 |---|---|
-| Stagiaire | Nom obligatoire ≤150, prénoms obligatoires ≤250; adresse ≤250, contact ≤100, email ≤150. Statut initial ACTIF. |
+| Stagiaire | Nom obligatoire ≤150, prénoms obligatoires ≤250; adresse obligatoire ≤250, contact ≤100, email ≤150. Statut initial ACTIF. |
 | Profil académique | Niveau, filière, établissement, année obligatoires; année YYYY-YYYY. Combinaison unique pour le stagiaire. Ajout/liste via `/stagiaires/{id}/academiques`, pas de modification autorisée. |
 | Encadreur | Nom/prénoms obligatoires ≤250; département obligatoire. Fonction/localité/contact/courriel ≤150, porte ≤30. Capacité facultative strictement positive. Utilisateur facultatif, association unique à la création. |
 | Stage | Libellé obligatoire ≤150, structure existante obligatoire; unicité libellé/structure. Département via la structure. |
 | Participation | Stage, profil académique, cadre, encadreur et dates obligatoires; fin ≥ début. Unicité stage/profil/date de début à la création. Statut initial PLANIFIEE. |
 | Rapport | Participation, mois, début/fin obligatoires; fin ≥ début; doublon de période refusé à la création. Activité/difficultés/solutions facultatives. Initial BROUILLON; modification interdite si VALIDE. |
 | Observation | Commentaire obligatoire; type de l’enum, défaut OBSERVATION; visibleStagiaire par défaut true. Auteur issu de la session. |
-| Évaluation | Une par participation; participation/encadreur obligatoires. Critère actif, note obligatoire de 0 à 20. POST note crée ou remplace. Finalisation exige les critères actifs obligatoires notés et rend l’évaluation non modifiable. Pas de score global exposé. |
+| Évaluation | Une par participation; participation/encadreur obligatoires. Critère actif, note obligatoire de 0 à 5, alignée sur le CHECK PostgreSQL après échec confirmé du test réel. POST note crée ou remplace. Finalisation exige les critères actifs obligatoires notés et rend l’évaluation non modifiable. Pas de score global exposé. |
 | Soutenance | Participation/dateSoutenance obligatoires, lieu ≤150, observation facultative. LocalDateTime sans offset. |
 | Utilisateur | Identifiant unique ≤50, mot de passe initial ≥6 caractères dans le service actuel; rôle initial actif. Réinitialisation avec nouveauMotDePasse ≥12 caractères. Retrait du dernier rôle interdit. Pas de PATCH général du profil. |
 | Référentiels | DTO dédiés pour établissements/filières/niveaux/mois/départements/structures/cadres. Lecture authentifiée; création/modification ADMIN. Rôles en lecture ADMIN seulement. |
@@ -54,11 +56,11 @@ Suspension EN_COURS → SUSPENDUE et reprise SUSPENDUE → EN_COURS : dateEffet 
 
 Prolongation : nouvelleDateFin strictement après la fin actuelle, événement PROLONGATION avec anciennes/nouvelles dates. Abandon cible ABANDONNEE; annulation cible ANNULEE. Le Java ne vérifie pas toutes les transitions; le SQL contient le trigger verifier_transition_autorisee, dont l’installation réelle reste à confirmer.
 
-**Clôture incohérente avec le SQL** : StageGestionService cherche le type d’événement **CLOTUREE** et le statut **TERMINEE**. Le script initialise **CLOTURE** et **CLOTUREE**, avec A_CLOTURER → CLOTUREE et trigger de date correspondant. La clôture peut donc échouer avec une base issue du script. Aucun contrôle des pièces/rapports/évaluation/soutenance dans cette méthode. Les vues SQL des pièces manquantes ne sont pas des gardes de clôture. Aucun endpoint de préparation. Ne pas contourner par un PATCH de statut.
+**Clôture corrigée le 31 octobre** : événement **CLOTURE**, statut **CLOTUREE**, transition active contrôlée, participation verrouillée et date enregistrée dans la même transaction. Les pièces actives obligatoires de participation doivent être présentes. Le PATCH vers CLOTUREE passe par le même workflow. Deux GET exposent les actions autorisées et les pièces obligatoires avec leur présence. Aucun prérequis supplémentaire sur les rapports, évaluations ou soutenances n’a été inventé. Persistance et refus vérifiés sur PostgreSQL isolé.
 
 ## Rapports et périodes
 
-CalculPeriodesRapportService produit des semaines finissant le dimanche, tronquées aux bornes du stage, avec échéance le lundi suivant ce dimanche. Pas d’API exposant ces périodes. Le détecteur considère SOUMIS/VALIDE/A_CORRIGER comme remis, pas BROUILLON.
+CalculPeriodesRapportService produit des semaines finissant le dimanche, tronquées aux bornes du stage, avec échéance le lundi suivant ce dimanche. GET `/api/stage-participants/{id}/periodes-rapports` expose ces périodes, le rapport associé et les indicateurs soumis/validé/exigible/manquant. Comme le détecteur, SOUMIS/VALIDE/A_CORRIGER avec dateSoumission compte comme remis; BROUILLON ne compte pas. Le retard commence après le lundi. Le calcul existant des semaines est conservé, y compris pendant une suspension.
 
 Soumission/validation via PATCH `/rapports-activite/{id}/statut`, sans routes `/soumettre` ou `/valider`. SOUMIS renseigne dateSoumission, VALIDE dateValidation. SQL : BROUILLON → SOUMIS; SOUMIS → A_CORRIGER ou VALIDE; A_CORRIGER → SOUMIS. Le service vérifie l’existence du statut mais pas cette matrice. Les triggers SQL contrôlent transitions, appartenance de la période au stage et absence de chevauchement. Leur installation PostgreSQL reste non vérifiée.
 

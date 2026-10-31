@@ -55,6 +55,8 @@ public class StageGestionService {
     private final StageParticipantEvenementRepository stageParticipantEvenementRepository;
     private final TypeEvenementParticipationRepository typeEvenementParticipationRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final mg.mef.stagemanagement.repository.TransitionStatutRepository transitions;
+    private final DocumentCatalogueService documents;
 
     public StageGestionService(
             StageRepository stageRepository,
@@ -67,7 +69,9 @@ public class StageGestionService {
             StageParticipantStatutHistoriqueRepository stageParticipantStatutHistoriqueRepository,
             StageParticipantEvenementRepository stageParticipantEvenementRepository,
             TypeEvenementParticipationRepository typeEvenementParticipationRepository,
-            UtilisateurRepository utilisateurRepository
+            UtilisateurRepository utilisateurRepository,
+            mg.mef.stagemanagement.repository.TransitionStatutRepository transitions,
+            DocumentCatalogueService documents
     ) {
         this.stageRepository = stageRepository;
         this.stageParticipantRepository = stageParticipantRepository;
@@ -80,6 +84,8 @@ public class StageGestionService {
         this.stageParticipantEvenementRepository = stageParticipantEvenementRepository;
         this.typeEvenementParticipationRepository = typeEvenementParticipationRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.transitions = transitions;
+        this.documents = documents;
     }
 
     // =========================
@@ -534,7 +540,13 @@ public class StageGestionService {
             );
         }
 
-        StageParticipant participant = stageParticipantRepository.findById(participationId)
+        if ("CLOTUREE".equalsIgnoreCase(request.getStatutCode().trim())) {
+            EvenementParticipationRequest evenement = new EvenementParticipationRequest();
+            evenement.setMotif(request.getMotif());
+            return cloturerParticipation(participationId, evenement, responsableId);
+        }
+
+        StageParticipant participant = stageParticipantRepository.findForUpdate(participationId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -573,6 +585,7 @@ public class StageGestionService {
             return toParticipantResponse(participant);
         }
 
+        verifierTransition(ancienStatut, nouveauStatut);
         participant.setStatut(nouveauStatut);
         participant.setDateModification(LocalDateTime.now());
 
@@ -728,43 +741,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
-        StageParticipant participant = stageParticipantRepository.findById(participationId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Participation introuvable"
-                        )
-                );
-
-        if (participant.getDateCloture() != null) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Cette participation est déjà clôturée"
-            );
-        }
-
-        StageParticipantResponse response = appliquerEvenementAvecStatut(
-                participationId,
-                "CLOTUREE",
-                "TERMINEE",
-                request,
-                responsableId
-        );
-
-        participant = stageParticipantRepository.findById(participationId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Participation introuvable"
-                        )
-                );
-
-        participant.setDateCloture(LocalDateTime.now());
-        participant.setDateModification(LocalDateTime.now());
-
-        StageParticipant enregistre = stageParticipantRepository.save(participant);
-
-        return toParticipantResponse(enregistre);
+        return appliquerEvenementAvecStatut(participationId, "CLOTURE", "CLOTUREE", request, responsableId);
     }
 
     private StageParticipantResponse appliquerEvenementAvecStatut(
@@ -774,7 +751,7 @@ public class StageGestionService {
             EvenementParticipationRequest request,
             Integer responsableId
     ) {
-        StageParticipant participant = stageParticipantRepository.findById(participationId)
+        StageParticipant participant = stageParticipantRepository.findForUpdate(participationId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -812,6 +789,18 @@ public class StageGestionService {
                 );
 
         Statut ancienStatut = participant.getStatut();
+        verifierTransition(ancienStatut, nouveauStatut);
+        if (!Boolean.TRUE.equals(typeEvenement.getActif())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Type evenement inactif");
+        }
+        if ("CLOTURE".equals(typeEvenementCode)) {
+            if (participant.getDateCloture() != null) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Participation deja cloturee");
+            }
+            documents.verifierCloture(participationId);
+            participant.setDateCloture(LocalDateTime.now());
+        }
+
 
         
         LocalDate dateEffet = null;
@@ -917,4 +906,11 @@ public class StageGestionService {
 
         return toParticipantResponse(participantEnregistre);
     }
+    private void verifierTransition(Statut source, Statut cible) {
+        if (source == null || !Boolean.TRUE.equals(cible.getActif())
+                || !transitions.existsByStatutSource_IdAndStatutCible_IdAndActifTrue(source.getId(), cible.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Transition de statut non autorisee");
+        }
+    }
+
 }

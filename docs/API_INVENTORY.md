@@ -2,7 +2,7 @@
 
 Généré par `python scripts/audit_backend.py`. Complément métier : [audit](BACKEND_AUDIT.md).
 
-50 contrôleurs, 276 opérations HTTP, 103 opérations admises par SecurityConfig (certaines techniques).
+51 contrôleurs, 287 opérations HTTP, 114 opérations admises par SecurityConfig (certaines techniques).
 
 Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessible même à ADMIN. Les signatures décrivent les paramètres de chemin, de requête, multipart et le corps exact. Les paramètres AuthenticationPrincipal sont injectés par le serveur. Les réponses List sont des tableaux JSON, sans enveloppe data ni pagination Spring. Les statuts indiqués sont ceux du chemin de succès; voir les erreurs des services ci-dessous, ainsi que 401/403 pour les accès protégés. Les CRUD bruts peuvent aussi renvoyer 404 via Optional. Cet inventaire statique ne prouve ni la disponibilité du serveur ni les données PostgreSQL.
 
@@ -718,6 +718,34 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 - `update` : `@PathVariable Integer id, @RequestBody StructureAccueil structureAccueil`.
 - `delete` : `@PathVariable Integer id`.
 
+## [SuiviIntegrationController](../backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java)
+
+| Méthode | URL | Autorisation | Succès | Réponse |
+|---|---|---|---|---|
+| GET | `/api/referentiels/suivi/types-documents` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<DocumentCatalogueService.TypeDocument>` |
+| GET | `/api/referentiels/suivi/types-evenements` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
+| GET | `/api/referentiels/suivi/types-alertes` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
+| GET | `/api/referentiels/suivi/statuts/{type}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
+| GET | `/api/referentiels/suivi/transitions/{type}/{source}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<ReferentielWorkflowService.Transition>` |
+| GET | `/api/stage-participants/{id}/documents-obligatoires` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<DocumentCatalogueService.DocumentObligatoire>` |
+| GET | `/api/stage-participants/{id}/historique-statuts` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<SuiviParticipationService.Historique>` |
+| GET | `/api/stage-participants/{id}/evenements` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<SuiviParticipationService.Evenement>` |
+| GET | `/api/stage-participants/{id}/periodes-rapports` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<SuiviParticipationService.Periode>` |
+| GET | `/api/stage-participants/{id}/actions` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<SuiviParticipationService.Action>` |
+| GET | `/api/encadreurs/{id}/charge` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `SuiviParticipationService.Charge` |
+
+- `typesDocuments` : `aucun paramètre`.
+- `typesEvenements` : `aucun paramètre`.
+- `typesAlertes` : `aucun paramètre`.
+- `statuts` : `@PathVariable String type`.
+- `transitions` : `@PathVariable String type, @PathVariable String source`.
+- `documentsObligatoires` : `@PathVariable Integer id`.
+- `historique` : `@PathVariable Integer id`.
+- `evenements` : `@PathVariable Integer id`.
+- `periodes` : `@PathVariable Integer id`.
+- `actions` : `@PathVariable Integer id`.
+- `charge` : `@PathVariable Integer id`.
+
 ## [TransitionStatutController](../backend/src/main/java/mg/mef/stagemanagement/controller/TransitionStatutController.java)
 
 | Méthode | URL | Autorisation | Succès | Réponse |
@@ -1089,6 +1117,11 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `FORBIDDEN` : Ce compte n'est pas actif
 - `UNAUTHORIZED` : Session invalide ou expirée
 
+### [DocumentCatalogueService](../backend/src/main/java/mg/mef/stagemanagement/service/DocumentCatalogueService.java)
+
+- `NOT_FOUND` : Participation introuvable
+- `CONFLICT` : Documents obligatoires manquants : 
+
 ### [EncadreurGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/EncadreurGestionService.java)
 
 - `NOT_FOUND` : Encadreur introuvable
@@ -1182,6 +1215,11 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : Statut de département invalide
 - `BAD_REQUEST` : Le texte est trop long
 
+### [ReferentielWorkflowService](../backend/src/main/java/mg/mef/stagemanagement/service/ReferentielWorkflowService.java)
+
+- `NOT_FOUND` : Type de statut introuvable ou inactif
+- `NOT_FOUND` : Statut source introuvable ou inactif
+
 ### [SoutenanceGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/SoutenanceGestionService.java)
 
 - `NOT_FOUND` : Soutenance introuvable
@@ -1211,15 +1249,17 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : La nouvelle date de fin est obligatoire
 - `BAD_REQUEST` : La nouvelle date de fin doit être après l'ancienne date de fin
 - `INTERNAL_SERVER_ERROR` : Type d'événement PROLONGATION introuvable
-- `CONFLICT` : Cette participation est déjà clôturée
 - `INTERNAL_SERVER_ERROR` : Type d'événement introuvable : 
 - `INTERNAL_SERVER_ERROR` : Statut de participation introuvable : 
+- `CONFLICT` : Type evenement inactif
+- `CONFLICT` : Participation deja cloturee
 - `BAD_REQUEST` : La date d'effet est obligatoire pour une suspension ou une reprise
 - `BAD_REQUEST` : La date d'effet doit appartenir à la période du stage
 - `CONFLICT` : Seule une participation en cours peut être suspendue
 - `CONFLICT` : Seule une participation suspendue peut reprendre
 - `BAD_REQUEST` : La date d'effet ne peut pas être dans le futur
 - `CONFLICT` : La date d'effet doit être postérieure à celle du dernier événement de suspension ou de reprise
+- `CONFLICT` : Transition de statut non autorisee
 
 ### [StagiaireGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/StagiaireGestionService.java)
 
@@ -1234,6 +1274,13 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : L'année d'études est obligatoire
 - `BAD_REQUEST` : L'année d'études doit être au format 2025-2026
 - `BAD_REQUEST` : Le texte est trop long
+
+### [SuiviParticipationService](../backend/src/main/java/mg/mef/stagemanagement/service/SuiviParticipationService.java)
+
+- `NOT_FOUND` : Participation introuvable
+- `NOT_FOUND` : Encadreur introuvable
+- `SERVICE_UNAVAILABLE` : Charge indisponible
+- `SERVICE_UNAVAILABLE` : Capacite non configuree
 
 ### [UtilisateurGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/UtilisateurGestionService.java)
 

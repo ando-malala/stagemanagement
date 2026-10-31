@@ -2,6 +2,8 @@
 
 Ce guide distingue les contrôles automatisés disponibles et les parcours restant à valider. Aucun de ces scripts ne lance Chrome.
 
+**Actualisation du 31 octobre :** le lanceur `scripts/test-integration.ps1` exécute désormais les parcours authentifiés sur une base PostgreSQL temporaire, créée à partir du schéma du dépôt puis supprimée. Voir [le compte rendu et les endpoints intégrés](INTEGRATION_COMPLEMENTS.md). Les sections de lecture ci-dessous restent utilisables; la liste finale des parcours sert aussi de grille de recette visuelle, non exécutée ici.
+
 ## Vérifications locales
 
 Depuis `frontend/` :
