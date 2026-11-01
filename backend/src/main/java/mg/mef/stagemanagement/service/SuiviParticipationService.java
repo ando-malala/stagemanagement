@@ -72,7 +72,9 @@ public class SuiviParticipationService {
         if (!encadreurs.existsById(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Encadreur introuvable");
         var c = encadreurs.findCharge(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Charge indisponible"));
         if (c.getCapaciteMax() == null) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Capacite non configuree");
-        return new Charge(c.getEncadreurId(), c.getCapaciteMax(), c.getParticipationsActives(), Boolean.TRUE.equals(c.getSurcharge()));
+        long count = participations.findByEncadreur_Id(id).stream().filter(access::readParticipation)
+                .filter(p -> Set.of("EN_COURS", "A_CLOTURER").contains(p.getStatut().getCode())).count();
+        return new Charge(c.getEncadreurId(), c.getCapaciteMax(), count, count > c.getCapaciteMax());
     }
     public List<Action> actions(Integer id) {
         access.participation(id, false);

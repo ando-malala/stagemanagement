@@ -2,7 +2,7 @@
 
 Généré par `python scripts/audit_backend.py`. Complément métier : [audit](BACKEND_AUDIT.md).
 
-52 contrôleurs, 291 opérations HTTP, 118 opérations admises par SecurityConfig (certaines techniques).
+53 contrôleurs, 298 opérations HTTP, 125 opérations admises par SecurityConfig (certaines techniques).
 
 Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessible même à ADMIN. Les signatures décrivent les paramètres de chemin, de requête, multipart et le corps exact. Les paramètres AuthenticationPrincipal sont injectés par le serveur. Les réponses List sont des tableaux JSON, sans enveloppe data ni pagination Spring. Les statuts indiqués sont ceux du chemin de succès; voir les erreurs des services ci-dessous, ainsi que 401/403 pour les accès protégés. Les CRUD bruts peuvent aussi renvoyer 404 via Optional. Cet inventaire statique ne prouve ni la disponibilité du serveur ni les données PostgreSQL.
 
@@ -760,6 +760,26 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 - `actions` : `@PathVariable Integer id`.
 - `charge` : `@PathVariable Integer id`.
 
+## [SyntheseController](../backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java)
+
+| Méthode | URL | Autorisation | Succès | Réponse |
+|---|---|---|---|---|
+| GET | `/api/stagiaires/{id}/dossier` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `DossierSyntheseService.Dossier` |
+| GET | `/api/dashboard/pilotage` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `PilotageService.Pilotage` |
+| GET | `/api/dashboard/priorites` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<PilotageService.Priorite>` |
+| GET | `/api/stage-participants/{id}/bilan.pdf` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/exports/participations.csv` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/exports/statistiques.csv` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/exports/alertes.csv` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
+
+- `dossier` : `@PathVariable Integer id`.
+- `pilotage` : `aucun paramètre`.
+- `priorites` : `aucun paramètre`.
+- `bilan` : `@PathVariable Integer id`.
+- `participations` : `aucun paramètre`.
+- `statistiques` : `aucun paramètre`.
+- `alertes` : `aucun paramètre`.
+
 ## [TransitionStatutController](../backend/src/main/java/mg/mef/stagemanagement/controller/TransitionStatutController.java)
 
 | Méthode | URL | Autorisation | Succès | Réponse |
@@ -1116,6 +1136,38 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 `Integer id`, `String code`, `String libelle`, `boolean present`
 
+### [DocumentContentValidator.Validated](../backend/src/main/java/mg/mef/stagemanagement/service/DocumentContentValidator.java)
+
+`String filename`, `String extension`, `String mime`, `byte[] bytes`
+
+### [DossierSyntheseService.Rapport](../backend/src/main/java/mg/mef/stagemanagement/service/DossierSyntheseService.java)
+
+`RapportActiviteResponse rapport`, `List<RapportObservationResponse> observations`
+
+### [DossierSyntheseService.Participation](../backend/src/main/java/mg/mef/stagemanagement/service/DossierSyntheseService.java)
+
+`StageParticipantResponse participation`, `List<Rapport> rapports`, `List<SuiviParticipationService.Periode> periodes`, `List<FichierResponse> fichiers`, `List<DocumentCatalogueService.DocumentObligatoire> documentsObligatoires`, `List<SuiviParticipationService.Historique> historique`, `List<SuiviParticipationService.Evenement> evenements`, `EvaluationFinaleResponse evaluation`, `List<EvaluationCritereResponse> notes`, `List<SoutenanceResponse> soutenances`
+
+### [DossierSyntheseService.Dossier](../backend/src/main/java/mg/mef/stagemanagement/service/DossierSyntheseService.java)
+
+`StagiaireResponse stagiaire`, `List<StagiaireAcademiqueResponse> academiques`, `List<FichierResponse> fichiers`, `List<Participation> participations`
+
+### [PilotageService.Priorite](../backend/src/main/java/mg/mef/stagemanagement/service/PilotageService.java)
+
+`Integer participationId`, `Integer stagiaireId`, `String stagiaire`, `long nombreAlertes`, `long score`, `String priorite`, `String situation`, `String actionRecommandee`
+
+### [PilotageService.Dossier](../backend/src/main/java/mg/mef/stagemanagement/service/PilotageService.java)
+
+`Integer participationId`, `String stagiaire`, `String stage`, `String statut`, `LocalDate dateFin`, `long joursRestants`, `long documentsManquants`, `long rapportsAttendus`, `long rapportsSoumis`, `long rapportsValides`, `long rapportsManquants`
+
+### [PilotageService.Charge](../backend/src/main/java/mg/mef/stagemanagement/service/PilotageService.java)
+
+`Integer encadreurId`, `String encadreur`, `Integer capaciteMax`, `long participationsActives`, `boolean surcharge`
+
+### [PilotageService.Pilotage](../backend/src/main/java/mg/mef/stagemanagement/service/PilotageService.java)
+
+`LocalDate dateCalcul`, `List<Dossier> dossiers`, `List<Priorite> priorites`, `List<Charge> charges`, `List<SoutenanceResponse> soutenancesProchaines`
+
 ### [PortailStagiaireService.Compte](../backend/src/main/java/mg/mef/stagemanagement/service/PortailStagiaireService.java)
 
 `Integer utilisateurId`, `String identifiant`
@@ -1184,6 +1236,13 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `NOT_FOUND` : Participation introuvable
 - `CONFLICT` : Documents obligatoires manquants : 
 
+### [DocumentContentValidator](../backend/src/main/java/mg/mef/stagemanagement/service/DocumentContentValidator.java)
+
+- `BAD_REQUEST` : Fichier obligatoire
+- `PAYLOAD_TOO_LARGE` : Maximum 10 Mio
+- `UNSUPPORTED_MEDIA_TYPE` : Contenu documentaire invalide
+- `UNSUPPORTED_MEDIA_TYPE` : Formats autorises : PDF sans contenu actif detecte, JPEG et PNG ; extension, contenu et type MIME doivent correspondre
+
 ### [DossierAccessService](../backend/src/main/java/mg/mef/stagemanagement/service/DossierAccessService.java)
 
 - `UNAUTHORIZED` : Session requise
@@ -1231,7 +1290,8 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : Ce type de pièce jointe n'est pas autorisé pour une participation
 - `NOT_FOUND` : Fichier introuvable
 - `NOT_FOUND` : Fichier physique introuvable
-- `BAD_REQUEST` : Le fichier est obligatoire
+- `FORBIDDEN` : Fichier hors du stockage autorise
+- `NOT_FOUND` : Fichier indisponible
 - `INTERNAL_SERVER_ERROR` : Erreur lors de l'enregistrement du fichier
 - `BAD_REQUEST` : Le type de pièce jointe est obligatoire
 - `NOT_FOUND` : Type de pièce jointe introuvable

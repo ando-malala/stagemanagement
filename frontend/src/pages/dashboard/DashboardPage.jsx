@@ -10,6 +10,7 @@ import AppLink from '../../components/common/AppLink.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
+import PilotagePanel from './PilotagePanel.jsx';
 
 const fetchSummary = async (options) => requireDashboard(await getDashboardResume(options));
 const fetchAlerts = async (options) => requireList(await listAlertesNonLues(options));
@@ -29,6 +30,7 @@ export default function DashboardPage({ navigate }) {
         </article>)}
       </div>}
     </Card>
+    <PilotagePanel navigate={navigate} />
   </div>;
 }
 

@@ -79,4 +79,18 @@ class DossierAccessTests {
         var report = new RapportActivite(); report.setStageParticipant(participation(2, 21, 31)); alert.setRapport(report);
         assertFalse(access.readAlert(alert));
     }
+    @Test void mentorWorkloadAlertDoesNotDiscloseCountsFromOtherDepartments() {
+        login(10, "RESPONSABLE_STAGE");
+        when(departments.existsByUtilisateur_IdAndDepartement_Id(10, 1)).thenReturn(true);
+        var department = new Departement(); department.setId(1);
+        var mentor = new Encadreur(); mentor.setId(7); mentor.setDepartement(department);
+        var own = participation(1, 20, 30); var other = participation(2, 20, 31);
+        when(own.getStatut().getCode()).thenReturn("EN_COURS"); when(other.getStatut().getCode()).thenReturn("EN_COURS");
+        when(participations.findByEncadreur_Id(7)).thenReturn(List.of(own, other));
+        var type = new TypeAlerte(); type.setCode("ENCADREUR_SURCHARGE");
+        var alert = new Alerte(); alert.setTypeAlerte(type); alert.setEncadreur(mentor);
+        assertFalse(access.readAlert(alert));
+        login(20, "ENCADREUR"); var user = new Utilisateur(); user.setId(20); mentor.setUtilisateur(user);
+        assertTrue(access.readAlert(alert));
+    }
 }

@@ -140,16 +140,27 @@ public class DossierAccessService {
         boolean linked = false;
         if (a.getStageParticipant() != null) { linked = true; if (!readParticipation(a.getStageParticipant())) return false; }
         if (a.getRapport() != null) { linked = true; if (!readReport(a.getRapport())) return false; }
-        if (a.getEncadreur() != null) { linked = true; if (!readMentor(a.getEncadreur())) return false; }
+        if (a.getEncadreur() != null) {
+            linked = true;
+            if (!readMentor(a.getEncadreur())) return false;
+            // A global workload message contains counts across all this mentor's departments.
+            if (a.getTypeAlerte() != null && "ENCADREUR_SURCHARGE".equals(a.getTypeAlerte().getCode())
+                    && participations.findByEncadreur_Id(a.getEncadreur().getId()).stream()
+                    .filter(p -> java.util.Set.of("EN_COURS", "A_CLOTURER").contains(p.getStatut().getCode()))
+                    .anyMatch(p -> !readParticipation(p))) return false;
+        }
         if (a.getSoutenance() != null) { linked = true; if (!readDefense(a.getSoutenance())) return false; }
         return linked;
     }
     public void file(Integer id) {
-        if (role("ADMIN")) return;
+        require(readFile(id));
+    }
+    public boolean readFile(Integer id) {
+        if (role("ADMIN")) return true;
         var ps = participationFiles.findByFichier_Id(id);
         var ts = traineeFiles.findByFichier_Id(id);
-        require(!ps.isEmpty() || !ts.isEmpty());
         // All associations must be readable; a second link must never expose another dossier.
-        require(ps.stream().allMatch(f -> readParticipation(f.getStageParticipant())) && ts.stream().allMatch(f -> readTrainee(f.getStagiaire())));
+        return (!ps.isEmpty() || !ts.isEmpty()) && ps.stream().allMatch(f -> readParticipation(f.getStageParticipant()))
+                && ts.stream().allMatch(f -> readTrainee(f.getStagiaire()));
     }
 }

@@ -1,3 +1,7 @@
+# Mise à jour du 1 novembre 2026
+
+Le contenu ci-dessous conserve l'audit historique. L'état courant, les tests et les limites de livraison figurent dans [REMEDIATION_STATUS.md](REMEDIATION_STATUS.md). Les anciens constats sur les permissions, rapports de clôture, formats documentaires et six compteurs seuls ne décrivent plus intégralement la version corrigée.
+
 # Audit d’intégration — actualisé le 31 octobre 2026
 
 Les écarts initiaux et leurs corrections sont détaillés dans [INTEGRATION_COMPLEMENTS.md](INTEGRATION_COMPLEMENTS.md). Onze endpoints de lecture ont été ajoutés et les parcours HTTP ont été exécutés sur PostgreSQL isolé, sans modification des données métier de production.

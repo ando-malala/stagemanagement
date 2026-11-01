@@ -53,6 +53,11 @@ try {
         & mvn.cmd -o test
         $testExit = $LASTEXITCODE
     } finally { Pop-Location }
+    if ($testExit -eq 0) {
+        & $pgExecutable -X -w -h $sourceUrl.Host -p $sourceUrl.Port -U $settings['username'] -d $testDatabase -v ON_ERROR_STOP=1 -f (Join-Path $projectRoot 'backend/migrations/checks/preflight.sql') | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Read-only migration preflight failed on the isolated database.' }
+        Write-Host 'Migration preflight: SQL verified on the isolated test database.'
+    }
 } finally {
     if ($created) { Write-Host "Isolated test database retained: $testDatabase" }
     foreach ($name in $savedEnvironment.Keys) { [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], 'Process') }

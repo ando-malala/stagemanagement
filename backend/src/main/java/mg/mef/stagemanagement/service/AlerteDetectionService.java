@@ -67,6 +67,7 @@ public class AlerteDetectionService {
         private final StageParticipantFichierRepository stageParticipantFichierRepository;
         private final EncadreurRepository encadreurRepository;
         private final SoutenanceRepository soutenanceRepository;
+        private final ParticipationRulesService participationRules;
 
         public AlerteDetectionService(
                 AlerteRepository alerteRepository,
@@ -79,7 +80,8 @@ public class AlerteDetectionService {
                 TypePieceJointeRepository typePieceJointeRepository,
                 StageParticipantFichierRepository stageParticipantFichierRepository,
                 EncadreurRepository encadreurRepository,
-                SoutenanceRepository soutenanceRepository
+                SoutenanceRepository soutenanceRepository,
+                ParticipationRulesService participationRules
         ) {
                 this.alerteRepository = alerteRepository;
                 this.participationRepository = participationRepository;
@@ -92,6 +94,7 @@ public class AlerteDetectionService {
                 this.stageParticipantFichierRepository = stageParticipantFichierRepository;
                 this.encadreurRepository = encadreurRepository;
                 this.soutenanceRepository = soutenanceRepository;
+                this.participationRules = participationRules;
         }
 
         public void detecterToutesLesAlertes() {
@@ -104,7 +107,7 @@ public class AlerteDetectionService {
         @Transactional
         public int detecterStagesDepasses() {
 
-                LocalDate aujourdHui = LocalDate.now();
+                LocalDate aujourdHui = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
 
                 TypeAlerte type = typeAlerteRepository
                         .findByCodeIgnoreCaseAndActifTrue("STAGE_DEPASSE")
@@ -618,7 +621,8 @@ public class AlerteDetectionService {
                         String cle = "DOSSIER_INCOMPLET_PARTICIPATION_"
                                 + participation.getId();
 
-                        if (documentsManquants.isEmpty()) {
+                        var rapportsManquants = participationRules.missingClosureReports(participation);
+                        if (documentsManquants.isEmpty() && rapportsManquants.isEmpty()) {
                         continue;
                         }
 
@@ -650,6 +654,7 @@ public class AlerteDetectionService {
                                 + participation.getId()
                                 + ". Documents obligatoires manquants : "
                                 + String.join(", ", documentsManquants)
+                                + ". Rapports obligatoires non valides : " + rapportsManquants.size()
                         );
 
                         alerteRepository.save(alerte);

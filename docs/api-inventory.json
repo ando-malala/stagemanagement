@@ -3775,6 +3775,134 @@
   },
   {
     "method": "GET",
+    "path": "/api/stagiaires/{id}/dossier",
+    "controller": "SyntheseController",
+    "handler": "dossier",
+    "response": "DossierSyntheseService.Dossier",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR",
+      "STAGIAIRE"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 18
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/pilotage",
+    "controller": "SyntheseController",
+    "handler": "pilotage",
+    "response": "PilotageService.Pilotage",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 20
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/priorites",
+    "controller": "SyntheseController",
+    "handler": "priorites",
+    "response": "List<PilotageService.Priorite>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 22
+  },
+  {
+    "method": "GET",
+    "path": "/api/stage-participants/{id}/bilan.pdf",
+    "controller": "SyntheseController",
+    "handler": "bilan",
+    "response": "ResponseEntity<byte[]>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR",
+      "STAGIAIRE"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 24
+  },
+  {
+    "method": "GET",
+    "path": "/api/exports/participations.csv",
+    "controller": "SyntheseController",
+    "handler": "participations",
+    "response": "ResponseEntity<byte[]>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 28
+  },
+  {
+    "method": "GET",
+    "path": "/api/exports/statistiques.csv",
+    "controller": "SyntheseController",
+    "handler": "statistiques",
+    "response": "ResponseEntity<byte[]>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 30
+  },
+  {
+    "method": "GET",
+    "path": "/api/exports/alertes.csv",
+    "controller": "SyntheseController",
+    "handler": "alertes",
+    "response": "ResponseEntity<byte[]>",
+    "parameters": "",
+    "body": null,
+    "success": "200",
+    "access": "hasAnyRole",
+    "roles": [
+      "ADMIN",
+      "RESPONSABLE_STAGE",
+      "ENCADREUR"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
+    "line": 32
+  },
+  {
+    "method": "GET",
     "path": "/api/transitions-statut",
     "controller": "TransitionStatutController",
     "handler": "findAll",

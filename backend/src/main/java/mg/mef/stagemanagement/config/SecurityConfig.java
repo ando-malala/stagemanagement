@@ -47,6 +47,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/dossier", "/api/stage-participants/{id}/bilan.pdf")
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .requestMatchers(HttpMethod.GET, "/api/dashboard/pilotage", "/api/dashboard/priorites",
+                                "/api/exports/participations.csv", "/api/exports/statistiques.csv", "/api/exports/alertes.csv")
+                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+
                         .requestMatchers(HttpMethod.GET, "/api/portail/me").hasRole("STAGIAIRE")
                         .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/compte").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/stagiaires/{id}/compte").hasRole("ADMIN")

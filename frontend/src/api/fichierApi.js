@@ -29,9 +29,13 @@ export function getFichierDownloadUrl(id) {
 }
 
 export async function downloadFichier(id, options = {}) {
-  const { blob, headers } = await apiRequest(getFichierDownloadUrl(id), { ...options, responseType: 'blob' });
+  return downloadResource(getFichierDownloadUrl(id), id, options);
+}
+
+export async function downloadResource(path, fallback, options = {}) {
+  const { blob, headers } = await apiRequest(path, { ...options, responseType: 'blob' });
   const disposition = headers.get('content-disposition') ?? '';
-  const filename = downloadFilename(disposition, id);
+  const filename = downloadFilename(disposition, fallback);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   try {

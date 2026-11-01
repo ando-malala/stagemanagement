@@ -1,4 +1,5 @@
 import CompteStagiaire from './CompteStagiaire.jsx';
+import DossierSynthese from './DossierSynthese.jsx';
 import StagiaireParticipations from './StagiaireParticipations.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { can } from '../../utils/permissions.js';
@@ -19,6 +20,7 @@ export default function StagiaireDetailPage({ params, navigate }) {
       <AcademiquesPanel stagiaireId={params.id} />
       {can(utilisateur, 'gererUtilisateurs') && <CompteStagiaire id={params.id} />}
       <StagiaireParticipations id={params.id} navigate={navigate} />
+      <DossierSynthese id={params.id} navigate={navigate} />
       <DocumentsPanel key={`stagiaire/${data.id}`} scope="stagiaire" ownerId={data.id} ownerLabel={`${data.nom} ${data.prenoms}`} />
     </div>}
   </ResourceDetail>;

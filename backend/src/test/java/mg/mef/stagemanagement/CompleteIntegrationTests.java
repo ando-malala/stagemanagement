@@ -38,6 +38,7 @@ class CompleteIntegrationTests {
     @Value("${local.server.port}") int port;
     @Autowired JdbcTemplate jdbc;
     @Autowired PasswordEncoder encoder;
+    @Autowired mg.mef.stagemanagement.service.AlerteDetectionService detection;
     @MockitoBean AlerteOrchestrationService schedulerOnly;
     final JsonMapper json = JsonMapper.builder().build();
     final HttpClient http = HttpClient.newHttpClient();
@@ -102,7 +103,7 @@ class CompleteIntegrationTests {
             request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", criterion.get("id").asInt(), "note", 5), 201);
         assertTrue(request("POST", "/evaluations/" + evaluation + "/finaliser", Map.of(), 200).get("estFinalisee").asBoolean());
         request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", get("/evaluations/criteres").get(0).get("id").asInt(), "note", 4), 409);
-        create("/soutenances", Map.of("stageParticipantId", participation, "dateSoutenance", today.atTime(14, 0).toString(), "lieu", "Integration room"));
+        int defense = create("/soutenances", Map.of("stageParticipantId", participation, "dateSoutenance", today.atTime(14, 0).toString(), "lieu", "Integration room"));
         int alert = create("/alertes", Map.of("typeAlerteCode", "DOSSIER_INCOMPLET", "stageParticipantId", participation, "message", "Integration alert", "priorite", "AVERTISSEMENT"));
         request("PATCH", "/alertes/" + alert + "/lire", Map.of(), 200);
         request("PATCH", base + "/statut", Map.of("statutCode", "A_CLOTURER"), 200);
@@ -127,6 +128,19 @@ class CompleteIntegrationTests {
         JsonNode closed = request("POST", base + "/cloturer", Map.of("motif", "Integration closure"), 200);
         request("PATCH", base, participationBody, 409);
         request("POST", base + "/prolonger", Map.of("nouvelleDateFin", today.plusDays(30).toString()), 409);
+        request("PATCH", "/rapports-activite/" + report, Map.of("stageParticipantId", participation, "moisStageId", month,
+                "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString(), "activite", "forbidden"), 409);
+        request("POST", "/rapports-activite/" + report + "/observations", Map.of("commentaire", "forbidden"), 409);
+        request("PATCH", "/soutenances/" + defense, Map.of("stageParticipantId", participation, "dateSoutenance", today.plusDays(1) + "T14:00:00"), 409);
+        request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", get("/evaluations/criteres").get(0).get("id").asInt(), "note", 3), 409);
+        upload(base + "/fichiers", "CONVENTION_STAGE", 409);
+        assertEquals(1, get("/stagiaires/" + trainee + "/dossier").get("participations").size());
+        var finalPdf = http.send(builder(base + "/bilan.pdf").GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+        assertEquals(200, finalPdf.statusCode());
+        try (var document = org.apache.pdfbox.Loader.loadPDF(finalPdf.body())) {
+            String content = new org.apache.pdfbox.text.PDFTextStripper().getText(document);
+            assertTrue(content.contains("Bilan final")); assertTrue(content.contains("CLOTUREE")); assertTrue(content.contains("/5"));
+        }
         assertEquals("CLOTUREE", closed.get("statut").asString()); assertFalse(closed.get("dateCloture").isNull());
         assertEquals("CLOTUREE", get(base).get("statut").asString());
         assertEquals("CLOTURE", get(base + "/evenements").get(3).get("code").asString());
@@ -231,6 +245,22 @@ class CompleteIntegrationTests {
             assertEquals(1, get("/stagiaires/" + t[i] + "/participations").size());
             assertEquals(1, get("/rapports-activite/" + r[i] + "/observations").size());
             assertEquals("public", get("/rapports-activite/" + r[i] + "/observations").get(0).get("commentaire").asString());
+            JsonNode dossier = get("/stagiaires/" + t[i] + "/dossier");
+            assertEquals(1, dossier.get("participations").size());
+            assertFalse(dossier.toString().contains("private"));
+            assertTrue(dossier.get("participations").get(0).get("evaluation").isNull());
+            request("GET", "/stagiaires/" + t[1-i] + "/dossier", null, 403);
+            request("GET", "/dashboard/pilotage", null, 403);
+            request("GET", "/dashboard/priorites", null, 403);
+            request("GET", "/exports/participations.csv", null, 403);
+            var pdf = http.send(builder("/stage-participants/" + p[i] + "/bilan.pdf").GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+            assertEquals(200, pdf.statusCode()); assertEquals("application/pdf", pdf.headers().firstValue("content-type").orElseThrow());
+            assertTrue(pdf.headers().firstValue("cache-control").orElseThrow().contains("no-store"));
+            try (var document = org.apache.pdfbox.Loader.loadPDF(pdf.body())) {
+                String content = new org.apache.pdfbox.text.PDFTextStripper().getText(document);
+                assertTrue(content.contains(prefix + " T" + i)); assertFalse(content.contains("private"));
+            }
+            assertEquals(403, http.send(builder("/stage-participants/" + p[1-i] + "/bilan.pdf").GET().build(), HttpResponse.BodyHandlers.discarding()).statusCode());
             request("GET", "/stagiaires/" + t[1-i], null, 403);
             request("GET", "/stage-participants/" + p[1-i] + "/periodes-rapports", null, 403);
             request("GET", "/rapports-activite/" + r[1-i] + "/observations", null, 403);
@@ -259,6 +289,22 @@ class CompleteIntegrationTests {
             for (String list : List.of("/stagiaires", "/stage-participants", "/stages", "/encadreurs", "/rapports-activite", "/evaluations", "/soutenances", "/alertes")) assertEquals(list.equals("/rapports-activite") ? 2 : 1, get(list).size(), role + list);
             assertEquals(p[i], get("/stage-participants").get(0).get("id").asInt());
             assertEquals(1, get("/dashboard/resume").get("totalParticipations").asInt());
+            JsonNode pilotage = get("/dashboard/pilotage");
+            assertEquals(1, pilotage.get("dossiers").size());
+            assertEquals(p[i], pilotage.get("dossiers").get(0).get("participationId").asInt());
+            assertEquals(1, pilotage.get("charges").size());
+            JsonNode priorities = get("/dashboard/priorites");
+            assertEquals(1, priorities.size()); assertEquals(p[i], priorities.get(0).get("participationId").asInt());
+            assertEquals(jdbc.queryForObject("select score_priorite from vue_actions_prioritaires where stage_participant_id=?", Long.class, p[i]), priorities.get(0).get("score").asLong());
+            assertEquals("HAUTE", priorities.get(0).get("priorite").asString());
+            for (String type : List.of("participations", "statistiques", "alertes")) {
+                var export = http.send(builder("/exports/" + type + ".csv").GET().build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                assertEquals(200, export.statusCode()); assertTrue(export.body().startsWith("\ufeff"));
+                assertTrue(export.headers().firstValue("content-disposition").orElseThrow().contains(type + ".csv"));
+                assertFalse(export.body().contains(prefix + " T" + (1-i)));
+            }
+            assertEquals(1, get("/stagiaires/" + t[i] + "/dossier").get("participations").size());
+            request("GET", "/stagiaires/" + t[1-i] + "/dossier", null, 403);
             int other = 1 - i;
             for (int index : new int[] {i, other}) {
                 int expected = index == i ? 200 : 403;
@@ -274,6 +320,15 @@ class CompleteIntegrationTests {
             request("POST", "/evaluations/" + v[other] + "/finaliser", Map.of(), 403);
             request("POST", "/rapports-activite", Map.of("stageParticipantId", p[other], "moisStageId", month, "debutSemaine", "2026-10-05", "finSemaine", "2026-10-11"), 403);
         }
+        token = login(prefix + "-manager0");
+        request("PATCH", "/alertes/" + a[0] + "/lire", Map.of(), 200);
+        assertEquals(0, get("/dashboard/priorites").size());
+        token = login(prefix + "-manager1");
+        assertEquals(1, get("/dashboard/priorites").size());
+        jdbc.update("insert into stage_participant_fichiers(stage_participant_id,fichier_id,type_piece_jointe_id) select ?,fichier_id,type_piece_jointe_id from stage_participant_fichiers where fichier_id=? limit 1", p[1], f[0]);
+        token = login(prefix + "-trainee0");
+        assertEquals(0, get("/stage-participants/" + p[0] + "/fichiers").size());
+        assertEquals(403, http.send(builder("/fichiers/" + f[0] + "/telecharger").GET().build(), HttpResponse.BodyHandlers.discarding()).statusCode());
     }
     @Test void passwordResetRevokesExistingSessions() throws Exception {
         String prefix = "reset-" + UUID.randomUUID().toString().substring(0,8);
@@ -282,6 +337,95 @@ class CompleteIntegrationTests {
         token = login(prefix + "-admin");
         request("PATCH", "/utilisateurs/" + target + "/mot-de-passe", Map.of("nouveauMotDePasse", "new-integration-password"), 204);
         token = oldToken; request("GET", "/auth/me", null, 401);
+    }
+    record Fixture(int trainee, int academic, int mentor, int stage, int cadre, int month, int level, int stream, int school) {}
+    Fixture fixture(String prefix) throws Exception {
+        seedUser(prefix + "-admin", "ADMIN"); token = login(prefix + "-admin");
+        int department = create("/referentiels/organisation/departements", Map.of("libelle", prefix));
+        int structure = create("/referentiels/organisation/structures-accueil", Map.of("libelle", prefix, "departementId", department, "actif", true));
+        int cadre = create("/referentiels/organisation/cadres-stage", Map.of("themeStage", prefix, "actif", true));
+        int school = create("/referentiels/academiques/etablissements", Map.of("libelle", prefix, "actif", true));
+        int stream = create("/referentiels/academiques/filieres", Map.of("libelle", prefix, "actif", true));
+        int level = create("/referentiels/academiques/niveaux-etude", Map.of("libelle", prefix, "actif", true));
+        int month = create("/referentiels/academiques/mois-stage", Map.of("libelle", prefix, "actif", true));
+        int trainee = create("/stagiaires", Map.of("nom", prefix, "prenoms", "Test", "adresse", "test"));
+        int academic = create("/stagiaires/" + trainee + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
+        int mentor = create("/encadreurs", Map.of("nom", prefix, "prenoms", "Mentor", "departementId", department, "capaciteMaxStagiaires", 1));
+        int stage = create("/stages", Map.of("libelle", prefix, "structureAccueilId", structure));
+        return new Fixture(trainee, academic, mentor, stage, cadre, month, level, stream, school);
+    }
+    Map<String, Object> participationBody(Fixture f, int academic, LocalDate start, LocalDate end) {
+        return Map.of("stageId", f.stage(), "stagiaireAcademiqueId", academic, "cadreStageId", f.cadre(), "encadreurId", f.mentor(), "dateDebutStage", start.toString(), "dateFinStage", end.toString());
+    }
+    @Test void concurrentAssignmentsAndReportsRemainUnique() throws Exception {
+        var f = fixture("race-" + UUID.randomUUID().toString().substring(0, 8));
+        int otherAcademic = create("/stagiaires/" + f.trainee() + "/academiques", Map.of("niveauEtudeId", f.level(), "filiereId", f.stream(), "etablissementId", f.school(), "anneeEtudes", "2027-2028"));
+        LocalDate today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
+        var calls = new ArrayList<java.util.concurrent.CompletableFuture<HttpResponse<String>>>();
+        for (int academic : List.of(f.academic(), otherAcademic)) calls.add(http.sendAsync(builder("/stage-participants")
+                .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(participationBody(f, academic, today, today.plusDays(35)))))
+                .build(), HttpResponse.BodyHandlers.ofString()));
+        var results = calls.stream().map(java.util.concurrent.CompletableFuture::join).toList();
+        assertEquals(List.of(201, 409), results.stream().map(HttpResponse::statusCode).sorted().toList());
+        int id = json.readTree(results.stream().filter(r -> r.statusCode() == 201).findFirst().orElseThrow().body()).get("id").asInt();
+        var period = get("/stage-participants/" + id + "/periodes-rapports").get(0);
+        var reportBody = Map.of("stageParticipantId", id, "moisStageId", f.month(), "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString());
+        calls.clear();
+        for (int i = 0; i < 2; i++) calls.add(http.sendAsync(builder("/rapports-activite").header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(reportBody))).build(), HttpResponse.BodyHandlers.ofString()));
+        var reports = calls.stream().map(java.util.concurrent.CompletableFuture::join).toList();
+        assertEquals(List.of(201, 409), reports.stream().map(HttpResponse::statusCode).sorted().toList());
+        int report = json.readTree(reports.stream().filter(r -> r.statusCode() == 201).findFirst().orElseThrow().body()).get("id").asInt();
+        // Exercise PostgreSQL guards independently of the Java checks, only in this test database.
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update rapports_activite set fin_semaine=fin_semaine+1 where id=?", report));
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("insert into stage_participant(stage_id,stagiaire_academique_id,cadre_stage_id,encadreur_id,date_debut_stage,date_fin_stage,statut_id) select stage_id,stagiaire_academique_id,cadre_stage_id,encadreur_id,date_debut_stage+1,date_fin_stage,statut_id from stage_participant where id=?", id));
+        assertEquals(1, jdbc.queryForObject("select count(*) from stage_participant p join stagiaire_academique a on a.id=p.stagiaire_academique_id where a.stagiaire_id=?", Integer.class, f.trainee()));
+    }
+    @Test void realSevenAlertDetectorsDeduplicateAndResolve() throws Exception {
+        var f = fixture("detect-" + UUID.randomUUID().toString().substring(0, 8));
+        LocalDate today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
+        int p1 = create("/stage-participants", participationBody(f, f.academic(), today.minusDays(42), today.minusDays(1)));
+        request("PATCH", "/stage-participants/" + p1 + "/statut", Map.of("statutCode", "EN_COURS"), 200);
+        request("PATCH", "/stage-participants/" + p1 + "/statut", Map.of("statutCode", "A_CLOTURER"), 200);
+        int t2 = create("/stagiaires", Map.of("nom", "Detect", "prenoms", "Second", "adresse", "test"));
+        int academic = create("/stagiaires/" + t2 + "/academiques", Map.of("niveauEtudeId", f.level(), "filiereId", f.stream(), "etablissementId", f.school(), "anneeEtudes", "2026-2027"));
+        int p2 = create("/stage-participants", participationBody(f, academic, today.minusDays(21), today.plusDays(1)));
+        request("PATCH", "/stage-participants/" + p2 + "/statut", Map.of("statutCode", "EN_COURS"), 200);
+        int defense = create("/soutenances", Map.of("stageParticipantId", p2, "dateSoutenance", today.plusDays(1) + "T14:00:00"));
+        var period = get("/stage-participants/" + p1 + "/periodes-rapports").get(0);
+        int report = create("/rapports-activite", Map.of("stageParticipantId", p1, "moisStageId", f.month(), "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString()));
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        jdbc.update("update rapports_activite set date_soumission=? where id=?", java.sql.Timestamp.valueOf(today.minusDays(30).atStartOfDay()), report);
+        var actualOrchestration = new AlerteOrchestrationService(detection);
+        actualOrchestration.executerControlesQuotidiens();
+        Set<String> detected = new HashSet<>(jdbc.queryForList("select distinct t.code from alertes a join types_alerte t on t.id=a.type_alerte_id where a.stage_participant_id in (?,?) or a.rapport_id=? or a.encadreur_id=? or a.soutenance_id=?", String.class, p1, p2, report, f.mentor(), defense));
+        assertEquals(Set.of("STAGE_DEPASSE", "FIN_STAGE_PROCHE", "RAPPORT_MANQUANT", "VALIDATION_EN_RETARD", "DOSSIER_INCOMPLET", "ENCADREUR_SURCHARGE", "SOUTENANCE_PROCHE"), detected);
+        int count = jdbc.queryForObject("select count(*) from alertes", Integer.class);
+        actualOrchestration.executerControlesQuotidiens();
+        assertEquals(count, jdbc.queryForObject("select count(*) from alertes", Integer.class));
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "VALIDE"), 200);
+        detection.detecterValidationsEnRetard();
+        assertEquals("TRAITEE", jdbc.queryForObject("select statut from alertes where cle_deduplication=?", String.class, "VALIDATION_EN_RETARD_RAPPORT_" + report));
+        for (var required : get("/stage-participants/" + p1 + "/documents-obligatoires"))
+            upload("/stage-participants/" + p1 + "/fichiers", required.get("code").asString(), 200);
+        detection.detecterDossiersIncomplets();
+        String incompleteKey = "DOSSIER_INCOMPLET_PARTICIPATION_" + p1;
+        assertEquals("A_TRAITER", jdbc.queryForObject("select statut from alertes where cle_deduplication=?", String.class, incompleteKey));
+        assertTrue(jdbc.queryForObject("select message from alertes where cle_deduplication=?", String.class, incompleteKey).contains("Rapports obligatoires non valides"));
+        for (var expected : get("/stage-participants/" + p1 + "/periodes-rapports")) {
+            if (expected.get("validee").asBoolean()) continue;
+            int remaining = create("/rapports-activite", Map.of("stageParticipantId", p1, "moisStageId", f.month(), "debutSemaine", expected.get("debut").asString(), "finSemaine", expected.get("fin").asString()));
+            request("PATCH", "/rapports-activite/" + remaining + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+            request("PATCH", "/rapports-activite/" + remaining + "/statut", Map.of("statutCode", "VALIDE"), 200);
+        }
+        detection.detecterDossiersIncomplets();
+        assertEquals("EXPIREE", jdbc.queryForObject("select statut from alertes where cle_deduplication=?", String.class, incompleteKey));
+        request("PATCH", "/soutenances/" + defense, Map.of("stageParticipantId", p2, "dateSoutenance", today.plusDays(365) + "T14:00:00"), 200);
+        detection.detecterSoutenancesProches();
+        assertEquals("EXPIREE", jdbc.queryForObject("select statut from alertes where soutenance_id=?", String.class, defense));
+        request("POST", "/stage-participants/" + p2 + "/abandonner", Map.of(), 200);
+        detection.detecterEncadreursSurcharges();
+        assertEquals("TRAITEE", jdbc.queryForObject("select statut from alertes where encadreur_id=?", String.class, f.mentor()));
     }
     int seedUser(String name, String role) {
         jdbc.update("insert into utilisateurs(identifiant,mot_de_passe_hash,statut_id) select ?,?,s.id from statuts s join types_statut t on t.id=s.type_statut_id where t.code='UTILISATEUR' and s.code='ACTIF'", name, encoder.encode(PASSWORD));

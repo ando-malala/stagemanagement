@@ -1,3 +1,9 @@
+# État courant — 1 novembre 2026
+
+Les étapes historiques ci-dessous sont complétées par [le rapport de corrections](docs/REMEDIATION_STATUS.md). Portail personnel, API de suivi, restrictions de ressources, dossier consolidé, pilotage, bilans PDF et exports CSV sont reliés au backend réel. La synthèse dispose d'une commande d'impression.
+
+Validation courante : 106 tests frontend, ESLint et build Vite réussis ; 30 tests backend réussis incluant HTTP/PostgreSQL, accès croisés, concurrence et sept détecteurs réels. Le JAR backend est construit. Aucun navigateur utilisé ; rendu interactif et impression restent à contrôler en recette. Consulter le rapport pour les migrations et la production ; les anciennes prochaines étapes ci-dessous restent un historique.
+
 # Suivi frontend MEF–SIIGFP
 
 Dernière mise à jour : 31 octobre 2026.

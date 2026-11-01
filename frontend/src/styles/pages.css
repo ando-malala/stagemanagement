@@ -150,3 +150,13 @@
 .business-form .entity-form { margin-bottom: 0; }
 .detail-grid + .row-actions { margin-bottom: 20px; }
 @media (max-width: 720px) { .detail-grid { grid-template-columns: 1fr; } }
+/* The consolidated dossier renders every row; printing never truncates a paginated table. */
+@media print {
+  body:has(.dossier-print) .app-shell * { visibility: hidden; }
+  body:has(.dossier-print) .dossier-print,
+  body:has(.dossier-print) .dossier-print * { visibility: visible; }
+  body:has(.dossier-print) .dossier-print { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 1rem; }
+  body:has(.dossier-print) .dossier-print button,
+  body:has(.dossier-print) .dossier-print .actions { display: none; }
+  .dossier-participation { break-before: page; }
+}

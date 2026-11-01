@@ -57,7 +57,7 @@ for path in controllers:
     mappings = list(re.finditer(r'@(Get|Post|Put|Patch|Delete)Mapping(?:\((.*?)\))?', source, re.S))
     for i, mapping in enumerate(mappings):
         section = source[mapping.end():mappings[i + 1].start() if i + 1 < len(mappings) else len(source)]
-        signature = re.search(r'public\s+(.+?)\s+(\w+)\s*\((.*?)\)\s*\{', section, re.S)
+        signature = re.search(r'public\s+(.+?)\s+(\w+)\s*\((.*?)\)\s*(?:throws\s+[\w.,\s]+)?\{', section, re.S)
         if not signature:
             raise ValueError(f'Unparsed mapping: {path.name}:{mapping[0]}')
         suffixes = strings(mapping[2] or '')

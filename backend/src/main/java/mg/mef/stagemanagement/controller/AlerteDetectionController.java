@@ -28,7 +28,7 @@ public class AlerteDetectionController {
         }
 
         @PostMapping("/stages-depasses")
-        @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_STAGE')")
+        @PreAuthorize("hasRole('ADMIN')")
         public ResponseEntity<Map<String, Object>> detecterStagesDepasses() {
 
                 int nouvellesAlertes = detectionService.detecterStagesDepasses();
@@ -42,7 +42,7 @@ public class AlerteDetectionController {
         }
 
         @PostMapping("/fins-stages-proches")
-        @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_STAGE')")
+        @PreAuthorize("hasRole('ADMIN')")
         public ResponseEntity<Map<String, Object>> detecterFinsStagesProches() {
 
                 int nouvellesAlertes = detectionService.detecterFinsStagesProches();
@@ -57,7 +57,7 @@ public class AlerteDetectionController {
 
     
         @PostMapping("/rapports-manquants")
-        @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_STAGE')")
+        @PreAuthorize("hasRole('ADMIN')")
         public ResponseEntity<Map<String, Object>> detecterRapportsManquants() {
 
                 int nouvellesAlertes = detectionService.detecterRapportsManquants();

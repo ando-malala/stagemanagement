@@ -85,6 +85,7 @@ public class FichierGestionService {
 
         return stagiaireFichierRepository.findByStagiaire_Id(stagiaireId)
                 .stream()
+                .filter(link -> access.readFile(link.getFichier().getId()))
                 .map(this::toResponse)
                 .toList();
     }
@@ -154,6 +155,7 @@ public class FichierGestionService {
         return stageParticipantFichierRepository
                 .findByStageParticipant_Id(stageParticipantId)
                 .stream()
+                .filter(link -> access.readFile(link.getFichier().getId()))
                 .map(this::toResponse)
                 .toList();
     }

@@ -46,15 +46,20 @@ public class ParticipationRulesService {
             conflict("Choisissez une periode de rapport calculee par le serveur");
     }
     public void closureReports(StageParticipant p) {
+        var missing = missingClosureReports(p);
+        if (!missing.isEmpty()) {
+            var period = missing.get(0);
+            conflict("Rapport obligatoire non valide pour la periode du " + period.debut() + " au " + period.fin());
+        }
+    }
+    public List<CalculPeriodesRapportService.PeriodeRapport> missingClosureReports(StageParticipant p) {
         var rows = reports.findByStageParticipant_Id(p.getId());
         var today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
-        for (var period : calendar.calculer(p.getDateDebutStage(), p.getDateFinStage())) {
-            // Periods already completed are required, even if their submission deadline has not elapsed.
-            if (period.fin().isAfter(today)) continue;
-            boolean valid = rows.stream().anyMatch(r -> period.debut().equals(r.getDebutSemaine())
+        // Completed periods are required, even before their submission deadline.
+        return calendar.calculer(p.getDateDebutStage(), p.getDateFinStage()).stream()
+                .filter(period -> !period.fin().isAfter(today))
+                .filter(period -> rows.stream().noneMatch(r -> period.debut().equals(r.getDebutSemaine())
                     && period.fin().equals(r.getFinSemaine()) && "VALIDE".equals(r.getStatut().getCode())
-                    && r.getDateSoumission() != null);
-            if (!valid) conflict("Rapport obligatoire non valide pour la periode du " + period.debut() + " au " + period.fin());
-        }
+                    && r.getDateSoumission() != null)).toList();
     }
 }
