@@ -12,7 +12,7 @@
   gap: 16px;
   padding: 32px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   background: white;
   box-shadow: 0 20px 54px rgba(31, 41, 55, .1);
 }
@@ -35,6 +35,9 @@
   margin-bottom: 16px;
 }
 
+.section-heading h2, .section-heading h3 { position: relative; padding-left: 13px; }
+.section-heading h2::before, .section-heading h3::before { content: ''; position: absolute; left: 0; top: .2em; bottom: .2em; width: 3px; border-radius: 3px; background: #7fa7d8; }
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(130px, 1fr));
@@ -44,7 +47,15 @@
 .stat-card {
   display: grid;
   gap: 8px;
+  border-top: 3px solid #7fa7d8;
+  background: linear-gradient(160deg, #fff, #f7faff);
 }
+
+.stat-card:nth-child(3n + 2) { border-top-color: #7cb9b4; }
+.stat-card:nth-child(3n) { border-top-color: #a5a2c8; }
+.stat-card a { width: fit-content; font-size: 12px; font-weight: 600; text-decoration: none; }
+.stat-card a:hover { text-decoration: underline; }
+.stat-card a::after { content: ' →'; }
 
 .stat-card span {
   color: var(--muted);
@@ -52,7 +63,10 @@
 }
 
 .stat-card strong {
-  font-size: 28px;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 .alert-list {
@@ -67,7 +81,8 @@
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #f9fafb;
+  background: #f8fafd;
+  border-left: 3px solid #9bb4d5;
 }
 
 .alert-card span {
@@ -84,12 +99,12 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr));
   align-items: end;
-  gap: 12px;
-  padding: 14px;
+  gap: 16px;
+  padding: 18px;
   margin-bottom: 16px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #f9fafb;
+  border-radius: 10px;
+  background: #f7f9fc;
 }
 
 .entity-form .field:has(textarea) {
@@ -109,17 +124,20 @@
 }
 
 .segmented button {
-  border: 0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 9px 12px;
   color: var(--text);
-  background: #e5e7eb;
+  background: white;
   font-weight: 700;
 }
+
+.segmented button:hover:not(.active) { background: var(--primary-soft); border-color: #a5bddf; }
 
 .segmented button.active {
   color: white;
   background: var(--primary);
+  border-color: var(--primary);
 }
 
 @media (max-width: 1080px) {
@@ -142,8 +160,9 @@
 }
 
 .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 20px 0 28px; }
-.detail-grid dt { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
-.detail-grid dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.detail-grid dt { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+.detail-grid dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; font-weight: 500; }
+.detail-grid > div { padding-bottom: 14px; border-bottom: 1px solid #edf1f6; }
 .back-link { display: inline-block; margin-top: 24px; }
 .business-form { padding-block: 16px; }
 .audit-values { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; }
@@ -152,6 +171,8 @@
 @media (max-width: 720px) { .detail-grid { grid-template-columns: 1fr; } }
 /* The consolidated dossier renders every row; printing never truncates a paginated table. */
 @media print {
+  .card, .stat-card, .modal { box-shadow: none; background: #fff; }
+  .stat-card a::after { content: none; }
   body:has(.dossier-print) .app-shell * { visibility: hidden; }
   body:has(.dossier-print) .dossier-print,
   body:has(.dossier-print) .dossier-print * { visibility: visible; }

@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-export default function Input({ label, name, type = 'text', options, error, hint, ...props }) {
+export default function Input({ label, name, type = 'text', options, error, hint, emptyOptionLabel = 'Sélectionner', ...props }) {
   const id = useId();
   const describedBy = [error && `${id}-error`, hint && `${id}-hint`].filter(Boolean).join(' ') || undefined;
   const controlProps = { ...props, id, name, 'aria-invalid': Boolean(error), 'aria-describedby': describedBy };
@@ -9,7 +9,7 @@ export default function Input({ label, name, type = 'text', options, error, hint
       <label htmlFor={id}>{label}{props.required ? ' *' : ''}</label>
       {type === 'textarea' ? <textarea {...controlProps} /> : type === 'select' ? (
         <select {...controlProps}>
-          <option value="">Sélectionner</option>
+          <option value="">{emptyOptionLabel}</option>
           {options?.map((option) => (
             <option key={option.value ?? option} value={option.value ?? option}>{option.label ?? option}</option>
           ))}
