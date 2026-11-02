@@ -1,10 +1,10 @@
 // Mirrors SecurityConfig.java. UI checks never replace server authorization.
 import { hasAnyRole } from './roleUtils.js';
 
-export const BUSINESS_ROLES = ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR'];
+export const BUSINESS_ROLES = ['ADMIN', 'ENCADREUR'];
 export const PERSONAL_ROLES = [...BUSINESS_ROLES, 'STAGIAIRE'];
 export function isTraineeOnly(user) { return hasAnyRole(user, ['STAGIAIRE']) && !hasAnyRole(user, BUSINESS_ROLES); }
-export const MANAGEMENT_ROLES = ['ADMIN', 'RESPONSABLE_STAGE'];
+export const MANAGEMENT_ROLES = ['ADMIN'];
 const permissions = {
   consulterMetier: BUSINESS_ROLES,
   gererStagiaires: MANAGEMENT_ROLES,

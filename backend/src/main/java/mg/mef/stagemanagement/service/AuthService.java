@@ -95,6 +95,9 @@ public class AuthService {
                         .map(utilisateurRole ->
                                 utilisateurRole.getRole().getCode()
                         )
+                        .map(mg.mef.stagemanagement.security.ApplicationRoles::effective)
+                        .filter(mg.mef.stagemanagement.security.ApplicationRoles.SUPPORTED::contains)
+                        .distinct()
                         .toList();
                 
                 // 5 - Generer le token envoye au client
@@ -201,6 +204,9 @@ public class AuthService {
                         .map(utilisateurRole ->
                                 utilisateurRole.getRole().getCode()
                         )
+                        .map(mg.mef.stagemanagement.security.ApplicationRoles::effective)
+                        .filter(mg.mef.stagemanagement.security.ApplicationRoles.SUPPORTED::contains)
+                        .distinct()
                         .toList();
 
                 return new AuthMeResponse(

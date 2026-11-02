@@ -75,7 +75,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteGestionController.java",
@@ -93,7 +92,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteGestionController.java",
@@ -110,8 +108,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteGestionController.java",
     "line": 40
@@ -128,7 +125,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteGestionController.java",
@@ -146,7 +142,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/AlerteGestionController.java",
@@ -346,7 +341,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/DashboardController.java",
@@ -504,7 +498,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -523,7 +516,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -541,8 +533,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
     "line": 43
@@ -558,8 +549,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
     "line": 52
@@ -575,8 +565,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
     "line": 62
@@ -873,7 +862,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -891,7 +879,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -909,7 +896,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -927,7 +913,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -945,7 +930,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -963,7 +947,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -981,7 +964,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -999,7 +981,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -1017,7 +998,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EvaluationGestionController.java",
@@ -1105,7 +1085,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1123,8 +1102,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/FichierGestionController.java",
     "line": 42
@@ -1141,7 +1119,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1159,8 +1136,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/FichierGestionController.java",
     "line": 75
@@ -1177,7 +1153,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1642,7 +1617,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1661,7 +1635,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1680,7 +1653,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1699,7 +1671,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1718,7 +1689,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1737,7 +1707,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -1756,7 +1725,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
@@ -1774,7 +1742,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2539,7 +2506,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SoutenanceGestionController.java",
@@ -2557,7 +2523,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SoutenanceGestionController.java",
@@ -2574,8 +2539,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SoutenanceGestionController.java",
     "line": 34
@@ -2591,8 +2555,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SoutenanceGestionController.java",
     "line": 43
@@ -2609,7 +2572,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2628,7 +2590,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2646,8 +2607,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 49
@@ -2663,8 +2623,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 58
@@ -2681,7 +2640,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2700,7 +2658,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2719,7 +2676,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2738,7 +2694,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -2756,8 +2711,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 102
@@ -2773,8 +2727,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 111
@@ -2790,8 +2743,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 121
@@ -2807,8 +2759,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 137
@@ -2824,8 +2775,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 153
@@ -2841,8 +2791,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 168
@@ -2858,8 +2807,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 183
@@ -2875,8 +2823,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 198
@@ -2892,8 +2839,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StageGestionController.java",
     "line": 213
@@ -3260,7 +3206,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3279,7 +3224,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3297,8 +3241,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StagiaireGestionController.java",
     "line": 42
@@ -3314,8 +3257,7 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StagiaireGestionController.java",
     "line": 51
@@ -3332,7 +3274,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3350,8 +3291,7 @@
     "success": "201",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
-      "RESPONSABLE_STAGE"
+      "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/StagiaireGestionController.java",
     "line": 70
@@ -3578,7 +3518,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3597,7 +3536,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
@@ -3615,7 +3553,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SuiviIntegrationController.java",
@@ -3633,7 +3570,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3652,7 +3588,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3671,7 +3606,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3690,7 +3624,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3709,7 +3642,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3728,7 +3660,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3747,7 +3678,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3766,7 +3696,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3785,7 +3714,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3804,7 +3732,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
@@ -3822,7 +3749,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
@@ -3840,7 +3766,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR",
       "STAGIAIRE"
     ],
@@ -3859,7 +3784,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
@@ -3877,7 +3801,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",
@@ -3895,7 +3818,6 @@
     "access": "hasAnyRole",
     "roles": [
       "ADMIN",
-      "RESPONSABLE_STAGE",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/SyntheseController.java",

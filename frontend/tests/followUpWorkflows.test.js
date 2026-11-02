@@ -42,12 +42,12 @@ test('permissions d’édition : encadreur habilité au suivi, rapports validés
   const encadreur = { roles: ['ENCADREUR'] };
   for (const kind of ['rapport', 'evaluation', 'observation']) assert.equal(canEditBusiness(encadreur, kind), true);
   for (const kind of ['soutenance', 'participation', 'stage', 'stagiaire', 'inconnu']) assert.equal(canEditBusiness(encadreur, kind), false);
-  for (const role of ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR']) {
+  for (const role of ['ADMIN', 'ENCADREUR']) {
     assert.equal(canEditBusiness({ roles: [role] }, 'rapport', { statut: 'VALIDE' }), false);
     assert.equal(canEditBusiness({ roles: [role] }, 'evaluation', { estFinalisee: true }), false);
   }
   assert.equal(canEditBusiness({ roles: ['STAGIAIRE'] }, 'rapport'), true);
-  assert.equal(canEditBusiness({ roles: ['RESPONSABLE_STAGE'] }, 'soutenance'), true);
+  assert.equal(canEditBusiness({ roles: ['ADMIN'] }, 'soutenance'), true);
 });
 
 test('notes : zéro et décimales acceptés, vide et hors bornes refusés', () => {

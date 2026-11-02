@@ -20,7 +20,7 @@ test('API de suivi : routes réelles, permissions métier et annulation des lect
   for (const [call, path, template = path] of calls) {
     const endpoint = inventory.find((r) => r.method === 'GET' && r.path === template);
     assert.ok(endpoint, template);
-    assert.deepEqual(endpoint.roles, ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR', 'STAGIAIRE']);
+    assert.deepEqual(endpoint.roles, ['ADMIN', 'ENCADREUR', 'STAGIAIRE']);
     context.mock.method(globalThis, 'fetch', async (url, options) => {
       assert.equal(url, path); assert.equal(options.signal, signal); assert.equal(options.method ?? 'GET', 'GET');
       return Response.json(path.endsWith('/charge') ? { capaciteMax: 5, participationsActives: 2, surcharge: false } : []);

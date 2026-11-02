@@ -27,7 +27,7 @@ export default function RapportsPage({ navigate }) {
       renderCreate={(reload) => <BusinessEditor kind="rapport" label="Créer un brouillon" save={createRapport} onSaved={reload} />}
       fetcher={listRapports}
       creator={createRapport}
-      canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR'])}
+      canCreate={hasAnyRole(utilisateur, ['ADMIN', 'ENCADREUR'])}
       createLabel="Créer le rapport"
     />
   );

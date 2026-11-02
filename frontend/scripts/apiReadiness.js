@@ -9,7 +9,7 @@ export function validateApiBase(value) {
   return url.href.replace(/\/$/, '');
 }
 
-const businessRoles = ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR'];
+const businessRoles = ['ADMIN', 'ENCADREUR'];
 const businessLists = ['/api/stagiaires', '/api/encadreurs', '/api/stages', '/api/stage-participants',
   '/api/rapports-activite', '/api/evaluations', '/api/soutenances', '/api/alertes', '/api/alertes/non-lues', '/api/evaluations/criteres'];
 const referenceLists = ['/api/referentiels/academiques/etablissements', '/api/referentiels/academiques/filieres',

@@ -26,7 +26,7 @@ export default function SoutenancesPage({ navigate }) {
       renderCreate={(reload) => <BusinessEditor kind="soutenance" label="Planifier la soutenance" save={createSoutenance} onSaved={reload} />}
       fetcher={listSoutenances}
       creator={createSoutenance}
-      canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE'])}
+      canCreate={hasAnyRole(utilisateur, ['ADMIN'])}
       createLabel="Planifier la soutenance"
     />
   );

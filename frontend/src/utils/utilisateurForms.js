@@ -1,7 +1,7 @@
 import { requireList } from './businessForms.js';
 
 export function activeRoleOptions(roles) {
-  return requireList(roles).filter((role) => role.actif === true).map((role) => ({ value: role.code, label: `${role.libelle} (${role.code})` }));
+  return requireList(roles).filter((role) => role.actif === true && ['ADMIN', 'ENCADREUR', 'STAGIAIRE'].includes(role.code)).map((role) => ({ value: role.code, label: `${role.libelle} (${role.code})` }));
 }
 
 export function accountPayload(values, roles) {

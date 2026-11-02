@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional(readOnly = true)
 public class DossierAccessService {
-    private final ResponsableDepartementRepository departments;
     private final StageParticipantRepository participations;
     private final StagiaireRepository trainees;
     private final StageRepository stages;
@@ -27,12 +26,12 @@ public class DossierAccessService {
     private final StructureAccueilRepository structures;
     private final StagiaireAcademiqueRepository academics;
 
-    public DossierAccessService(ResponsableDepartementRepository departments, StageParticipantRepository participations,
+    public DossierAccessService(StageParticipantRepository participations,
             StagiaireRepository trainees, StageRepository stages, EncadreurRepository mentors,
             RapportActiviteRepository reports, EvaluationFinaleRepository evaluations, SoutenanceRepository defenses,
             StageParticipantFichierRepository participationFiles, StagiaireFichierRepository traineeFiles,
             StructureAccueilRepository structures, StagiaireAcademiqueRepository academics) {
-        this.departments = departments; this.participations = participations; this.trainees = trainees;
+        this.participations = participations; this.trainees = trainees;
         this.stages = stages; this.mentors = mentors; this.reports = reports; this.evaluations = evaluations;
         this.defenses = defenses; this.participationFiles = participationFiles; this.traineeFiles = traineeFiles;
         this.structures = structures; this.academics = academics;
@@ -44,15 +43,15 @@ public class DossierAccessService {
         return (AuthMeResponse) auth.getPrincipal();
     }
     public boolean role(String role) { return user().getRoles().contains(role); }
-    public boolean traineeOnly() { return role("STAGIAIRE") && !role("ADMIN") && !role("RESPONSABLE_STAGE") && !role("ENCADREUR"); }
+    public boolean traineeOnly() { return role("STAGIAIRE") && !role("ADMIN") && !role("ENCADREUR"); }
     public void require(boolean allowed) {
         if (!allowed) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acces hors de votre perimetre");
     }
     private ResponseStatusException missing() { return new ResponseStatusException(HttpStatus.NOT_FOUND, "Ressource introuvable"); }
     private boolean owns(Utilisateur u) { return u != null && Objects.equals(u.getId(), user().getUtilisateurId()); }
+    // Administrative authority is global after merging ADMIN and RESPONSABLE_STAGE.
     public boolean department(Integer id) {
-        return role("ADMIN") || (id != null && role("RESPONSABLE_STAGE")
-                && departments.existsByUtilisateur_IdAndDepartement_Id(user().getUtilisateurId(), id));
+        return role("ADMIN");
     }
     public boolean readParticipation(StageParticipant p) {
         return manageParticipation(p) || (role("ENCADREUR") && owns(p.getEncadreur().getUtilisateur()))
@@ -66,13 +65,13 @@ public class DossierAccessService {
         require(write ? manageParticipation(p) : readParticipation(p)); return p;
     }
     public boolean readTrainee(Stagiaire t) {
-        return department(t.getDepartement() == null ? null : t.getDepartement().getId())
+        return role("ADMIN")
                 || (role("STAGIAIRE") && owns(t.getUtilisateur()))
                 || participations.findByStagiaireAcademique_Stagiaire_Id(t.getId()).stream().anyMatch(this::readParticipation);
     }
     public Stagiaire trainee(Integer id, boolean write) {
         var t = trainees.findById(id).orElseThrow(this::missing);
-        require(write ? department(t.getDepartement() == null ? null : t.getDepartement().getId()) : readTrainee(t)); return t;
+        require(write ? role("ADMIN") : readTrainee(t)); return t;
     }
     public boolean readStage(Stage s) {
         return department(s.getStructureAccueil().getDepartement().getId())

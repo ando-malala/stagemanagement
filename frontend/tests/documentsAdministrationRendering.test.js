@@ -15,7 +15,7 @@ test('rendu documents et administration : périmètres, droits et absence de sec
       value: { utilisateur: { utilisateurId: 1, roles } }
     }, React.createElement(Component, props)));
     const owner = { scope: 'stagiaire', ownerId: 42, ownerLabel: 'Dossier test' };
-    const manager = render(Documents, owner, ['RESPONSABLE_STAGE']);
+    const manager = render(Documents, owner, ['ADMIN']);
     assert.match(manager, /Documents du stagiaire/);
     assert.match(manager, /name="typePieceJointeCode"/);
     assert.match(manager, /type="file"/);
@@ -25,11 +25,11 @@ test('rendu documents et administration : périmètres, droits et absence de sec
     assert.match(reader, /Pièces obligatoires pour la clôture/);
     assert.doesNotMatch(reader, /type="file"/);
     assert.doesNotMatch(reader, /Supprimer/);
-    assert.equal(render(Administration, { account: { id: 42 } }, ['RESPONSABLE_STAGE']), '');
+    assert.equal(render(Administration, { account: { id: 42 } }, ['ENCADREUR']), '');
     assert.equal(render(CreateAccount, {}, ['ENCADREUR']), '');
     const admin = render(Administration, { account: { id: 42, identifiant: 'compte-test' } }, ['ADMIN']);
     assert.match(admin, /Rôles du compte/);
-    assert.match(admin, /Départements rattachés/);
+    assert.doesNotMatch(admin, /Départements rattachés/);
     assert.match(admin, /Réinitialiser le mot de passe/);
     assert.doesNotMatch(admin, /type="password"/); // Closed forms hold no secret input.
   } finally { await server.close(); }

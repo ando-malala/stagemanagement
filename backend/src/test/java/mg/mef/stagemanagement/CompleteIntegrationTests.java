@@ -187,11 +187,10 @@ class CompleteIntegrationTests {
             }
         }
         String adminToken = token;
-        for (String role : List.of("RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")) {
+        for (String role : List.of("ENCADREUR", "STAGIAIRE")) {
             token = adminToken;
             create("/utilisateurs", Map.of("identifiant", "integration-" + role, "motDePasse", PASSWORD, "roleCode", role));
             token = login("integration-" + role);
-            int expected = "STAGIAIRE".equals(role) ? 403 : 200;
             for (String path : List.of("/referentiels/suivi/types-documents", "/referentiels/suivi/types-evenements", "/referentiels/suivi/types-alertes",
                     "/referentiels/suivi/statuts/PARTICIPATION", "/referentiels/suivi/transitions/PARTICIPATION/A_CLOTURER",
                     base + "/documents-obligatoires", base + "/evenements", base + "/historique-statuts", base + "/periodes-rapports", base + "/actions", "/encadreurs/" + mentor + "/charge"))
@@ -202,7 +201,7 @@ class CompleteIntegrationTests {
         request("POST", "/auth/logout", Map.of(), 204);
         request("GET", "/auth/me", null, 401);
     }
-    @Test void departmentAndAssignmentIsolationOverHttp() throws Exception {
+    @Test void mergedAdministrationAndAssignmentIsolationOverHttp() throws Exception {
         String prefix = "scope-" + UUID.randomUUID().toString().substring(0, 8);
         int admin = seedUser(prefix + "-admin", "ADMIN");
         token = login(prefix + "-admin");
@@ -221,7 +220,7 @@ class CompleteIntegrationTests {
             studentUsers[i] = seedUser(prefix + "-trainee" + i, "STAGIAIRE");
             int structure = create("/referentiels/organisation/structures-accueil", Map.of("libelle", prefix + i, "departementId", department, "actif", true));
             int stage = create("/stages", Map.of("libelle", prefix + i, "structureAccueilId", structure));
-            t[i] = create("/stagiaires", Map.of("nom", prefix, "prenoms", "T" + i, "adresse", "test", "departementId", department));
+            t[i] = create("/stagiaires", Map.of("nom", prefix, "prenoms", "T" + i, "adresse", "test"));
             request("PATCH", "/stagiaires/" + t[i] + "/compte", Map.of("utilisateurId", studentUsers[i]), 200);
             int academic = create("/stagiaires/" + t[i] + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
             e[i] = create("/encadreurs", Map.of("nom", prefix, "prenoms", "E" + i, "departementId", department, "utilisateurId", mentorUser));
@@ -284,7 +283,7 @@ class CompleteIntegrationTests {
             token = login(prefix + "-trainee" + i);
             assertEquals("VALIDE", get("/rapports-activite/" + ownReport).get("statut").asString());
         }
-        for (String role : List.of("manager", "mentor")) for (int i = 0; i < 2; i++) {
+        for (String role : List.of("mentor")) for (int i = 0; i < 2; i++) {
             token = login(prefix + "-" + role + i);
             for (String list : List.of("/stagiaires", "/stage-participants", "/stages", "/encadreurs", "/rapports-activite", "/evaluations", "/soutenances", "/alertes")) assertEquals(list.equals("/rapports-activite") ? 2 : 1, get(list).size(), role + list);
             assertEquals(p[i], get("/stage-participants").get(0).get("id").asInt());
@@ -320,16 +319,60 @@ class CompleteIntegrationTests {
             request("POST", "/evaluations/" + v[other] + "/finaliser", Map.of(), 403);
             request("POST", "/rapports-activite", Map.of("stageParticipantId", p[other], "moisStageId", month, "debutSemaine", "2026-10-05", "finSemaine", "2026-10-11"), 403);
         }
+        for (int i = 0; i < 2; i++) {
+            token = login(prefix + "-manager" + i);
+            assertEquals("ADMIN", get("/auth/me").get("roles").get(0).asString());
+            request("GET", "/utilisateurs", null, 200);
+            for (int other : new int[] {0, 1}) {
+                request("GET", "/stagiaires/" + t[other] + "/dossier", null, 200);
+                request("PATCH", "/stagiaires/" + t[other], Map.of("nom", prefix, "prenoms", "T" + other, "adresse", "test"), 200);
+                assertEquals(200, http.send(builder("/stage-participants/" + p[other] + "/bilan.pdf").GET().build(), HttpResponse.BodyHandlers.discarding()).statusCode());
+            }
+        }
         token = login(prefix + "-manager0");
         request("PATCH", "/alertes/" + a[0] + "/lire", Map.of(), 200);
-        assertEquals(0, get("/dashboard/priorites").size());
+        assertTrue(java.util.stream.StreamSupport.stream(get("/dashboard/priorites").spliterator(), false)
+                .noneMatch(row -> row.get("participationId").asInt() == p[0]));
         token = login(prefix + "-manager1");
-        assertEquals(1, get("/dashboard/priorites").size());
+        assertTrue(java.util.stream.StreamSupport.stream(get("/dashboard/priorites").spliterator(), false)
+                .anyMatch(row -> row.get("participationId").asInt() == p[1]));
         jdbc.update("insert into stage_participant_fichiers(stage_participant_id,fichier_id,type_piece_jointe_id) select ?,fichier_id,type_piece_jointe_id from stage_participant_fichiers where fichier_id=? limit 1", p[1], f[0]);
         token = login(prefix + "-trainee0");
         assertEquals(0, get("/stage-participants/" + p[0] + "/fichiers").size());
         assertEquals(403, http.send(builder("/fichiers/" + f[0] + "/telecharger").GET().build(), HttpResponse.BodyHandlers.discarding()).statusCode());
     }
+    @Test void originalTraineeSchemaAndThreeRolesWithLegacyAdministration() throws Exception {
+        assertEquals(0, jdbc.queryForObject("select count(*) from information_schema.columns where table_schema='public' and table_name='stagiaires' and column_name='departement_id'", Integer.class));
+        String prefix = "roles-" + UUID.randomUUID().toString().substring(0,8);
+        int legacy = seedUser(prefix + "-legacy", "RESPONSABLE_STAGE");
+        var loginResponse = request("POST", "/auth/login", Map.of("identifiant", prefix + "-legacy", "motDePasse", PASSWORD), 200);
+        assertEquals(1, loginResponse.get("roles").size());
+        assertEquals("ADMIN", loginResponse.get("roles").get(0).asString());
+        token = loginResponse.get("token").asString();
+        assertEquals("ADMIN", get("/auth/me").get("roles").get(0).asString());
+        Set<String> catalog = new HashSet<>();
+        for (var role : get("/roles")) catalog.add(role.get("code").asString());
+        assertEquals(Set.of("ADMIN", "ENCADREUR", "STAGIAIRE"), catalog);
+        int trainee = create("/stagiaires", Map.of("nom", prefix, "prenoms", "Sans participation", "adresse", "test"));
+        request("PATCH", "/stagiaires/" + trainee, Map.of("nom", prefix, "prenoms", "Modifié", "adresse", "test"), 200);
+        assertTrue(get("/stagiaires/" + trainee + "/participations").isEmpty());
+        assertFalse(get("/stagiaires/" + trainee).has("departementId"));
+        for (String role : List.of("RESPONSABLE_STAGE", "INCONNU")) {
+            request("POST", "/utilisateurs", Map.of("identifiant", prefix + "-bad", "motDePasse", PASSWORD, "roleCode", role), 400);
+            request("POST", "/utilisateurs/" + legacy + "/roles", Map.of("roleCode", role), 400);
+        }
+        // Two stored aliases must count as only one effective role and both disappear on removal.
+        request("POST", "/utilisateurs/" + legacy + "/roles", Map.of("roleCode", "ADMIN"), 200);
+        assertEquals(1, get("/utilisateurs/" + legacy + "/roles").size());
+        request("DELETE", "/utilisateurs/" + legacy + "/roles/ADMIN", null, 400);
+        request("POST", "/utilisateurs/" + legacy + "/roles", Map.of("roleCode", "ENCADREUR"), 200);
+        request("DELETE", "/utilisateurs/" + legacy + "/roles/ADMIN", null, 200);
+        assertEquals("ENCADREUR", get("/auth/me").get("roles").get(0).asString());
+        request("GET", "/utilisateurs", null, 403);
+        request("GET", "/stagiaires/" + trainee, null, 403);
+        request("POST", "/stagiaires", Map.of("nom", prefix, "prenoms", "Interdit", "adresse", "test"), 403);
+    }
+
     @Test void passwordResetRevokesExistingSessions() throws Exception {
         String prefix = "reset-" + UUID.randomUUID().toString().substring(0,8);
         seedUser(prefix + "-admin", "ADMIN"); int target = seedUser(prefix + "-trainee", "STAGIAIRE");

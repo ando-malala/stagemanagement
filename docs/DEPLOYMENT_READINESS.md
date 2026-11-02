@@ -18,13 +18,13 @@ Une origine API distincte exige une configuration CORS explicite sur le serveur,
 
 ## Migrations et sauvegardes
 
-Suivre [la procédure des migrations](../backend/migrations/README.md). Les scripts V001/V002 et le précontrôle sont non destructifs. Le schéma d'initialisation `Conception2.sql` ne doit jamais être lancé sur une base existante.
+Suivre [la procédure des migrations](../backend/migrations/README.md). Depuis le 2 novembre 2026, V001 est retirée : l'application ne dépend plus de `stagiaires.departement_id`. La fusion de `RESPONSABLE_STAGE` dans `ADMIN` se fait en lecture, sans migration des comptes. V002 concerne séparément le renforcement des contraintes SQL et reste à décider sur la cible après précontrôle et sauvegarde. Le schéma d'initialisation `Conception2.sql` ne doit jamais être lancé sur une base existante.
 
 Sauvegarder PostgreSQL avec `pg_dump` au format custom et le stockage documentaire dans la même fenêtre de cohérence. Une sauvegarde de la base seule ne conserve pas les octets des fichiers. Sur une instance isolée, créer une base vide, restaurer avec `pg_restore --no-owner --no-acl --exit-on-error`, sans `--clean`, et restaurer une copie des fichiers. Attention : les chemins documentaires enregistrés sont absolus. Préserver ces chemins sur l'instance isolée ou préparer une adaptation explicite des métadonnées dans la copie restaurée ; changer seulement `MEF_UPLOAD_DIR` ne relocalise pas les fichiers historiques. Comparer les volumes, vérifier les clés étrangères, se connecter avec les comptes de recette et télécharger des pièces. La restauration d'une sauvegarde de production, la planification des sauvegardes et la rétention restent à valider par l'exploitant.
 
 ## Recette à faire sur la cible
 
-1. Qualifier les départements des dossiers historiques et associer explicitement les comptes stagiaires. Créer deux comptes de départements différents et deux stagiaires de recette.
+1. Associer explicitement les comptes stagiaires. Préparer un ADMIN, deux encadreurs affectés à des dossiers distincts et deux stagiaires de recette. Tester aussi un ancien compte RESPONSABLE_STAGE : il doit recevoir ADMIN et son accès global. Aucun rattachement départemental direct du stagiaire n'est demandé.
 2. Vérifier les parcours création, affectation, dépôt/correction/validation des rapports, événements, pièces, évaluation, soutenance facultative, alertes et clôture. La clôture exige les pièces obligatoires actives et les rapports validés des périodes achevées. Les périodes futures ne sont pas exigées ; les suspensions n'interrompent pas le calendrier hebdomadaire existant.
 3. Vérifier les refus croisés, les exports et téléchargements avec ces comptes. Les bilans du portail stagiaire excluent les observations privées et les évaluations/soutenances administratives, conformément aux permissions existantes.
 4. Contrôler le rendu mobile, le clavier, les dialogues, la sélection des fichiers et l'impression. Aucun navigateur n'a été utilisé pendant cette intervention, à la demande de l'utilisateur. Les tests SSR ne prouvent pas ces interactions.

@@ -19,7 +19,7 @@ test('rendu du suivi : droits, verrouillage et sélecteurs métier', async () =>
     assert.equal(render(Editor, { kind: 'rapport', initial: { statut: 'VALIDE' } }), '');
     assert.equal(render(Editor, { kind: 'evaluation', initial: { estFinalisee: true } }), '');
     assert.equal(render(Editor, { kind: 'soutenance' }), '');
-    assert.match(render(Editor, { kind: 'soutenance' }, ['RESPONSABLE_STAGE']), /Ajouter/);
+    assert.match(render(Editor, { kind: 'soutenance' }, ['ADMIN']), /Ajouter/);
     const report = render(Form, { kind: 'rapport' });
     assert.match(report, /<select[^>]*name="stageParticipantId"/);
     assert.match(report, /<select[^>]*required=""[^>]*name="moisStageId"/);

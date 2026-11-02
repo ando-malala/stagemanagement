@@ -85,11 +85,7 @@ public class StagiaireGestionService {
         Stagiaire stagiaire = new Stagiaire();
 
         remplirStagiaire(stagiaire, request);
-        if (request.getDepartementId() != null) {
-            access.require(access.department(request.getDepartementId()));
-            var dept = new mg.mef.stagemanagement.model.Departement(); dept.setId(request.getDepartementId());
-            stagiaire.setDepartement(dept);
-        } else access.require(access.role("ADMIN") || stagiaire.getDepartement() != null);
+        access.require(access.role("ADMIN"));
 
         Statut statutActif = statutRepository
                 .findStatutByTypeCodeAndStatutCode("STAGIAIRE", "ACTIF")
@@ -123,11 +119,7 @@ public class StagiaireGestionService {
                 );
 
         remplirStagiaire(stagiaire, request);
-        if (request.getDepartementId() != null) {
-            access.require(access.department(request.getDepartementId()));
-            var dept = new mg.mef.stagemanagement.model.Departement(); dept.setId(request.getDepartementId());
-            stagiaire.setDepartement(dept);
-        } else access.require(access.role("ADMIN") || stagiaire.getDepartement() != null);
+        access.require(access.role("ADMIN"));
 
         Stagiaire enregistre = stagiaireRepository.save(stagiaire);
 
@@ -255,7 +247,6 @@ public class StagiaireGestionService {
                 statut,
                 stagiaire.getDateCreation()
         );
-        response.setDepartementId(stagiaire.getDepartement() == null ? null : stagiaire.getDepartement().getId());
         return response;
     }
 

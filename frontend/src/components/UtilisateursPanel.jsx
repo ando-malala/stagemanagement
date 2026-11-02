@@ -7,7 +7,6 @@ import {
 
 const ROLES = [
     'ADMIN',
-    'RESPONSABLE_STAGE',
     'ENCADREUR',
     'STAGIAIRE'
 ];

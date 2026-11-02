@@ -2,6 +2,7 @@ package mg.mef.stagemanagement.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import mg.mef.stagemanagement.security.ApplicationRoles;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -82,7 +83,8 @@ public class UtilisateurGestionService {
 
                 String identifiant = request.getIdentifiant().trim();
                 String motDePasse = request.getMotDePasse();
-                String roleCode = request.getRoleCode().trim();
+                String roleCode = request.getRoleCode().trim().toUpperCase(java.util.Locale.ROOT);
+                verifierRoleSupporte(roleCode);
 
                 if (identifiant.isEmpty()
                         || identifiant.length() > 50
@@ -307,6 +309,9 @@ public class UtilisateurGestionService {
                         .map(utilisateurRole ->
                                 utilisateurRole.getRole().getCode()
                         )
+                        .map(ApplicationRoles::effective)
+                        .filter(ApplicationRoles.SUPPORTED::contains)
+                        .distinct()
                         .toList();
         }
 
@@ -331,7 +336,8 @@ public class UtilisateurGestionService {
                                 )
                         );
 
-                String roleCode = request.getRoleCode().trim().toUpperCase();
+                String roleCode = request.getRoleCode().trim().toUpperCase(java.util.Locale.ROOT);
+                verifierRoleSupporte(roleCode);
 
                 Role role = roleRepository.findByCode(roleCode)
                         .orElseThrow(() ->
@@ -386,32 +392,23 @@ public class UtilisateurGestionService {
                                 )
                         );
 
-                String roleCodeNettoye = roleCode.trim().toUpperCase();
-
-                UtilisateurRole utilisateurRole =
-                        utilisateurRoleRepository
-                                .findByUtilisateur_IdAndRole_Code(
-                                        utilisateur.getId(),
-                                        roleCodeNettoye
-                                )
-                                .orElseThrow(() ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Ce rôle n'est pas attribué à cet utilisateur"
-                                        )
-                                );
-
-                List<String> rolesActuels =
-                        listerRolesUtilisateur(utilisateur.getId());
-
-                if (rolesActuels.size() <= 1) {
-                        throw new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Un utilisateur doit conserver au moins un rôle"
-                        );
+                String roleCodeNettoye = roleCode.trim().toUpperCase(java.util.Locale.ROOT);
+                verifierRoleSupporte(roleCodeNettoye);
+                var attributions = utilisateurRoleRepository.findByUtilisateur_Id(utilisateur.getId());
+                var aRetirer = attributions.stream()
+                        .filter(attribution -> roleCodeNettoye.equals(ApplicationRoles.effective(attribution.getRole().getCode())))
+                        .toList();
+                if (aRetirer.isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce rôle n'est pas attribué à cet utilisateur");
                 }
-
-                utilisateurRoleRepository.delete(utilisateurRole);
+                boolean autreRoleActif = attributions.stream().anyMatch(attribution ->
+                        !aRetirer.contains(attribution) && Boolean.TRUE.equals(attribution.getRole().getActif())
+                        && ApplicationRoles.SUPPORTED.contains(ApplicationRoles.effective(attribution.getRole().getCode())));
+                if (!autreRoleActif) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un utilisateur doit conserver au moins un rôle actif");
+                }
+                // Remove both ADMIN and its legacy alias, otherwise administrative access would survive.
+                utilisateurRoleRepository.deleteAll(aRetirer);
 
                 return listerRolesUtilisateur(utilisateur.getId());
         }
@@ -529,5 +526,10 @@ public class UtilisateurGestionService {
                 responsableDepartementRepository.delete(responsableDepartement);
 
                 return listerDepartementsUtilisateur(utilisateur.getId());
+        }
+        private void verifierRoleSupporte(String code) {
+                if (!ApplicationRoles.SUPPORTED.contains(code)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rôle attendu : ADMIN, ENCADREUR ou STAGIAIRE");
+                }
         }
 }

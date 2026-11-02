@@ -56,7 +56,7 @@ python scripts/audit_backend.py
 
 ## Ressources principales
 
-Les listes proposent la création et les fiches proposent la modification aux rôles ADMIN et RESPONSABLE_STAGE. Les formulaires chargent les référentiels autorisés et les choix métier depuis le serveur. Le compte associé à un encadreur est sélectionnable par ADMIN; pour le responsable, l’association existante est conservée.
+Les listes proposent la création et les fiches proposent la modification au rôle ADMIN. Les formulaires chargent les référentiels autorisés et les choix métier depuis le serveur. Le compte associé à un encadreur est sélectionnable par ADMIN. Les rôles applicatifs sont ADMIN, ENCADREUR et STAGIAIRE ; le serveur expose les anciennes attributions RESPONSABLE_STAGE comme ADMIN. Le formulaire stagiaire ne demande aucun département : celui-ci appartient à la structure d'accueil de chaque participation.
 
 Depuis la fiche stagiaire, consulter ou ajouter les profils académiques. Pour affecter un stagiaire, le sélectionner puis choisir l’un de ses profils. La fiche stage donne accès à ses participants. La fiche participation propose les actions compatibles avec son état, avec confirmation et contrôles des dates d’effet à Madagascar.
 
@@ -66,13 +66,13 @@ La fiche participation affiche les historiques, événements et périodes attend
 
 - Rapports : créer un brouillon depuis la liste ou une participation, puis ouvrir la fiche pour modifier le contenu, soumettre, demander une correction ou valider. Un rapport validé ne peut plus être modifié. Les observations sont gérées séparément du changement de statut.
 - Évaluations : ouvrir la fiche pour modifier les appréciations et noter les critères actifs **sur 5**, conformément à PostgreSQL. La finalisation est proposée une fois les critères obligatoires notés et nécessite une confirmation; le dossier devient ensuite non modifiable.
-- Soutenances : sélectionner une participation et saisir la date/heure locale. Le lieu et l’observation sont facultatifs. ADMIN et RESPONSABLE_STAGE peuvent créer ou modifier une soutenance; les encadreurs la consultent.
+- Soutenances : sélectionner une participation et saisir la date/heure locale. Le lieu et l’observation sont facultatifs. ADMIN peut créer ou modifier une soutenance ; les encadreurs la consultent dans leur périmètre.
 
 Rapports et évaluations sont modifiables par les trois rôles métier autorisés. Les listes ne sont pas limitées aux dossiers de l’utilisateur connecté par le backend actuel. Les contrôles frontend ne remplacent jamais les autorisations ni les validations serveur.
 
 ## Documents et comptes
 
-Les documents se consultent depuis une fiche stagiaire/participation ou la page Documents. ADMIN et RESPONSABLE_STAGE peuvent déposer un fichier non vide, sous la limite de 10 Mio (requête multipart comprise). Le sélecteur utilise le catalogue actif, filtré par périmètre et multiplicité; les pièces obligatoires présentes/manquantes viennent du serveur. La clôture revérifie ces pièces. Les téléchargements restent authentifiés.
+Les documents se consultent depuis une fiche stagiaire/participation ou la page Documents. ADMIN peut déposer un fichier non vide, sous la limite de 10 Mio (requête multipart comprise). Le sélecteur utilise le catalogue actif, filtré par périmètre et multiplicité ; les pièces obligatoires présentes/manquantes viennent du serveur. La clôture revérifie ces pièces. Les téléchargements restent authentifiés.
 
 ADMIN peut créer un compte avec un rôle actif chargé depuis le serveur, gérer ses rôles/départements depuis sa fiche et réinitialiser son mot de passe avec confirmation. Le backend actuel exige 6 caractères à la création et 12 à la réinitialisation. Aucun secret n’est affiché dans un récapitulatif ou stocké dans le navigateur. Le compte doit conserver au moins un rôle; une modification de ses propres rôles relit la session et actualise les accès.
 

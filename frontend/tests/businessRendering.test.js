@@ -15,10 +15,10 @@ test('rendu métier : permissions, champs alimentés par API et actions selon st
       value: { utilisateur: { utilisateurId: 1, roles } }
     }, React.createElement(Component, props)));
     assert.equal(render(BusinessEditor, { kind: 'stage' }, ['ENCADREUR']), '');
-    assert.match(render(BusinessEditor, { kind: 'stage', initial: { id: 2 } }, ['RESPONSABLE_STAGE']), /Modifier le dossier/);
-    const responsible = render(BusinessForm, { kind: 'encadreur', initial: { utilisateurId: 8 } }, ['RESPONSABLE_STAGE']);
-    assert.doesNotMatch(responsible, /name="utilisateurId"/);
-    assert.match(responsible, /compte déjà associé est conservé/);
+    assert.match(render(BusinessEditor, { kind: 'stage', initial: { id: 2 } }, ['ADMIN']), /Modifier le dossier/);
+    const responsible = render(BusinessForm, { kind: 'encadreur', initial: { utilisateurId: 8 } }, ['ADMIN']);
+    assert.match(responsible, /name="utilisateurId"/);
+    assert.doesNotMatch(render(BusinessForm, { kind: 'stagiaire' }, ['ADMIN']), /name="departementId"/);
     assert.match(responsible, /<select[^>]*name="departementId"/);
     assert.match(render(BusinessForm, { kind: 'encadreur' }, ['ADMIN']), /<select[^>]*name="utilisateurId"/);
     const participantForm = render(BusinessForm, { kind: 'participation' }, ['ADMIN']);
@@ -27,7 +27,7 @@ test('rendu métier : permissions, champs alimentés par API et actions selon st
     const readOnly = render(Actions, { participation }, ['ENCADREUR']);
     assert.doesNotMatch(readOnly, /<button/);
     assert.match(readOnly, /Chargement des actions autorisées/);
-    const manager = render(Actions, { participation }, ['RESPONSABLE_STAGE']);
+    const manager = render(Actions, { participation }, ['ADMIN']);
     assert.match(manager, /Chargement des actions autorisées/);
     assert.doesNotMatch(manager, />Reprendre<\/button>/);
     assert.doesNotMatch(manager, />Clôturer<\/button>/);

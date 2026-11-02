@@ -27,7 +27,7 @@ export default function EncadreursPage({ navigate }) {
       renderCreate={(reload) => <BusinessEditor kind="encadreur" label="Créer l’encadreur" save={createEncadreur} onSaved={reload} />}
       fetcher={listEncadreurs}
       creator={createEncadreur}
-      canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE'])}
+      canCreate={hasAnyRole(utilisateur, ['ADMIN'])}
       createLabel="Créer l’encadreur"
     />
   );

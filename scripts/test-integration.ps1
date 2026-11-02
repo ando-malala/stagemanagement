@@ -1,3 +1,4 @@
+param([switch]$KeepUploads)
 $ErrorActionPreference = 'Stop'
 # Create a uniquely named empty test database; never restore over the configured database.
 $projectRoot = Split-Path $PSScriptRoot -Parent
@@ -38,7 +39,8 @@ try {
     [IO.File]::WriteAllText($schemaFile, $schema, [Text.UTF8Encoding]::new($false))
     & $pgExecutable -X -w -h $sourceUrl.Host -p $sourceUrl.Port -U $settings['username'] -d $testDatabase -v ON_ERROR_STOP=1 -f $schemaFile | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Cannot initialize the isolated test schema.' }
-    Get-ChildItem -LiteralPath (Join-Path $projectRoot 'backend/migrations') -Filter '*.sql' | Sort-Object Name | ForEach-Object {
+    # V001 is retired: verify Hibernate against the original stagiaires table without departement_id.
+    Get-ChildItem -LiteralPath (Join-Path $projectRoot 'backend/migrations') -Filter '*.sql' | Where-Object Name -ne 'V001__stagiaire_department.sql' | Sort-Object Name | ForEach-Object {
         & $pgExecutable -X -w -h $sourceUrl.Host -p $sourceUrl.Port -U $settings['username'] -d $testDatabase -v ON_ERROR_STOP=1 -f $_.FullName | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Cannot apply test migration.' }
     }
@@ -64,6 +66,7 @@ try {
     $uploadRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'backend/target/integration-uploads'))
     $uploadDirectory = [IO.Path]::GetFullPath((Join-Path $uploadRoot $testDatabase))
     if (!$uploadDirectory.StartsWith($uploadRoot + [IO.Path]::DirectorySeparatorChar) -or (Split-Path $uploadDirectory -Leaf) -ne $testDatabase) { throw 'Unsafe upload cleanup path.' }
-    if (Test-Path -LiteralPath $uploadDirectory) { Remove-Item -LiteralPath $uploadDirectory -Recurse -Force }
+    if (!$KeepUploads -and (Test-Path -LiteralPath $uploadDirectory)) { Remove-Item -LiteralPath $uploadDirectory -Recurse -Force }
+    if ($KeepUploads) { Write-Host 'Isolated fixture uploads retained for browser acceptance.' }
 }
 exit $testExit

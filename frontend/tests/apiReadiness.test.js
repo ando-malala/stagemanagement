@@ -39,7 +39,7 @@ test('contrôle HTTP réel sur serveur local : GET seulement, droits et sous-dos
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const baseUrl = `http://127.0.0.1:${server.address().port}/api`;
-  for (const role of ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR', 'STAGIAIRE']) {
+  for (const role of ['ADMIN', 'ENCADREUR', 'STAGIAIRE']) {
     roles = [role];
     const start = requests.length;
     const result = await runApiChecks({ baseUrl, token });

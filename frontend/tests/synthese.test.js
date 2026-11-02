@@ -24,8 +24,8 @@ test('synthèses : contrats réels, signal et erreurs de format', async context 
 test('exports : refus serveur conservé et périmètres déclarés dans Spring', async context => {
   const inventory = JSON.parse(readFileSync(new URL('../../docs/api-inventory.json', import.meta.url), 'utf8'));
   for (const [call, path, template, roles] of [
-    [() => downloadBilan(42), '/api/stage-participants/42/bilan.pdf', '/api/stage-participants/{id}/bilan.pdf', ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR', 'STAGIAIRE']],
-    ...['participations', 'statistiques', 'alertes'].map(type => [() => downloadExport(type), `/api/exports/${type}.csv`, `/api/exports/${type}.csv`, ['ADMIN', 'RESPONSABLE_STAGE', 'ENCADREUR']])
+    [() => downloadBilan(42), '/api/stage-participants/42/bilan.pdf', '/api/stage-participants/{id}/bilan.pdf', ['ADMIN', 'ENCADREUR', 'STAGIAIRE']],
+    ...['participations', 'statistiques', 'alertes'].map(type => [() => downloadExport(type), `/api/exports/${type}.csv`, `/api/exports/${type}.csv`, ['ADMIN', 'ENCADREUR']])
   ]) {
     assert.deepEqual(inventory.find(e => e.method === 'GET' && e.path === template)?.roles, roles);
     context.mock.method(globalThis, 'fetch', async url => {

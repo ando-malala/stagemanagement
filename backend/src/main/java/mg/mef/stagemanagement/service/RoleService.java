@@ -19,12 +19,15 @@ public class RoleService {
 
     @Transactional(readOnly = true)
     public List<Role> findAll() {
-        return repository.findAll();
+        return repository.findAll().stream()
+                .filter(role -> mg.mef.stagemanagement.security.ApplicationRoles.SUPPORTED.contains(role.getCode()))
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public Optional<Role> findById(Integer id) {
-        return repository.findById(id);
+        return repository.findById(id)
+                .filter(role -> mg.mef.stagemanagement.security.ApplicationRoles.SUPPORTED.contains(role.getCode()));
     }
 
     @Transactional

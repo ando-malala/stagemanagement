@@ -23,7 +23,7 @@ test('payload : nombres, booléens, champs absents, mot de passe intact', () => 
 test('permissions métier, refus par défaut et rôle STAGIAIRE sans accès métier', () => {
   assert.equal(can({ roles: ['ENCADREUR'] }, 'gererRapports'), true);
   assert.equal(can({ roles: ['ENCADREUR'] }, 'gererStages'), false);
-  assert.equal(can({ roles: ['RESPONSABLE_STAGE'] }, 'gererUtilisateurs'), false);
+  assert.equal(can({ roles: ['ADMIN'] }, 'gererUtilisateurs'), true);
   assert.equal(can({ roles: ['STAGIAIRE'] }, 'consulterMetier'), false);
   assert.equal(can({ roles: ['ADMIN'] }, 'actionInconnue'), false);
   assert.equal(can(null, 'consulterMetier'), false);
@@ -41,7 +41,7 @@ test('traitement des alertes : nature du DTO et état réel, sans confondre prio
 test('inventaire : endpoints métiers admis et CRUD sensibles fermés', () => {
   const endpoints = JSON.parse(readFileSync(new URL('../../docs/api-inventory.json', import.meta.url), 'utf8'));
   const find = (method, path) => endpoints.find((e) => e.method === method && e.path === path);
-  assert.deepEqual(find('POST', '/api/stage-participants/{id}/suspendre').roles, ['ADMIN', 'RESPONSABLE_STAGE']);
+  assert.deepEqual(find('POST', '/api/stage-participants/{id}/suspendre').roles, ['ADMIN']);
   assert.equal(find('POST', '/api/stage-participants/{id}/suspendre').body, 'EvenementParticipationRequest');
   assert.equal(find('GET', '/api/types-piece-jointe').access, 'denyAll');
   assert.equal(find('GET', '/api/sessions-utilisateur').access, 'denyAll');

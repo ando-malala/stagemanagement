@@ -26,7 +26,7 @@ const participationColumns = [
 
 export default function StagesPage({ navigate }) {
   const { utilisateur } = useAuth();
-  const canWrite = hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE']);
+  const canWrite = hasAnyRole(utilisateur, ['ADMIN']);
 
   return (
     <div className="page-stack">

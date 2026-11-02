@@ -22,7 +22,6 @@ export default function AccountAdministration({ account }) {
   if (!can(utilisateur, 'gererUtilisateurs')) return null;
   return <div className="page-stack">
     <MembershipPanel kind="roles" account={account} />
-    <MembershipPanel kind="departements" account={account} />
     <ResetPassword account={account} />
     <p className="notice">Les changements de statut et l’historique du compte ne sont pas disponibles dans cette interface.</p>
   </div>;

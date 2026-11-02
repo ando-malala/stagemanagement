@@ -36,7 +36,7 @@ export const businessFields = {
     options: [{ value: 'OBSERVATION', label: 'Observation' }, { value: 'DEMANDE_CORRECTION', label: 'Demande de correction' }, { value: 'VALIDATION', label: 'Validation' }] },
     paragraph('commentaire', 'Commentaire', true), { name: 'visibleStagiaire', label: 'Visibilité stagiaire', type: 'select', valueType: 'boolean', required: true,
       options: [{ value: 'true', label: 'Visible' }, { value: 'false', label: 'Non visible' }] }],
-  stagiaire: [choice('departementId', 'Departement de rattachement', ref('organisation', 'departements'), ['libelle'], false), text('nom', 'Nom', 150, true), text('prenoms', 'Prénoms', 250, true),
+  stagiaire: [text('nom', 'Nom', 150, true), text('prenoms', 'Prénoms', 250, true),
     text('adresse', 'Adresse', 250, true), text('contact', 'Contact', 100), { ...text('email', 'Courriel', 150), type: 'email' }],
   encadreur: [choice('utilisateurId', 'Compte associé', '/api/utilisateurs', ['identifiant'], false),
     text('nom', 'Nom', 250, true), text('prenoms', 'Prénoms', 250, true), text('fonction', 'Fonction', 150),

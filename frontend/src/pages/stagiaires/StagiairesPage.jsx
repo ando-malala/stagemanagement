@@ -26,7 +26,7 @@ export default function StagiairesPage({ navigate }) {
       renderCreate={(reload) => <BusinessEditor kind="stagiaire" label="Créer le stagiaire" save={createStagiaire} onSaved={reload} />}
       fetcher={listStagiaires}
       creator={createStagiaire}
-      canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE'])}
+      canCreate={hasAnyRole(utilisateur, ['ADMIN'])}
       createLabel="Créer le stagiaire"
     />
   );

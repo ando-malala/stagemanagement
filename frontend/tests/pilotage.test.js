@@ -35,7 +35,7 @@ test('référentiels : valeurs false préservées, contraintes et département s
   assert.equal(businessPayload('structure', { libelle: 'Structure', departementId: '3', actif: 'false', porte: '' }).porte, null);
   for (const kind of ['reference', 'departement', 'structure', 'cadre']) {
     assert.equal(canEditBusiness({ roles: ['ADMIN'] }, kind), true);
-    assert.equal(canEditBusiness({ roles: ['RESPONSABLE_STAGE'] }, kind), false);
+    assert.equal(canEditBusiness({ roles: ['ENCADREUR'] }, kind), false);
   }
 });
 

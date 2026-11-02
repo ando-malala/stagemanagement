@@ -13,6 +13,6 @@ export default function AcademiquesPanel({ stagiaireId }) {
   const { utilisateur } = useAuth();
   const fetcher = useCallback((options) => listAcademiques(stagiaireId, options), [stagiaireId]);
   return <EntityPage title="Profils académiques" description="Profils utilisables pour les affectations aux stages."
-    columns={columns} fetcher={fetcher} canCreate={hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE'])}
+    columns={columns} fetcher={fetcher} canCreate={hasAnyRole(utilisateur, ['ADMIN'])}
     renderCreate={(reload) => <BusinessEditor kind="academique" label="Ajouter un profil académique" save={(payload) => createAcademique(stagiaireId, payload)} onSaved={reload} />} />;
 }

@@ -24,11 +24,11 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/alertes` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<List<AlerteResponse>>` |
-| GET | `/api/alertes/non-lues` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<List<AlerteResponse>>` |
-| POST | `/api/alertes` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<AlerteResponse>` |
-| PATCH | `/api/alertes/{id}/lire` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<AlerteResponse>` |
-| PATCH | `/api/alertes/tout-lire` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 204 | `ResponseEntity<Void>` |
+| GET | `/api/alertes` | ADMIN, ENCADREUR | 200 | `ResponseEntity<List<AlerteResponse>>` |
+| GET | `/api/alertes/non-lues` | ADMIN, ENCADREUR | 200 | `ResponseEntity<List<AlerteResponse>>` |
+| POST | `/api/alertes` | ADMIN | 201 | `ResponseEntity<AlerteResponse>` |
+| PATCH | `/api/alertes/{id}/lire` | ADMIN, ENCADREUR | 200 | `ResponseEntity<AlerteResponse>` |
+| PATCH | `/api/alertes/tout-lire` | ADMIN, ENCADREUR | 204 | `ResponseEntity<Void>` |
 
 - `listerAlertes` : `aucun paramètre`.
 - `listerAlertesATraiter` : `aucun paramètre`.
@@ -84,7 +84,7 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/dashboard/resume` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<DashboardResumeResponse>` |
+| GET | `/api/dashboard/resume` | ADMIN, ENCADREUR | 200 | `ResponseEntity<DashboardResumeResponse>` |
 
 - `resume` : `aucun paramètre`.
 
@@ -124,11 +124,11 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/encadreurs` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<EncadreurResponse>>` |
-| GET | `/api/encadreurs/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<EncadreurResponse>` |
-| POST | `/api/encadreurs` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<EncadreurResponse>` |
-| PATCH | `/api/encadreurs/{id}` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<EncadreurResponse>` |
-| PATCH | `/api/encadreurs/{id}/statut` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<EncadreurResponse>` |
+| GET | `/api/encadreurs` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<EncadreurResponse>>` |
+| GET | `/api/encadreurs/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<EncadreurResponse>` |
+| POST | `/api/encadreurs` | ADMIN | 201 | `ResponseEntity<EncadreurResponse>` |
+| PATCH | `/api/encadreurs/{id}` | ADMIN | 200 | `ResponseEntity<EncadreurResponse>` |
+| PATCH | `/api/encadreurs/{id}/statut` | ADMIN | 200 | `ResponseEntity<EncadreurResponse>` |
 
 - `listerEncadreurs` : `aucun paramètre`.
 - `trouverEncadreur` : `@PathVariable Integer id`.
@@ -204,15 +204,15 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/evaluations` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<List<EvaluationFinaleResponse>>` |
-| GET | `/api/evaluations/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
-| GET | `/api/evaluations/participation/{stageParticipantId}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
-| POST | `/api/evaluations` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 201 | `ResponseEntity<EvaluationFinaleResponse>` |
-| PATCH | `/api/evaluations/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
-| GET | `/api/evaluations/criteres` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<List<CritereEvaluationResponse>>` |
-| GET | `/api/evaluations/{id}/notes` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<List<EvaluationCritereResponse>>` |
-| POST | `/api/evaluations/{id}/notes` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 201 | `ResponseEntity<EvaluationCritereResponse>` |
-| POST | `/api/evaluations/{id}/finaliser` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
+| GET | `/api/evaluations` | ADMIN, ENCADREUR | 200 | `ResponseEntity<List<EvaluationFinaleResponse>>` |
+| GET | `/api/evaluations/{id}` | ADMIN, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
+| GET | `/api/evaluations/participation/{stageParticipantId}` | ADMIN, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
+| POST | `/api/evaluations` | ADMIN, ENCADREUR | 201 | `ResponseEntity<EvaluationFinaleResponse>` |
+| PATCH | `/api/evaluations/{id}` | ADMIN, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
+| GET | `/api/evaluations/criteres` | ADMIN, ENCADREUR | 200 | `ResponseEntity<List<CritereEvaluationResponse>>` |
+| GET | `/api/evaluations/{id}/notes` | ADMIN, ENCADREUR | 200 | `ResponseEntity<List<EvaluationCritereResponse>>` |
+| POST | `/api/evaluations/{id}/notes` | ADMIN, ENCADREUR | 201 | `ResponseEntity<EvaluationCritereResponse>` |
+| POST | `/api/evaluations/{id}/finaliser` | ADMIN, ENCADREUR | 200 | `ResponseEntity<EvaluationFinaleResponse>` |
 
 - `listerEvaluations` : `aucun paramètre`.
 - `trouverEvaluation` : `@PathVariable Integer id`.
@@ -244,11 +244,11 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/stagiaires/{id}/fichiers` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<FichierResponse>>` |
-| POST | `/api/stagiaires/{id}/fichiers` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<FichierResponse>` |
-| GET | `/api/stage-participants/{id}/fichiers` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<FichierResponse>>` |
-| POST | `/api/stage-participants/{id}/fichiers` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<FichierResponse>` |
-| GET | `/api/fichiers/{id}/telecharger` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<Resource>` |
+| GET | `/api/stagiaires/{id}/fichiers` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<FichierResponse>>` |
+| POST | `/api/stagiaires/{id}/fichiers` | ADMIN | 200 | `ResponseEntity<FichierResponse>` |
+| GET | `/api/stage-participants/{id}/fichiers` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<FichierResponse>>` |
+| POST | `/api/stage-participants/{id}/fichiers` | ADMIN | 200 | `ResponseEntity<FichierResponse>` |
+| GET | `/api/fichiers/{id}/telecharger` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<Resource>` |
 
 - `listerFichiersStagiaire` : `@PathVariable Integer id`.
 - `ajouterFichierStagiaire` : `@PathVariable Integer id, @RequestParam("typePieceJointeCode") String typePieceJointeCode, @RequestParam("fichier") MultipartFile fichier, @AuthenticationPrincipal AuthMeResponse utilisateurConnecte`.
@@ -364,14 +364,14 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/rapports-activite` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportActiviteResponse>>` |
-| GET | `/api/rapports-activite/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
-| GET | `/api/rapports-activite/participation/{stageParticipantId}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportActiviteResponse>>` |
-| POST | `/api/rapports-activite` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 201 | `ResponseEntity<RapportActiviteResponse>` |
-| PATCH | `/api/rapports-activite/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
-| GET | `/api/rapports-activite/{id}/observations` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportObservationResponse>>` |
-| POST | `/api/rapports-activite/{id}/observations` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 201 | `ResponseEntity<RapportObservationResponse>` |
-| PATCH | `/api/rapports-activite/{id}/statut` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
+| GET | `/api/rapports-activite` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportActiviteResponse>>` |
+| GET | `/api/rapports-activite/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
+| GET | `/api/rapports-activite/participation/{stageParticipantId}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportActiviteResponse>>` |
+| POST | `/api/rapports-activite` | ADMIN, ENCADREUR, STAGIAIRE | 201 | `ResponseEntity<RapportActiviteResponse>` |
+| PATCH | `/api/rapports-activite/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
+| GET | `/api/rapports-activite/{id}/observations` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportObservationResponse>>` |
+| POST | `/api/rapports-activite/{id}/observations` | ADMIN, ENCADREUR | 201 | `ResponseEntity<RapportObservationResponse>` |
+| PATCH | `/api/rapports-activite/{id}/statut` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
 
 - `listerRapports` : `aucun paramètre`.
 - `trouverRapport` : `@PathVariable Integer id`.
@@ -536,10 +536,10 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/soutenances` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<List<SoutenanceResponse>>` |
-| GET | `/api/soutenances/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<SoutenanceResponse>` |
-| POST | `/api/soutenances` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<SoutenanceResponse>` |
-| PATCH | `/api/soutenances/{id}` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<SoutenanceResponse>` |
+| GET | `/api/soutenances` | ADMIN, ENCADREUR | 200 | `ResponseEntity<List<SoutenanceResponse>>` |
+| GET | `/api/soutenances/{id}` | ADMIN, ENCADREUR | 200 | `ResponseEntity<SoutenanceResponse>` |
+| POST | `/api/soutenances` | ADMIN | 201 | `ResponseEntity<SoutenanceResponse>` |
+| PATCH | `/api/soutenances/{id}` | ADMIN | 200 | `ResponseEntity<SoutenanceResponse>` |
 
 - `listerSoutenances` : `aucun paramètre`.
 - `trouverSoutenance` : `@PathVariable Integer id`.
@@ -550,23 +550,23 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/stages` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StageResponse>>` |
-| GET | `/api/stages/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<StageResponse>` |
-| POST | `/api/stages` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<StageResponse>` |
-| PATCH | `/api/stages/{id}` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageResponse>` |
-| GET | `/api/stages/{id}/participants` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StageParticipantResponse>>` |
-| GET | `/api/stagiaires/{id}/participations` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `java.util.List<StageParticipantResponse>` |
-| GET | `/api/stage-participants` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StageParticipantResponse>>` |
-| GET | `/api/stage-participants/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<StageParticipantResponse>` |
-| PATCH | `/api/stage-participants/{id}` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| PATCH | `/api/stage-participants/{id}/statut` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants/{id}/prolonger` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants/{id}/suspendre` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants/{id}/reprendre` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants/{id}/abandonner` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants/{id}/annuler` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
-| POST | `/api/stage-participants/{id}/cloturer` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StageParticipantResponse>` |
+| GET | `/api/stages` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StageResponse>>` |
+| GET | `/api/stages/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<StageResponse>` |
+| POST | `/api/stages` | ADMIN | 201 | `ResponseEntity<StageResponse>` |
+| PATCH | `/api/stages/{id}` | ADMIN | 200 | `ResponseEntity<StageResponse>` |
+| GET | `/api/stages/{id}/participants` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StageParticipantResponse>>` |
+| GET | `/api/stagiaires/{id}/participations` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `java.util.List<StageParticipantResponse>` |
+| GET | `/api/stage-participants` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StageParticipantResponse>>` |
+| GET | `/api/stage-participants/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants` | ADMIN | 201 | `ResponseEntity<StageParticipantResponse>` |
+| PATCH | `/api/stage-participants/{id}` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| PATCH | `/api/stage-participants/{id}/statut` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants/{id}/prolonger` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants/{id}/suspendre` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants/{id}/reprendre` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants/{id}/abandonner` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants/{id}/annuler` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
+| POST | `/api/stage-participants/{id}/cloturer` | ADMIN | 200 | `ResponseEntity<StageParticipantResponse>` |
 
 - `listerStages` : `aucun paramètre`.
 - `trouverStage` : `@PathVariable Integer id`.
@@ -670,12 +670,12 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/stagiaires` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StagiaireResponse>>` |
-| GET | `/api/stagiaires/{id}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<StagiaireResponse>` |
-| POST | `/api/stagiaires` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<StagiaireResponse>` |
-| PATCH | `/api/stagiaires/{id}` | ADMIN, RESPONSABLE_STAGE | 200 | `ResponseEntity<StagiaireResponse>` |
-| GET | `/api/stagiaires/{id}/academiques` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StagiaireAcademiqueResponse>>` |
-| POST | `/api/stagiaires/{id}/academiques` | ADMIN, RESPONSABLE_STAGE | 201 | `ResponseEntity<StagiaireAcademiqueResponse>` |
+| GET | `/api/stagiaires` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StagiaireResponse>>` |
+| GET | `/api/stagiaires/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<StagiaireResponse>` |
+| POST | `/api/stagiaires` | ADMIN | 201 | `ResponseEntity<StagiaireResponse>` |
+| PATCH | `/api/stagiaires/{id}` | ADMIN | 200 | `ResponseEntity<StagiaireResponse>` |
+| GET | `/api/stagiaires/{id}/academiques` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<StagiaireAcademiqueResponse>>` |
+| POST | `/api/stagiaires/{id}/academiques` | ADMIN | 201 | `ResponseEntity<StagiaireAcademiqueResponse>` |
 
 - `listerStagiaires` : `aucun paramètre`.
 - `trouverStagiaire` : `@PathVariable Integer id`.
@@ -736,17 +736,17 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/referentiels/suivi/types-documents` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<DocumentCatalogueService.TypeDocument>` |
-| GET | `/api/referentiels/suivi/types-evenements` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
-| GET | `/api/referentiels/suivi/types-alertes` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
-| GET | `/api/referentiels/suivi/statuts/{type}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<ReferentielWorkflowService.Reference>` |
-| GET | `/api/referentiels/suivi/transitions/{type}/{source}` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<ReferentielWorkflowService.Transition>` |
-| GET | `/api/stage-participants/{id}/documents-obligatoires` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<DocumentCatalogueService.DocumentObligatoire>` |
-| GET | `/api/stage-participants/{id}/historique-statuts` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Historique>` |
-| GET | `/api/stage-participants/{id}/evenements` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Evenement>` |
-| GET | `/api/stage-participants/{id}/periodes-rapports` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Periode>` |
-| GET | `/api/stage-participants/{id}/actions` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Action>` |
-| GET | `/api/encadreurs/{id}/charge` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `SuiviParticipationService.Charge` |
+| GET | `/api/referentiels/suivi/types-documents` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<DocumentCatalogueService.TypeDocument>` |
+| GET | `/api/referentiels/suivi/types-evenements` | ADMIN, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
+| GET | `/api/referentiels/suivi/types-alertes` | ADMIN, ENCADREUR | 200 | `List<ReferentielWorkflowService.Reference>` |
+| GET | `/api/referentiels/suivi/statuts/{type}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<ReferentielWorkflowService.Reference>` |
+| GET | `/api/referentiels/suivi/transitions/{type}/{source}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<ReferentielWorkflowService.Transition>` |
+| GET | `/api/stage-participants/{id}/documents-obligatoires` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<DocumentCatalogueService.DocumentObligatoire>` |
+| GET | `/api/stage-participants/{id}/historique-statuts` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Historique>` |
+| GET | `/api/stage-participants/{id}/evenements` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Evenement>` |
+| GET | `/api/stage-participants/{id}/periodes-rapports` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Periode>` |
+| GET | `/api/stage-participants/{id}/actions` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `List<SuiviParticipationService.Action>` |
+| GET | `/api/encadreurs/{id}/charge` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `SuiviParticipationService.Charge` |
 
 - `typesDocuments` : `aucun paramètre`.
 - `typesEvenements` : `aucun paramètre`.
@@ -764,13 +764,13 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
-| GET | `/api/stagiaires/{id}/dossier` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `DossierSyntheseService.Dossier` |
-| GET | `/api/dashboard/pilotage` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `PilotageService.Pilotage` |
-| GET | `/api/dashboard/priorites` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `List<PilotageService.Priorite>` |
-| GET | `/api/stage-participants/{id}/bilan.pdf` | ADMIN, RESPONSABLE_STAGE, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<byte[]>` |
-| GET | `/api/exports/participations.csv` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
-| GET | `/api/exports/statistiques.csv` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
-| GET | `/api/exports/alertes.csv` | ADMIN, RESPONSABLE_STAGE, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/stagiaires/{id}/dossier` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `DossierSyntheseService.Dossier` |
+| GET | `/api/dashboard/pilotage` | ADMIN, ENCADREUR | 200 | `PilotageService.Pilotage` |
+| GET | `/api/dashboard/priorites` | ADMIN, ENCADREUR | 200 | `List<PilotageService.Priorite>` |
+| GET | `/api/stage-participants/{id}/bilan.pdf` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/exports/participations.csv` | ADMIN, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/exports/statistiques.csv` | ADMIN, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
+| GET | `/api/exports/alertes.csv` | ADMIN, ENCADREUR | 200 | `ResponseEntity<byte[]>` |
 
 - `dossier` : `@PathVariable Integer id`.
 - `pilotage` : `aucun paramètre`.
@@ -1090,11 +1090,11 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 ### [StagiaireRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/stagiaire/StagiaireRequest.java)
 
-`departementId: Integer`, `nom: String`, `prenoms: String`, `adresse: String`, `contact: String`, `email: String`
+`nom: String`, `prenoms: String`, `adresse: String`, `contact: String`, `email: String`
 
 ### [StagiaireResponse](../backend/src/main/java/mg/mef/stagemanagement/dto/stagiaire/StagiaireResponse.java)
 
-`departementId: Integer`, `id: Integer`, `nom: String`, `prenoms: String`, `adresse: String`, `contact: String`, `email: String`, `statut: String`, `dateCreation: LocalDateTime`
+`id: Integer`, `nom: String`, `prenoms: String`, `adresse: String`, `contact: String`, `email: String`, `statut: String`, `dateCreation: LocalDateTime`
 
 ### [AjouterDepartementUtilisateurRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/utilisateur/AjouterDepartementUtilisateurRequest.java)
 
@@ -1433,10 +1433,11 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : Le nouveau mot de passe doit contenir au moins 12 caractères
 - `BAD_REQUEST` : Le rôle est obligatoire
 - `NOT_FOUND` : Ce rôle n'est pas attribué à cet utilisateur
-- `BAD_REQUEST` : Un utilisateur doit conserver au moins un rôle
+- `BAD_REQUEST` : Un utilisateur doit conserver au moins un rôle actif
 - `BAD_REQUEST` : Le département est obligatoire
 - `NOT_FOUND` : Département introuvable
 - `NOT_FOUND` : Ce département n'est pas attribué à cet utilisateur
+- `BAD_REQUEST` : Rôle attendu : ADMIN, ENCADREUR ou STAGIAIRE
 
 ## Modèles — relations et stockage
 
@@ -1472,7 +1473,7 @@ Ces champs ne sont pas tous des champs de DTO et ne doivent pas être envoyés a
 - [StageParticipantEvenement](../backend/src/main/java/mg/mef/stagemanagement/model/StageParticipantEvenement.java) : `id: Integer`, `stageParticipant: StageParticipant`, `typeEvenement: TypeEvenementParticipation`, `dateEvenement: LocalDateTime`, `dateEffet: LocalDate`, `ancienneDateFin: LocalDate`, `nouvelleDateFin: LocalDate`, `motif: String`, `responsable: Utilisateur`
 - [StageParticipantFichier](../backend/src/main/java/mg/mef/stagemanagement/model/StageParticipantFichier.java) : `id: Integer`, `stageParticipant: StageParticipant`, `fichier: Fichier`, `typePieceJointe: TypePieceJointe`, `dateAssociation: LocalDateTime`
 - [StageParticipantStatutHistorique](../backend/src/main/java/mg/mef/stagemanagement/model/StageParticipantStatutHistorique.java) : `id: Integer`, `stageParticipant: StageParticipant`, `ancienStatut: Statut`, `statut: Statut`, `responsable: Utilisateur`, `motif: String`, `dateModification: LocalDateTime`
-- [Stagiaire](../backend/src/main/java/mg/mef/stagemanagement/model/Stagiaire.java) : `id: Integer`, `nom: String`, `prenoms: String`, `adresse: String`, `contact: String`, `email: String`, `statut: Statut`, `utilisateur: Utilisateur`, `photoFichier: Fichier`, `dateCreation: LocalDateTime`, `departement: Departement`
+- [Stagiaire](../backend/src/main/java/mg/mef/stagemanagement/model/Stagiaire.java) : `id: Integer`, `nom: String`, `prenoms: String`, `adresse: String`, `contact: String`, `email: String`, `statut: Statut`, `utilisateur: Utilisateur`, `photoFichier: Fichier`, `dateCreation: LocalDateTime`
 - [StagiaireAcademique](../backend/src/main/java/mg/mef/stagemanagement/model/StagiaireAcademique.java) : `id: Integer`, `stagiaire: Stagiaire`, `niveauEtude: NiveauEtude`, `filiere: Filiere`, `etablissement: Etablissement`, `anneeEtudes: String`
 - [StagiaireFichier](../backend/src/main/java/mg/mef/stagemanagement/model/StagiaireFichier.java) : `id: Integer`, `stagiaire: Stagiaire`, `fichier: Fichier`, `typePieceJointe: TypePieceJointe`, `dateAssociation: LocalDateTime`
 - [StagiaireStatutHistorique](../backend/src/main/java/mg/mef/stagemanagement/model/StagiaireStatutHistorique.java) : `id: Integer`, `stagiaire: Stagiaire`, `ancienStatut: Statut`, `statut: Statut`, `responsable: Utilisateur`, `motif: String`, `dateModification: LocalDateTime`

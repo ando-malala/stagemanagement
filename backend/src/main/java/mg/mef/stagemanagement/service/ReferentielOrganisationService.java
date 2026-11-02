@@ -55,7 +55,7 @@ public class ReferentielOrganisationService {
 
     public List<DepartementResponse> listerDepartements() {
         return departementRepository.findAll()
-                .stream().filter(d -> access.role("ADMIN") || !access.role("RESPONSABLE_STAGE") || access.department(d.getId()))
+                .stream()
                 .sorted(Comparator.comparing(Departement::getLibelle))
                 .map(this::toDepartementResponse)
                 .toList();
@@ -133,7 +133,7 @@ public class ReferentielOrganisationService {
 
     public List<StructureAccueilResponse> listerStructuresAccueil() {
         return structureAccueilRepository.findAll()
-                .stream().filter(s -> access.role("ADMIN") || !access.role("RESPONSABLE_STAGE") || access.department(s.getDepartement().getId()))
+                .stream()
                 .sorted(Comparator.comparing(StructureAccueil::getLibelle))
                 .map(this::toStructureAccueilResponse)
                 .toList();

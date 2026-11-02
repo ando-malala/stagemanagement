@@ -17,7 +17,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DossierAccessTests {
-    @Mock ResponsableDepartementRepository departments;
     @Mock StageParticipantRepository participations;
     @Mock StagiaireRepository trainees;
     @Mock StageRepository stages;
@@ -42,14 +41,13 @@ class DossierAccessTests {
         lenient().when(p.getStagiaireAcademique().getStagiaire().getUtilisateur().getId()).thenReturn(traineeUser);
         return p;
     }
-    @Test void departmentManagersCannotReadOrWriteAnotherDepartment() {
-        login(10, "RESPONSABLE_STAGE");
-        when(departments.existsByUtilisateur_IdAndDepartement_Id(10, 1)).thenReturn(true);
+    @Test void administratorsManageParticipationsAcrossDepartments() {
+        login(10, "ADMIN");
         var own = participation(1, 20, 30); var other = participation(2, 21, 31);
         assertTrue(access.readParticipation(own)); assertTrue(access.manageParticipation(own));
-        assertFalse(access.readParticipation(other)); assertFalse(access.manageParticipation(other));
+        assertTrue(access.readParticipation(other)); assertTrue(access.manageParticipation(other));
         when(participations.findById(2)).thenReturn(Optional.of(other));
-        assertEquals(403, assertThrows(ResponseStatusException.class, () -> access.participation(2, true)).getStatusCode().value());
+        assertSame(other, access.participation(2, true));
     }
     @Test void mentorsNeedActualAssignmentNotJustTheSameDepartment() {
         login(20, "ENCADREUR");
@@ -79,18 +77,35 @@ class DossierAccessTests {
         var report = new RapportActivite(); report.setStageParticipant(participation(2, 21, 31)); alert.setRapport(report);
         assertFalse(access.readAlert(alert));
     }
-    @Test void mentorWorkloadAlertDoesNotDiscloseCountsFromOtherDepartments() {
-        login(10, "RESPONSABLE_STAGE");
-        when(departments.existsByUtilisateur_IdAndDepartement_Id(10, 1)).thenReturn(true);
+    @Test void administratorsReadGlobalWorkloadAndAssignedMentorsReadTheirOwn() {
+        login(10, "ADMIN");
         var department = new Departement(); department.setId(1);
         var mentor = new Encadreur(); mentor.setId(7); mentor.setDepartement(department);
-        var own = participation(1, 20, 30); var other = participation(2, 20, 31);
-        when(own.getStatut().getCode()).thenReturn("EN_COURS"); when(other.getStatut().getCode()).thenReturn("EN_COURS");
-        when(participations.findByEncadreur_Id(7)).thenReturn(List.of(own, other));
         var type = new TypeAlerte(); type.setCode("ENCADREUR_SURCHARGE");
         var alert = new Alerte(); alert.setTypeAlerte(type); alert.setEncadreur(mentor);
-        assertFalse(access.readAlert(alert));
+        assertTrue(access.readAlert(alert));
         login(20, "ENCADREUR"); var user = new Utilisateur(); user.setId(20); mentor.setUtilisateur(user);
         assertTrue(access.readAlert(alert));
+    }
+
+    @Test void unassignedTraineeNeedsAdminOrItsOwnAccount() {
+        var trainee = new Stagiaire(); trainee.setId(42);
+        var owner = new Utilisateur(); owner.setId(30); trainee.setUtilisateur(owner);
+        when(trainees.findById(42)).thenReturn(Optional.of(trainee));
+        login(10, "ADMIN"); assertSame(trainee, access.trainee(42, true));
+        login(20, "ENCADREUR"); assertFalse(access.readTrainee(trainee));
+        login(31, "STAGIAIRE"); assertFalse(access.readTrainee(trainee));
+        login(30, "STAGIAIRE"); assertTrue(access.readTrainee(trainee));
+        assertEquals(403, assertThrows(ResponseStatusException.class, () -> access.trainee(42, true)).getStatusCode().value());
+    }
+
+    @Test void mentorReadsTraineeViaActualParticipationWithoutOwningOtherParticipations() {
+        var trainee = new Stagiaire(); trainee.setId(42);
+        var own = participation(1, 20, 30); var other = participation(2, 21, 30);
+        when(participations.findByStagiaireAcademique_Stagiaire_Id(42)).thenReturn(List.of(own, other));
+        login(20, "ENCADREUR");
+        assertTrue(access.readTrainee(trainee));
+        assertFalse(access.readParticipation(other));
+        login(22, "ENCADREUR"); assertFalse(access.readTrainee(trainee));
     }
 }

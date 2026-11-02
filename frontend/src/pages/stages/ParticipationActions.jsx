@@ -17,7 +17,7 @@ export default function ParticipationActions({ participation, onSaved }) {
   const [values, setValues] = useState({});
   const [pending, setPending] = useState(null);
   const [error, setError] = useState('');
-  const allowed = hasAnyRole(utilisateur, ['ADMIN', 'RESPONSABLE_STAGE']);
+  const allowed = hasAnyRole(utilisateur, ['ADMIN']);
   const fetcher = useCallback((options) => listActionsParticipation(participation.id, options), [participation.id]);
   const loaded = useFetch(fetcher);
   const actions = availableParticipationActions(participation, loaded.data ?? []);

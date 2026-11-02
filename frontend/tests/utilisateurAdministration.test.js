@@ -5,12 +5,12 @@ import { accountPayload, resetPasswordPayload, activeRoleOptions, requireRoleCod
 import { createUtilisateur, listRoles, listUtilisateurRoles, addUtilisateurRole, removeUtilisateurRole,
   listUtilisateurDepartements, addUtilisateurDepartement, removeUtilisateurDepartement, resetUtilisateurPassword } from '../src/api/utilisateurApi.js';
 
-const roles = [{ code: 'ROLE_TEST', libelle: 'Rôle de test', actif: true }, { code: 'INACTIF', libelle: 'Inactif', actif: false }];
+const roles = [{ code: 'ADMIN', libelle: 'Administration', actif: true }, { code: 'INACTIF', libelle: 'Inactif', actif: false }, { code: 'RESPONSABLE_STAGE', libelle: 'Ancien rôle', actif: true }];
 test('comptes : identifiant normalisé, mot de passe intact et rôle actif issu du serveur', () => {
-  const values = { identifiant: ' compte-test ', motDePasse: ' secret-test ', confirmation: ' secret-test ', roleCode: 'ROLE_TEST' };
-  assert.deepEqual(accountPayload(values, roles), { identifiant: 'compte-test', motDePasse: ' secret-test ', roleCode: 'ROLE_TEST' });
-  assert.deepEqual(activeRoleOptions(roles), [{ value: 'ROLE_TEST', label: 'Rôle de test (ROLE_TEST)' }]);
-  for (const invalid of [{ identifiant: ' ' }, { identifiant: 'a'.repeat(51) }, { motDePasse: 'court' }, { confirmation: 'different' }, { roleCode: 'INACTIF' }, { roleCode: 'INCONNU' }]) {
+  const values = { identifiant: ' compte-test ', motDePasse: ' secret-test ', confirmation: ' secret-test ', roleCode: 'ADMIN' };
+  assert.deepEqual(accountPayload(values, roles), { identifiant: 'compte-test', motDePasse: ' secret-test ', roleCode: 'ADMIN' });
+  assert.deepEqual(activeRoleOptions(roles), [{ value: 'ADMIN', label: 'Administration (ADMIN)' }]);
+  for (const invalid of [{ identifiant: ' ' }, { identifiant: 'a'.repeat(51) }, { motDePasse: 'court' }, { confirmation: 'different' }, { roleCode: 'INACTIF' }, { roleCode: 'INCONNU' }, { roleCode: 'RESPONSABLE_STAGE' }]) {
     assert.throws(() => accountPayload({ ...values, ...invalid }, roles));
   }
 });

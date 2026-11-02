@@ -48,10 +48,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/dossier", "/api/stage-participants/{id}/bilan.pdf")
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .hasAnyRole("ADMIN", "ENCADREUR", "STAGIAIRE")
                         .requestMatchers(HttpMethod.GET, "/api/dashboard/pilotage", "/api/dashboard/priorites",
                                 "/api/exports/participations.csv", "/api/exports/statistiques.csv", "/api/exports/alertes.csv")
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(HttpMethod.GET, "/api/portail/me").hasRole("STAGIAIRE")
                         .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/compte").hasRole("ADMIN")
@@ -69,11 +69,11 @@ public class SecurityConfig {
                                 "/api/rapports-activite/participation/{stageParticipantId}", "/api/rapports-activite/{id}/observations",
                                 "/api/referentiels/suivi/types-documents", "/api/referentiels/suivi/statuts/{type}",
                                 "/api/referentiels/suivi/transitions/{type}/{source}")
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .hasAnyRole("ADMIN", "ENCADREUR", "STAGIAIRE")
                         .requestMatchers(HttpMethod.POST, "/api/rapports-activite")
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .hasAnyRole("ADMIN", "ENCADREUR", "STAGIAIRE")
                         .requestMatchers(HttpMethod.PATCH, "/api/rapports-activite/{id}", "/api/rapports-activite/{id}/statut")
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR", "STAGIAIRE")
+                        .hasAnyRole("ADMIN", "ENCADREUR", "STAGIAIRE")
 
                         // =========================
                         // AUTHENTIFICATION
@@ -255,39 +255,39 @@ public class SecurityConfig {
                                 "/api/stagiaires/{id}",
                                 "/api/stagiaires/{id}/academiques"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/stagiaires",
                                 "/api/stagiaires/{id}/academiques"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/stagiaires/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/encadreurs",
                                 "/api/encadreurs/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/encadreurs"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/encadreurs/{id}",
                                 "/api/encadreurs/{id}/statut"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/stages",
@@ -296,32 +296,32 @@ public class SecurityConfig {
                                 "/api/stage-participants",
                                 "/api/stage-participants/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/stages",
                                 "/api/stage-participants"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/stages/{id}",
                                 "/api/stage-participants/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/stage-participants/{id}/statut"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/stage-participants/{id}/prolonger"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/stage-participants/{id}/suspendre",
@@ -330,21 +330,21 @@ public class SecurityConfig {
                                 "/api/stage-participants/{id}/annuler",
                                 "/api/stage-participants/{id}/cloturer"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/stagiaires/{id}/fichiers",
                                 "/api/stage-participants/{id}/fichiers",
                                 "/api/fichiers/{id}/telecharger"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/stagiaires/{id}/fichiers",
                                 "/api/stage-participants/{id}/fichiers"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/rapports-activite",
@@ -352,49 +352,49 @@ public class SecurityConfig {
                                 "/api/rapports-activite/participation/{stageParticipantId}",
                                 "/api/rapports-activite/{id}/observations"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/rapports-activite"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/rapports-activite/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/rapports-activite/{id}/observations"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/rapports-activite/{id}/statut"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/soutenances",
                                 "/api/soutenances/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/soutenances"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/soutenances/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -404,7 +404,7 @@ public class SecurityConfig {
                                 "/api/evaluations/criteres",
                                 "/api/evaluations/{id}/notes"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -412,38 +412,38 @@ public class SecurityConfig {
                                 "/api/evaluations/{id}/notes",
                                 "/api/evaluations/{id}/finaliser"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/evaluations/{id}"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/alertes",
                                 "/api/alertes/non-lues"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/alertes"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/alertes/{id}/lire",
                                 "/api/alertes/tout-lire"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/dashboard/resume"
                         )
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/journal-audit",
@@ -484,7 +484,7 @@ public class SecurityConfig {
                                 "/api/stage-participants/{id}/periodes-rapports",
                                 "/api/stage-participants/{id}/actions",
                                 "/api/encadreurs/{id}/charge")
-                        .hasAnyRole("ADMIN", "RESPONSABLE_STAGE", "ENCADREUR")
+                        .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .anyRequest()
                         .denyAll()
