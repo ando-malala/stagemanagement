@@ -10,9 +10,9 @@ const links = [{"key": "stageParticipantId", "path": "/participations", "label":
 export default function RapportDetailPage({ params, navigate }) {
   return <ResourceDetail id={params.id} title="Rapport d’activité" fetcher={getRapport} fields={fields} links={links} backTo="/rapports" navigate={navigate}>
     {(data, reload) => <div className="page-stack">
-      <BusinessEditor kind="rapport" initial={data} save={(payload) => updateRapport(data.id, payload)} onSaved={reload} />
+      <BusinessEditor kind="rapport" initial={data} reportContext={{}} label={data.statut === 'A_CORRIGER' ? 'Corriger le rapport' : 'Modifier le brouillon'} save={(payload) => updateRapport(data.id, payload)} onSaved={reload} />
       <RapportActions rapport={data} onSaved={reload} />
-      <RapportObservations rapportId={data.id} />
+      <RapportObservations rapportId={data.id} peutExaminer={data.peutExaminer} />
     </div>}
   </ResourceDetail>;
 }

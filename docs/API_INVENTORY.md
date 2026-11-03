@@ -367,11 +367,11 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 | GET | `/api/rapports-activite` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportActiviteResponse>>` |
 | GET | `/api/rapports-activite/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
 | GET | `/api/rapports-activite/participation/{stageParticipantId}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportActiviteResponse>>` |
-| POST | `/api/rapports-activite` | ADMIN, ENCADREUR, STAGIAIRE | 201 | `ResponseEntity<RapportActiviteResponse>` |
-| PATCH | `/api/rapports-activite/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
+| POST | `/api/rapports-activite` | STAGIAIRE | 201 | `ResponseEntity<RapportActiviteResponse>` |
+| PATCH | `/api/rapports-activite/{id}` | STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
 | GET | `/api/rapports-activite/{id}/observations` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<RapportObservationResponse>>` |
-| POST | `/api/rapports-activite/{id}/observations` | ADMIN, ENCADREUR | 201 | `ResponseEntity<RapportObservationResponse>` |
-| PATCH | `/api/rapports-activite/{id}/statut` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
+| POST | `/api/rapports-activite/{id}/observations` | ENCADREUR | 201 | `ResponseEntity<RapportObservationResponse>` |
+| PATCH | `/api/rapports-activite/{id}/statut` | ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<RapportActiviteResponse>` |
 
 - `listerRapports` : `aucun paramètre`.
 - `trouverRapport` : `@PathVariable Integer id`.
@@ -1002,7 +1002,7 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 ### [RapportActiviteResponse](../backend/src/main/java/mg/mef/stagemanagement/dto/rapport/RapportActiviteResponse.java)
 
-`id: Integer`, `stageParticipantId: Integer`, `stagiaire: String`, `encadreur: String`, `debutSemaine: LocalDate`, `finSemaine: LocalDate`, `activite: String`, `difficultes: String`, `solutions: String`, `moisStageId: Integer`, `moisStage: String`, `statut: String`, `dateCreation: LocalDateTime`, `dateModification: LocalDateTime`, `dateSoumission: LocalDateTime`, `dateValidation: LocalDateTime`
+`peutRediger: boolean`, `peutExaminer: boolean`, `id: Integer`, `stageParticipantId: Integer`, `stagiaire: String`, `encadreur: String`, `debutSemaine: LocalDate`, `finSemaine: LocalDate`, `activite: String`, `difficultes: String`, `solutions: String`, `moisStageId: Integer`, `moisStage: String`, `statut: String`, `dateCreation: LocalDateTime`, `dateModification: LocalDateTime`, `dateSoumission: LocalDateTime`, `dateValidation: LocalDateTime`
 
 ### [RapportObservationRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/rapport/RapportObservationRequest.java)
 
@@ -1070,7 +1070,7 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 ### [StageParticipantResponse](../backend/src/main/java/mg/mef/stagemanagement/dto/stage/StageParticipantResponse.java)
 
-`id: Integer`, `stageId: Integer`, `stage: String`, `stagiaireAcademiqueId: Integer`, `stagiaireId: Integer`, `stagiaireNomComplet: String`, `niveauEtude: String`, `filiere: String`, `etablissement: String`, `anneeEtudes: String`, `cadreStageId: Integer`, `themeStage: String`, `encadreurId: Integer`, `encadreurNomComplet: String`, `dateDebutStage: LocalDate`, `dateFinStage: LocalDate`, `statut: String`, `dateCreation: LocalDateTime`, `dateModification: LocalDateTime`, `dateCloture: LocalDateTime`
+`peutRedigerRapport: boolean`, `id: Integer`, `stageId: Integer`, `stage: String`, `stagiaireAcademiqueId: Integer`, `stagiaireId: Integer`, `stagiaireNomComplet: String`, `niveauEtude: String`, `filiere: String`, `etablissement: String`, `anneeEtudes: String`, `cadreStageId: Integer`, `themeStage: String`, `encadreurId: Integer`, `encadreurNomComplet: String`, `dateDebutStage: LocalDate`, `dateFinStage: LocalDate`, `statut: String`, `dateCreation: LocalDateTime`, `dateModification: LocalDateTime`, `dateCloture: LocalDateTime`
 
 ### [StageRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/stage/StageRequest.java)
 

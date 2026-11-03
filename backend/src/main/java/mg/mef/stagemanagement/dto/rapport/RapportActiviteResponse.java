@@ -5,6 +5,14 @@ import java.time.LocalDateTime;
 
 public class RapportActiviteResponse {
 
+    private boolean peutRediger;
+    private boolean peutExaminer;
+
+    public boolean isPeutRediger() { return peutRediger; }
+    public void setPeutRediger(boolean value) { peutRediger = value; }
+    public boolean isPeutExaminer() { return peutExaminer; }
+    public void setPeutExaminer(boolean value) { peutExaminer = value; }
+
     private Integer id;
 
     private Integer stageParticipantId;

@@ -15,7 +15,9 @@ test('rendu du suivi : droits, verrouillage et sélecteurs métier', async () =>
     const render = (Component, props, roles = ['ENCADREUR']) => renderToStaticMarkup(React.createElement(AuthContext.Provider, {
       value: { utilisateur: { roles } }
     }, React.createElement(Component, props)));
-    assert.match(render(Editor, { kind: 'rapport' }), /Ajouter/);
+    assert.equal(render(Editor, { kind: 'rapport' }), '');
+    assert.equal(render(Editor, { kind: 'rapport' }, ['ADMIN']), '');
+    assert.match(render(Editor, { kind: 'rapport' }, ['STAGIAIRE']), /Ajouter/);
     assert.equal(render(Editor, { kind: 'rapport', initial: { statut: 'VALIDE' } }), '');
     assert.equal(render(Editor, { kind: 'evaluation', initial: { estFinalisee: true } }), '');
     assert.equal(render(Editor, { kind: 'soutenance' }), '');
@@ -25,7 +27,9 @@ test('rendu du suivi : droits, verrouillage et sélecteurs métier', async () =>
     assert.match(report, /<select[^>]*required=""[^>]*name="moisStageId"/);
     assert.match(render(Form, { kind: 'evaluation' }), /<select[^>]*name="encadreurId"/);
     assert.match(render(Form, { kind: 'soutenance' }, ['ADMIN']), /type="datetime-local"/);
-    assert.match(render(Actions, { rapport: { id: 1, statut: 'BROUILLON' } }), /Chargement des transitions/);
+    assert.match(render(Actions, { rapport: { id: 1, statut: 'BROUILLON', peutRediger: true } }, ['STAGIAIRE']), /Soumission du rapport/);
+    assert.match(render(Actions, { rapport: { id: 1, statut: 'SOUMIS', peutExaminer: true } }), /Examen du rapport/);
+    assert.equal(render(Actions, { rapport: { id: 1, statut: 'SOUMIS', peutExaminer: false, peutRediger: false } }, ['ADMIN']), '');
     assert.doesNotMatch(render(Actions, { rapport: { id: 1, statut: 'VALIDE' } }), />(Soumettre|Valider|Demander une correction)<\/button>/);
     assert.doesNotMatch(render(Actions, { rapport: { id: 1, statut: 'SOUMIS' } }), />Demander une correction<\/button>/);
     const notes = render(Notes, { evaluation: { id: 1, estFinalisee: true } });

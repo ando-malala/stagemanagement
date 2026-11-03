@@ -26,6 +26,11 @@ test('rendu React des composants : champs accessibles, listes vides, chargement,
     assert.match(table, /Page 1 sur 2/);
     assert.match(table, /<caption>Stagiaires<\/caption>/);
     assert.match(table, /scope="col"/);
+    assert.match(table, /aria-sort="none"/);
+    assert.match(table, /Trier par Nom, ordre croissant/);
+    const filteredTable = render(Table, { columns: [{ key: 'nom', label: 'Nom', filterable: true }], data: rows });
+    assert.match(filteredTable, /Filtrer : Nom/);
+    assert.match(filteredTable, />Tous<\/option>/);
   } finally {
     await server.close();
   }

@@ -1,5 +1,23 @@
 # Recette finale MEF–SIIGFP — 2 novembre 2026
 
+## Complément du 3 novembre — grille des rapports par semaine
+
+Correction du bouton Rédiger dans « Mon dossier → Dossier de participation » : la grille recharge la participation et ses droits avec les semaines, sans dépendre d’un booléen transmis par l’écran parent. Le filtre supplémentaire EN_COURS/A_CLOTURER a été retiré de la fiche pour respecter la règle serveur : une participation planifiée ou suspendue ne verrouille pas, à elle seule, la rédaction. Une participation clôturée, annulée ou abandonnée reste verrouillée. En cas de droit absent ou refusé, une explication est affichée au lieu d’une colonne Actions vide. Vérifications après correction : **116 tests frontend réussis**, lint et build réussis ; pas de vérification navigateur.
+
+« Mes rapports » sélectionne automatiquement la participation personnelle EN_COURS et présente les semaines attendues avec leur échéance, leur état et l’action adaptée. Une semaine vide ouvre un formulaire dont le stage et les dates sont déjà renseignés ; une semaine remplie ouvre le rapport existant sur la même page. Après enregistrement du brouillon, la relecture et la soumission sont possibles directement dans la page de la grille. Les boutons Soumettre sont réservés au stagiaire propriétaire. Les autres rôles sélectionnent un stagiaire puis consultent sa grille ; seul l’encadreur affecté peut valider un rapport soumis ou demander une correction. La même grille est utilisée dans la fiche de participation. Les anciens rapports restent consultables ; l’absence de stage en cours et les affectations multiples sont signalées explicitement.
+
+Vérifications : **114 tests frontend réussis**, aucun échec ni test ignoré, avec `node --test --test-concurrency=1 tests/*.test.js` ; `npm.cmd run lint` et `npm.cmd run build` réussis. Les tests couvrent le choix du stage personnel, la conservation des identifiants et dates dans le POST, le rendu du formulaire prérempli, les boutons de soumission et d’examen selon le rôle, le propriétaire et l’état du rapport, ainsi que l’écran de sélection du stagiaire pour les autres rôles. Pas de nouvelle modification backend ni de nouvelle campagne PostgreSQL pour ce complément d’interface ; pas de validation visuelle dans un navigateur.
+
+## Mise à jour du 3 novembre — soumission et validation des rapports
+
+Le stagiaire associé au dossier est seul autorisé à créer, modifier et soumettre ses rapports. L’encadreur affecté à la participation est seul autorisé à ajouter des observations, demander une correction ou valider un rapport soumis. ADMIN seul consulte ; le cumul de rôles ne dispense pas du contrôle de propriété ou d’affectation et ne permet pas de valider son propre rapport. Un rapport existant ne peut pas être déplacé vers une autre participation. Les boutons et formulaires utilisent les autorisations renvoyées par le serveur.
+
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-integration.ps1 -KeepUploads` : **35 tests backend réussis**, aucun échec ni test ignoré. Exécution sur la base isolée conservée `mef_integration_d1cef440bfbc4db6b19f3f5a8624de35`, avec précontrôle des migrations réussi. Aucune modification de la base métier.
+- `CompleteIntegrationTests.onlyTheOwnerSubmitsAndOnlyTheAssignedMentorReviewsReports` vérifie les refus HTTP pour ADMIN, l’autre stagiaire et l’encadreur non affecté, les indicateurs de droits des réponses, puis le cycle brouillon → soumis → à corriger → soumis → validé. `DossierAccessTests` couvre aussi les comptes cumulant plusieurs rôles et le refus d’auto-validation.
+- Frontend : **111 tests réussis** avec `node --test --test-concurrency=1 tests/*.test.js` ; lint et build réussis. Aucun essai navigateur pour cette correction.
+
+Les résultats ci-dessous restent les observations historiques des campagnes précédentes.
+
 ## Mise à jour du 2 novembre — schéma stagiaire conservé et trois rôles
 
 Cette mise à jour remplace les conclusions précédentes sur V001 et le rôle RESPONSABLE_STAGE. Les tableaux de la campagne initiale ci-dessous conservent leurs observations historiques ; ils ne prouvent pas les nouveaux droits à eux seuls.

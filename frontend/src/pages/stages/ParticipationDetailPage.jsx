@@ -17,8 +17,8 @@ export default function ParticipationDetailPage({ params, navigate }) {
       <DownloadButton download={() => downloadBilan(data.id)}>Télécharger le bilan PDF</DownloadButton>
       <BusinessEditor kind="participation" initial={data} save={(payload) => updateParticipation(params.id, payload)} onSaved={reload} />
       <ParticipationActions key={`actions/${data.dateModification}`} participation={data} onSaved={reload} />
-      <ParticipationSuivi key={`suivi/${data.dateModification}`} id={data.id} navigate={navigate} />
-      <ParticipationRapports participationId={data.id} navigate={navigate} />
+      <ParticipationRapports participationId={data.id} stageLabel={data.stage} navigate={navigate} />
+      <ParticipationSuivi key={`suivi/${data.dateModification}`} id={data.id} />
       <DocumentsPanel key={`participation/${data.id}`} scope="participation" ownerId={data.id} ownerLabel={`${data.stagiaireNomComplet} — ${data.stage}`} />
     </div>}
   </ResourceDetail>;

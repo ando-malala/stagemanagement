@@ -5,6 +5,11 @@ import java.time.LocalDateTime;
 
 public class StageParticipantResponse {
 
+    private boolean peutRedigerRapport;
+
+    public boolean isPeutRedigerRapport() { return peutRedigerRapport; }
+    public void setPeutRedigerRapport(boolean value) { peutRedigerRapport = value; }
+
     private Integer id;
 
     private Integer stageId;

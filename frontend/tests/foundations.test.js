@@ -21,7 +21,7 @@ test('payload : nombres, booléens, champs absents, mot de passe intact', () => 
 });
 
 test('permissions métier, refus par défaut et rôle STAGIAIRE sans accès métier', () => {
-  assert.equal(can({ roles: ['ENCADREUR'] }, 'gererRapports'), true);
+  assert.equal(can({ roles: ['ENCADREUR'] }, 'gererRapports'), false);
   assert.equal(can({ roles: ['ENCADREUR'] }, 'gererStages'), false);
   assert.equal(can({ roles: ['ADMIN'] }, 'gererUtilisateurs'), true);
   assert.equal(can({ roles: ['STAGIAIRE'] }, 'consulterMetier'), false);

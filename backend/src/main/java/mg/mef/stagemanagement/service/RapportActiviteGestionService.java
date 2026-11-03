@@ -112,7 +112,7 @@ public class RapportActiviteGestionService {
     public RapportActiviteResponse creerRapport(
             RapportActiviteRequest request
     ) {
-        if (request != null && request.getStageParticipantId() != null) access.participation(request.getStageParticipantId(), false);
+        if (request != null && request.getStageParticipantId() != null) access.reportAuthor(request.getStageParticipantId());
         verifierRapportRequest(request);
 
         if (request.getFinSemaine().isBefore(request.getDebutSemaine())) {
@@ -272,7 +272,7 @@ public class RapportActiviteGestionService {
             Integer auteurId
     ) {
         rules.lock(stageParticipantRepository.findForUpdate(access.report(rapportId).getStageParticipant().getId()).orElseThrow());
-        access.review(access.report(rapportId).getStageParticipant().getId());
+        access.reportReviewer(access.report(rapportId).getStageParticipant().getId());
         if (request == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -449,7 +449,7 @@ public class RapportActiviteGestionService {
                 ? rapport.getStatut().getCode()
                 : null;
 
-        return new RapportActiviteResponse(
+        var response = new RapportActiviteResponse(
                 rapport.getId(),
                 participant != null ? participant.getId() : null,
                 stagiaireNom,
@@ -467,6 +467,9 @@ public class RapportActiviteGestionService {
                 rapport.getDateSoumission(),
                 rapport.getDateValidation()
         );
+        response.setPeutRediger(access.canAuthorReport(participant));
+        response.setPeutExaminer(access.canReviewReport(participant));
+        return response;
     }
 
     private RapportObservationResponse toObservationResponse(

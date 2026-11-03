@@ -4,6 +4,7 @@ import { alerteLinks } from '../../utils/pilotage.js';
 
 export default function AlerteDetail({ alerte, navigate }) {
   return <div className="page-stack">
+    {alerte.stagiaireNomComplet && <p><strong>Stagiaire : </strong><AppLink to={`/stagiaires/${alerte.stagiaireId}`} navigate={navigate}>{alerte.stagiaireNomComplet}</AppLink></p>}
     <p>{alerte.message}</p>
     <dl className="detail-grid">
       <div><dt>Type</dt><dd>{alerte.typeAlerteLibelle} ({alerte.typeAlerteCode})</dd></div>

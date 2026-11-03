@@ -40,8 +40,8 @@ test('observation : enum Java, commentaire requis et visibilité false conservé
 
 test('permissions d’édition : encadreur habilité au suivi, rapports validés et évaluations finales verrouillés', () => {
   const encadreur = { roles: ['ENCADREUR'] };
-  for (const kind of ['rapport', 'evaluation', 'observation']) assert.equal(canEditBusiness(encadreur, kind), true);
-  for (const kind of ['soutenance', 'participation', 'stage', 'stagiaire', 'inconnu']) assert.equal(canEditBusiness(encadreur, kind), false);
+  for (const kind of ['evaluation', 'observation']) assert.equal(canEditBusiness(encadreur, kind), true);
+  for (const kind of ['rapport', 'soutenance', 'participation', 'stage', 'stagiaire', 'inconnu']) assert.equal(canEditBusiness(encadreur, kind), false);
   for (const role of ['ADMIN', 'ENCADREUR']) {
     assert.equal(canEditBusiness({ roles: [role] }, 'rapport', { statut: 'VALIDE' }), false);
     assert.equal(canEditBusiness({ roles: [role] }, 'evaluation', { estFinalisee: true }), false);

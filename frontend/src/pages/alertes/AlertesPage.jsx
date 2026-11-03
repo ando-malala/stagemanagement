@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { createAlerte, listAlertes, marquerAlerteLue } from '../../api/alerteApi.js';
+import { createAlerte, marquerAlerteLue } from '../../api/alerteApi.js';
+import { loadAlertContext } from '../../api/alertContextApi.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { canTreatAlert } from '../../utils/permissions.js';
-import { requireList } from '../../utils/businessForms.js';
 import { filterAlertes, alertFilterOptions } from '../../utils/pilotage.js';
 import { formatDate } from '../../utils/dateUtils.js';
 import Button from '../../components/common/Button.jsx';
@@ -16,8 +16,8 @@ import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import AlerteDetail from './AlerteDetail.jsx';
 
-const fetcher = async (options) => requireList(await listAlertes(options));
-const columns = [{ key: 'typeAlerteLibelle', label: 'Type' }, { key: 'message', label: 'Message' },
+const fetcher = async (options) => (await loadAlertContext(options)).rows;
+const columns = [{ key: 'stagiaireNomComplet', label: 'Stagiaire' }, { key: 'typeAlerteLibelle', label: 'Type' }, { key: 'message', label: 'Message' },
   { key: 'natureAlerte', label: 'Nature' }, { key: 'priorite', label: 'Priorité' },
   { key: 'dateEcheance', label: 'Échéance', render: (row) => formatDate(row.dateEcheance) }, { key: 'statut', label: 'Statut' }];
 

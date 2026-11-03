@@ -12,8 +12,8 @@ const permissions = {
   gererEncadreurs: MANAGEMENT_ROLES,
   gererSoutenances: MANAGEMENT_ROLES,
   televerserDocuments: MANAGEMENT_ROLES,
-  gererRapports: PERSONAL_ROLES,
-  validerRapports: BUSINESS_ROLES,
+  gererRapports: ['STAGIAIRE'],
+  validerRapports: ['ENCADREUR'],
   gererEvaluations: BUSINESS_ROLES,
   traiterAlertes: BUSINESS_ROLES,
   creerAlertes: MANAGEMENT_ROLES,
@@ -24,6 +24,13 @@ const permissions = {
 
 export function can(utilisateur, action) {
   return hasAnyRole(utilisateur, permissions[action] ?? []);
+}
+
+export function canActOnReport(utilisateur, rapport, target) {
+  if (target === 'SOUMIS') return can(utilisateur, 'gererRapports') && rapport?.peutRediger === true
+    && ['BROUILLON', 'A_CORRIGER'].includes(rapport.statut);
+  return ['VALIDE', 'A_CORRIGER'].includes(target) && can(utilisateur, 'validerRapports')
+    && rapport?.peutExaminer === true && rapport.statut === 'SOUMIS';
 }
 
 export function canTreatAlert(utilisateur, alerte) {

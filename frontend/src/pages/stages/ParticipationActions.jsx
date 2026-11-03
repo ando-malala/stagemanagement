@@ -36,7 +36,7 @@ export default function ParticipationActions({ participation, onSaved }) {
     {allowed && <>
       <div className="row-actions">{actions.map((item) => <Button variant="secondary" key={`${item.code}/${item.statutCible}`} onClick={() => { setAction(item); setValues({}); setError(''); }}>{item.label}</Button>)}</div>
       {action && <form onSubmit={prepare} className="page-stack">
-        <h4>{action.label} — participation n° {participation.id}</h4>
+        <h4>{action.label} — {participation.stagiaireNomComplet} (participation n° {participation.id})</h4>
         {action.dateEffet && <Input name="dateEffet" label="Date d’effet" type="date" required value={values.dateEffet ?? ''} min={participation.dateDebutStage}
           max={[participation.dateFinStage, todayMadagascar()].sort()[0]} onChange={update} hint="Elle doit suivre le dernier événement de suspension ou de reprise. Cette chronologie est vérifiée lors de l’enregistrement." />}
         {action.code === 'prolonger' && <><p>Fin actuelle : {formatDate(participation.dateFinStage)}</p><Input name="nouvelleDateFin" label="Nouvelle date de fin" type="date" required value={values.nouvelleDateFin ?? ''} min={participation.dateFinStage} onChange={update} /></>}

@@ -30,9 +30,9 @@ class DossierAccessTests {
     @Mock StagiaireAcademiqueRepository academics;
     @InjectMocks DossierAccessService access;
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
-    void login(int id, String role) {
+    void login(int id, String... roles) {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                new AuthMeResponse(id, "test", List.of(role)), null, List.of()));
+                new AuthMeResponse(id, "test", List.of(roles)), null, List.of()));
     }
     StageParticipant participation(int department, int mentorUser, int traineeUser) {
         var p = mock(StageParticipant.class, RETURNS_DEEP_STUBS);
@@ -40,6 +40,41 @@ class DossierAccessTests {
         lenient().when(p.getEncadreur().getUtilisateur().getId()).thenReturn(mentorUser);
         lenient().when(p.getStagiaireAcademique().getStagiaire().getUtilisateur().getId()).thenReturn(traineeUser);
         return p;
+    }
+    @Test void reportWorkflowBelongsToTheTraineeAndAssignedMentorEvenWithMultipleRoles() {
+        var p = participation(1, 20, 30);
+        when(p.getId()).thenReturn(7);
+        var report = new RapportActivite(); report.setStageParticipant(p);
+        var status = new Statut(); status.setCode("BROUILLON"); report.setStatut(status);
+        when(reports.findById(5)).thenReturn(Optional.of(report));
+        login(30, "STAGIAIRE", "ADMIN");
+        assertTrue(access.canAuthorReport(p)); assertFalse(access.canReviewReport(p));
+        access.reportContent(5, 7); access.reportTransition(5, "SOUMIS");
+        assertThrows(ResponseStatusException.class, () -> access.reportContent(5, 8));
+        assertThrows(ResponseStatusException.class, () -> access.reportTransition(5, "VALIDE"));
+        login(10, "ADMIN");
+        assertFalse(access.canAuthorReport(p)); assertFalse(access.canReviewReport(p));
+        assertThrows(ResponseStatusException.class, () -> access.reportContent(5, 7));
+        assertThrows(ResponseStatusException.class, () -> access.reportTransition(5, "SOUMIS"));
+        status.setCode("SOUMIS");
+        assertThrows(ResponseStatusException.class, () -> access.reportTransition(5, "VALIDE"));
+        login(20, "ENCADREUR", "ADMIN");
+        assertTrue(access.canReviewReport(p)); assertFalse(access.canAuthorReport(p));
+        access.reportTransition(5, "VALIDE"); access.reportTransition(5, "A_CORRIGER");
+        assertThrows(ResponseStatusException.class, () -> access.reportContent(5, 7));
+        assertThrows(ResponseStatusException.class, () -> access.reportTransition(5, "SOUMIS"));
+        login(21, "ENCADREUR", "ADMIN");
+        assertThrows(ResponseStatusException.class, () -> access.reportTransition(5, "VALIDE"));
+        login(31, "STAGIAIRE", "ADMIN");
+        assertThrows(ResponseStatusException.class, () -> access.reportContent(5, 7));
+        login(30, "STAGIAIRE", "ENCADREUR", "ADMIN");
+        assertFalse(access.canReviewReport(participation(1, 30, 30)));
+        assertThrows(ResponseStatusException.class, () -> access.reportContent(5, 7));
+        status.setCode("A_CORRIGER");
+        access.reportContent(5, 7); access.reportTransition(5, "SOUMIS");
+        status.setCode("VALIDE");
+        assertThrows(ResponseStatusException.class, () -> access.reportContent(5, 7));
+        assertThrows(ResponseStatusException.class, () -> access.reportTransition(5, "SOUMIS"));
     }
     @Test void administratorsManageParticipationsAcrossDepartments() {
         login(10, "ADMIN");

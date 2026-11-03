@@ -11,7 +11,7 @@ const columns = [
   { key: 'prenoms', label: 'Prénoms' },
   { key: 'contact', label: 'Contact' },
   { key: 'email', label: 'Email' },
-  { key: 'statut', label: 'Statut' }
+  { key: 'statut', label: 'Statut', filterable: true }
 ];
 
 export default function StagiairesPage({ navigate }) {

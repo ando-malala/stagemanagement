@@ -10,7 +10,7 @@ export function normalizeSearch(value) {
 }
 
 export function selectTableRows(data, columns, query = '', filters = {}, sort = null) {
-  const terms = normalizeSearch(query).trim().split(/\s+/).filter(Boolean);
+  const terms = String(query ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim().split(/\s+/).filter(Boolean);
   const rows = (Array.isArray(data) ? data : []).filter(row => {
     const text = columns.map(column => normalizeSearch(column.searchValue ? column.searchValue(row) : row[column.key])).join(' ');
     return terms.every(term => text.includes(term)) && columns.every(column =>

@@ -23,6 +23,10 @@ test('rendu métier : permissions, champs alimentés par API et actions selon st
     assert.match(render(BusinessForm, { kind: 'encadreur' }, ['ADMIN']), /<select[^>]*name="utilisateurId"/);
     const participantForm = render(BusinessForm, { kind: 'participation' }, ['ADMIN']);
     for (const name of ['stagiaireId', 'stageId', 'stagiaireAcademiqueId', 'cadreStageId', 'encadreurId']) assert.match(participantForm, new RegExp(`<select[^>]*name="${name}"`));
+    const reportForm = render(BusinessForm, { kind: 'rapport' }, ['STAGIAIRE']);
+    assert.ok(reportForm.indexOf('name="stageParticipantId"') < reportForm.indexOf('name="periodeAttendue"'));
+    assert.match(reportForm, /Enregistrer le brouillon/);
+    assert.match(reportForm, /Choisissez d’abord le stage/);
     const participation = { id: 3, statut: 'EN_COURS' };
     const readOnly = render(Actions, { participation }, ['ENCADREUR']);
     assert.doesNotMatch(readOnly, /<button/);

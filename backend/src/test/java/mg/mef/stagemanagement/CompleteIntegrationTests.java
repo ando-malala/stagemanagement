@@ -65,8 +65,12 @@ class CompleteIntegrationTests {
         int month = create("/referentiels/academiques/mois-stage", Map.of("libelle", "Integration month", "actif", true));
         request("POST", "/stagiaires", Map.of("nom", "Integration", "prenoms", "Trainee"), 400);
         int trainee = create("/stagiaires", Map.of("nom", "Integration", "prenoms", "Trainee", "adresse", "Integration address"));
+        int traineeUser = seedUser("workflow-trainee", "STAGIAIRE");
+        int mentorUser = seedUser("workflow-mentor", "ENCADREUR");
+        request("PATCH", "/stagiaires/" + trainee + "/compte", Map.of("utilisateurId", traineeUser), 200);
+        String adminSession = token, traineeSession = login("workflow-trainee"), mentorSession = login("workflow-mentor");
         int academic = create("/stagiaires/" + trainee + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
-        int mentor = create("/encadreurs", Map.of("nom", "Integration", "prenoms", "Mentor", "departementId", department, "capaciteMaxStagiaires", 1));
+        int mentor = create("/encadreurs", Map.of("nom", "Integration", "prenoms", "Mentor", "departementId", department, "capaciteMaxStagiaires", 1, "utilisateurId", mentorUser));
         int stage = create("/stages", Map.of("libelle", "Integration stage", "structureAccueilId", structure));
         LocalDate today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
         var participationBody = Map.of("stageId", stage, "stagiaireAcademiqueId", academic, "cadreStageId", cadre, "encadreurId", mentor,
@@ -85,16 +89,21 @@ class CompleteIntegrationTests {
         assertEquals(3, get(base + "/evenements").size());
         JsonNode period = get(base + "/periodes-rapports").get(0);
         assertTrue(period.get("manquante").asBoolean());
+        token = traineeSession;
         int report = create("/rapports-activite", Map.of("stageParticipantId", participation, "moisStageId", month,
                 "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString(), "activite", "Integration work"));
         JsonNode conflict = request("POST", "/rapports-activite", Map.of("stageParticipantId", participation, "moisStageId", month,
                 "debutSemaine", period.get("debut").asString(), "finSemaine", LocalDate.parse(period.get("fin").asString()).plusDays(1).toString()), 409);
         assertFalse(conflict.toString().contains("SQL"));
         request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        token = mentorSession;
         request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "A_CORRIGER"), 200);
         request("POST", "/rapports-activite/" + report + "/observations", Map.of("typeObservation", "DEMANDE_CORRECTION", "commentaire", "Integration correction", "visibleStagiaire", true), 201);
+        token = traineeSession;
         request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        token = mentorSession;
         request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "VALIDE"), 200);
+        token = adminSession;
         assertTrue(get(base + "/periodes-rapports").get(0).get("validee").asBoolean());
         int evaluation = create("/evaluations", Map.of("stageParticipantId", participation, "encadreurId", mentor));
         request("POST", "/evaluations/" + evaluation + "/finaliser", Map.of(), 409);
@@ -120,17 +129,23 @@ class CompleteIntegrationTests {
         request("POST", base + "/cloturer", Map.of(), 409); // Documents alone are not sufficient.
         for (JsonNode missingPeriod : get(base + "/periodes-rapports")) {
             if (LocalDate.parse(missingPeriod.get("fin").asString()).isAfter(today) || missingPeriod.get("validee").asBoolean()) continue;
+            token = traineeSession;
             int requiredReport = create("/rapports-activite", Map.of("stageParticipantId", participation, "moisStageId", month,
                     "debutSemaine", missingPeriod.get("debut").asString(), "finSemaine", missingPeriod.get("fin").asString()));
             request("PATCH", "/rapports-activite/" + requiredReport + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+            token = mentorSession;
             request("PATCH", "/rapports-activite/" + requiredReport + "/statut", Map.of("statutCode", "VALIDE"), 200);
         }
+        token = adminSession;
         JsonNode closed = request("POST", base + "/cloturer", Map.of("motif", "Integration closure"), 200);
         request("PATCH", base, participationBody, 409);
         request("POST", base + "/prolonger", Map.of("nouvelleDateFin", today.plusDays(30).toString()), 409);
+        token = traineeSession;
         request("PATCH", "/rapports-activite/" + report, Map.of("stageParticipantId", participation, "moisStageId", month,
                 "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString(), "activite", "forbidden"), 409);
+        token = mentorSession;
         request("POST", "/rapports-activite/" + report + "/observations", Map.of("commentaire", "forbidden"), 409);
+        token = adminSession;
         request("PATCH", "/soutenances/" + defense, Map.of("stageParticipantId", participation, "dateSoutenance", today.plusDays(1) + "T14:00:00"), 409);
         request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", get("/evaluations/criteres").get(0).get("id").asInt(), "note", 3), 409);
         upload(base + "/fichiers", "CONVENTION_STAGE", 409);
@@ -225,7 +240,10 @@ class CompleteIntegrationTests {
             int academic = create("/stagiaires/" + t[i] + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
             e[i] = create("/encadreurs", Map.of("nom", prefix, "prenoms", "E" + i, "departementId", department, "utilisateurId", mentorUser));
             p[i] = create("/stage-participants", Map.of("stageId", stage, "stagiaireAcademiqueId", academic, "cadreStageId", cadre, "encadreurId", e[i], "dateDebutStage", "2026-10-01", "dateFinStage", "2026-10-31"));
+            String setupSession = token;
+            token = login(prefix + "-trainee" + i);
             r[i] = create("/rapports-activite", Map.of("stageParticipantId", p[i], "moisStageId", month, "debutSemaine", "2026-10-01", "finSemaine", "2026-10-04"));
+            token = setupSession;
             v[i] = create("/evaluations", Map.of("stageParticipantId", p[i], "encadreurId", e[i]));
             d[i] = create("/soutenances", Map.of("stageParticipantId", p[i], "dateSoutenance", "2026-10-30T14:00:00"));
             a[i] = create("/alertes", Map.of("typeAlerteCode", "DOSSIER_INCOMPLET", "stageParticipantId", p[i], "message", prefix, "priorite", "AVERTISSEMENT"));
@@ -381,7 +399,8 @@ class CompleteIntegrationTests {
         request("PATCH", "/utilisateurs/" + target + "/mot-de-passe", Map.of("nouveauMotDePasse", "new-integration-password"), 204);
         token = oldToken; request("GET", "/auth/me", null, 401);
     }
-    record Fixture(int trainee, int academic, int mentor, int stage, int cadre, int month, int level, int stream, int school) {}
+    record Fixture(int trainee, int academic, int mentor, int stage, int cadre, int month, int level, int stream, int school,
+                   String adminToken, String traineeToken, String mentorToken) {}
     Fixture fixture(String prefix) throws Exception {
         seedUser(prefix + "-admin", "ADMIN"); token = login(prefix + "-admin");
         int department = create("/referentiels/organisation/departements", Map.of("libelle", prefix));
@@ -392,13 +411,76 @@ class CompleteIntegrationTests {
         int level = create("/referentiels/academiques/niveaux-etude", Map.of("libelle", prefix, "actif", true));
         int month = create("/referentiels/academiques/mois-stage", Map.of("libelle", prefix, "actif", true));
         int trainee = create("/stagiaires", Map.of("nom", prefix, "prenoms", "Test", "adresse", "test"));
+        int traineeUser = seedUser(prefix + "-trainee", "STAGIAIRE");
+        int mentorUser = seedUser(prefix + "-mentor", "ENCADREUR");
+        request("PATCH", "/stagiaires/" + trainee + "/compte", Map.of("utilisateurId", traineeUser), 200);
         int academic = create("/stagiaires/" + trainee + "/academiques", Map.of("niveauEtudeId", level, "filiereId", stream, "etablissementId", school, "anneeEtudes", "2026-2027"));
-        int mentor = create("/encadreurs", Map.of("nom", prefix, "prenoms", "Mentor", "departementId", department, "capaciteMaxStagiaires", 1));
+        int mentor = create("/encadreurs", Map.of("nom", prefix, "prenoms", "Mentor", "departementId", department, "capaciteMaxStagiaires", 1, "utilisateurId", mentorUser));
         int stage = create("/stages", Map.of("libelle", prefix, "structureAccueilId", structure));
-        return new Fixture(trainee, academic, mentor, stage, cadre, month, level, stream, school);
+        return new Fixture(trainee, academic, mentor, stage, cadre, month, level, stream, school, token, login(prefix + "-trainee"), login(prefix + "-mentor"));
     }
     Map<String, Object> participationBody(Fixture f, int academic, LocalDate start, LocalDate end) {
         return Map.of("stageId", f.stage(), "stagiaireAcademiqueId", academic, "cadreStageId", f.cadre(), "encadreurId", f.mentor(), "dateDebutStage", start.toString(), "dateFinStage", end.toString());
+    }
+    @Test void onlyTheOwnerSubmitsAndOnlyTheAssignedMentorReviewsReports() throws Exception {
+        String prefix = "reports-" + UUID.randomUUID().toString().substring(0, 8);
+        var f = fixture(prefix);
+        LocalDate today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
+        int participation = create("/stage-participants", participationBody(f, f.academic(), today, today.plusDays(20)));
+        String base = "/stage-participants/" + participation;
+        var period = get(base + "/periodes-rapports").get(0);
+        var body = Map.of("stageParticipantId", participation, "moisStageId", f.month(),
+                "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString(), "activite", "My work");
+        assertFalse(get(base).get("peutRedigerRapport").asBoolean());
+        request("POST", "/rapports-activite", body, 403);
+        token = f.mentorToken();
+        request("POST", "/rapports-activite", body, 403);
+        token = f.traineeToken();
+        assertTrue(get(base).get("peutRedigerRapport").asBoolean());
+        int report = create("/rapports-activite", body);
+        String path = "/rapports-activite/" + report;
+        assertTrue(get(path).get("peutRediger").asBoolean());
+        assertFalse(get(path).get("peutExaminer").asBoolean());
+        request("PATCH", path, body, 200);
+        request("PATCH", path + "/statut", Map.of("statutCode", "VALIDE"), 403);
+        token = f.mentorToken();
+        assertTrue(get(path).get("peutExaminer").asBoolean());
+        request("PATCH", path, body, 403);
+        request("PATCH", path + "/statut", Map.of("statutCode", "SOUMIS"), 403);
+        request("PATCH", path + "/statut", Map.of("statutCode", "VALIDE"), 403);
+        token = f.traineeToken();
+        request("PATCH", path + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        request("PATCH", path, body, 403);
+        token = f.adminToken();
+        assertFalse(get(path).get("peutRediger").asBoolean());
+        assertFalse(get(path).get("peutExaminer").asBoolean());
+        for (String status : List.of("SOUMIS", "VALIDE", "A_CORRIGER"))
+            request("PATCH", path + "/statut", Map.of("statutCode", status), 403);
+        request("PATCH", path, body, 403);
+        request("POST", path + "/observations", Map.of("commentaire", "Not the assigned mentor"), 403);
+        // Extra ADMIN authority grants read access, but must not bypass report ownership/assignment.
+        for (String role : List.of("ENCADREUR", "STAGIAIRE")) {
+            String name = prefix + "-outside-" + role;
+            int outsider = seedUser(name, role);
+            jdbc.update("insert into utilisateurs_role(utilisateur_id,role_id) select ?,id from roles where code='ADMIN'", outsider);
+            token = login(name);
+            get(path);
+            request("POST", "/rapports-activite", body, 403);
+            request("PATCH", path, body, 403);
+            request("PATCH", path + "/statut", Map.of("statutCode", "VALIDE"), 403);
+            request("POST", path + "/observations", Map.of("commentaire", "Outside assignment"), 403);
+        }
+        token = f.mentorToken();
+        request("PATCH", path + "/statut", Map.of("statutCode", "A_CORRIGER"), 200);
+        token = f.traineeToken();
+        request("PATCH", path, body, 200);
+        request("PATCH", path + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        token = f.mentorToken();
+        request("POST", path + "/observations", Map.of("commentaire", "Validated by the assigned mentor"), 201);
+        request("PATCH", path + "/statut", Map.of("statutCode", "VALIDE"), 200);
+        token = f.traineeToken();
+        assertEquals("VALIDE", get(path).get("statut").asString());
+        request("PATCH", path, body, 403);
     }
     @Test void concurrentAssignmentsAndReportsRemainUnique() throws Exception {
         var f = fixture("race-" + UUID.randomUUID().toString().substring(0, 8));
@@ -414,6 +496,7 @@ class CompleteIntegrationTests {
         var period = get("/stage-participants/" + id + "/periodes-rapports").get(0);
         var reportBody = Map.of("stageParticipantId", id, "moisStageId", f.month(), "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString());
         calls.clear();
+        token = f.traineeToken();
         for (int i = 0; i < 2; i++) calls.add(http.sendAsync(builder("/rapports-activite").header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(reportBody))).build(), HttpResponse.BodyHandlers.ofString()));
         var reports = calls.stream().map(java.util.concurrent.CompletableFuture::join).toList();
@@ -436,8 +519,10 @@ class CompleteIntegrationTests {
         request("PATCH", "/stage-participants/" + p2 + "/statut", Map.of("statutCode", "EN_COURS"), 200);
         int defense = create("/soutenances", Map.of("stageParticipantId", p2, "dateSoutenance", today.plusDays(1) + "T14:00:00"));
         var period = get("/stage-participants/" + p1 + "/periodes-rapports").get(0);
+        token = f.traineeToken();
         int report = create("/rapports-activite", Map.of("stageParticipantId", p1, "moisStageId", f.month(), "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString()));
         request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        token = f.adminToken();
         jdbc.update("update rapports_activite set date_soumission=? where id=?", java.sql.Timestamp.valueOf(today.minusDays(30).atStartOfDay()), report);
         var actualOrchestration = new AlerteOrchestrationService(detection);
         actualOrchestration.executerControlesQuotidiens();
@@ -446,7 +531,9 @@ class CompleteIntegrationTests {
         int count = jdbc.queryForObject("select count(*) from alertes", Integer.class);
         actualOrchestration.executerControlesQuotidiens();
         assertEquals(count, jdbc.queryForObject("select count(*) from alertes", Integer.class));
+        token = f.mentorToken();
         request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "VALIDE"), 200);
+        token = f.adminToken();
         detection.detecterValidationsEnRetard();
         assertEquals("TRAITEE", jdbc.queryForObject("select statut from alertes where cle_deduplication=?", String.class, "VALIDATION_EN_RETARD_RAPPORT_" + report));
         for (var required : get("/stage-participants/" + p1 + "/documents-obligatoires"))
@@ -457,10 +544,13 @@ class CompleteIntegrationTests {
         assertTrue(jdbc.queryForObject("select message from alertes where cle_deduplication=?", String.class, incompleteKey).contains("Rapports obligatoires non valides"));
         for (var expected : get("/stage-participants/" + p1 + "/periodes-rapports")) {
             if (expected.get("validee").asBoolean()) continue;
+            token = f.traineeToken();
             int remaining = create("/rapports-activite", Map.of("stageParticipantId", p1, "moisStageId", f.month(), "debutSemaine", expected.get("debut").asString(), "finSemaine", expected.get("fin").asString()));
             request("PATCH", "/rapports-activite/" + remaining + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+            token = f.mentorToken();
             request("PATCH", "/rapports-activite/" + remaining + "/statut", Map.of("statutCode", "VALIDE"), 200);
         }
+        token = f.adminToken();
         detection.detecterDossiersIncomplets();
         assertEquals("EXPIREE", jdbc.queryForObject("select statut from alertes where cle_deduplication=?", String.class, incompleteKey));
         request("PATCH", "/soutenances/" + defense, Map.of("stageParticipantId", p2, "dateSoutenance", today.plusDays(365) + "T14:00:00"), 200);

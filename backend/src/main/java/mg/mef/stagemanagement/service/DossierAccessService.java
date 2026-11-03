@@ -108,16 +108,33 @@ public class DossierAccessService {
     }
     public void reportContent(Integer id, Integer targetParticipation) {
         var r = report(id);
-        participation(targetParticipation, false);
-        if (traineeOnly()) {
-            require(Objects.equals(r.getStageParticipant().getId(), targetParticipation));
-            require(java.util.Set.of("BROUILLON", "A_CORRIGER").contains(r.getStatut().getCode()));
-        }
+        require(canAuthorReport(r.getStageParticipant()));
+        require(Objects.equals(r.getStageParticipant().getId(), targetParticipation));
+        require(java.util.Set.of("BROUILLON", "A_CORRIGER").contains(r.getStatut().getCode()));
+    }
+    public boolean canAuthorReport(StageParticipant p) {
+        return p != null && role("STAGIAIRE") && owns(p.getStagiaireAcademique().getStagiaire().getUtilisateur());
+    }
+    public boolean canReviewReport(StageParticipant p) {
+        return p != null && role("ENCADREUR") && owns(p.getEncadreur().getUtilisateur())
+                && !owns(p.getStagiaireAcademique().getStagiaire().getUtilisateur());
+    }
+    public void reportAuthor(Integer participationId) {
+        require(canAuthorReport(participation(participationId, false)));
+    }
+    public void reportReviewer(Integer participationId) {
+        require(canReviewReport(participation(participationId, false)));
     }
     public void reportTransition(Integer id, String target) {
         var r = report(id);
-        if (traineeOnly()) require("SOUMIS".equals(target) && java.util.Set.of("BROUILLON", "A_CORRIGER").contains(r.getStatut().getCode()));
-        else review(r.getStageParticipant().getId());
+        String code = target == null ? "" : target.trim().toUpperCase(java.util.Locale.ROOT);
+        if ("SOUMIS".equals(code)) {
+            require(canAuthorReport(r.getStageParticipant()));
+            require(java.util.Set.of("BROUILLON", "A_CORRIGER").contains(r.getStatut().getCode()));
+        } else {
+            require(canReviewReport(r.getStageParticipant()));
+            require(java.util.Set.of("VALIDE", "A_CORRIGER").contains(code) && "SOUMIS".equals(r.getStatut().getCode()));
+        }
     }
     public boolean readEvaluation(EvaluationFinale e) { return readParticipation(e.getStageParticipant()); }
     public void evaluation(Integer id, boolean write) {

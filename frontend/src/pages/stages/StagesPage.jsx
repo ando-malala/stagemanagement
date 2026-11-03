@@ -8,8 +8,8 @@ import { hasAnyRole } from '../../utils/roleUtils.js';
 const stageColumns = [
   { key: 'id', label: 'ID' },
   { key: 'libelle', label: 'Libellé' },
-  { key: 'structureAccueil', label: 'Structure' },
-  { key: 'departement', label: 'Département' },
+  { key: 'structureAccueil', label: 'Structure', filterable: true },
+  { key: 'departement', label: 'Département', filterable: true },
   { key: 'dateCreation', label: 'Créé le' }
 ];
 
@@ -18,10 +18,10 @@ const participationColumns = [
   { key: 'stagiaireNomComplet', label: 'Stagiaire' },
   { key: 'stage', label: 'Stage' },
   { key: 'themeStage', label: 'Thème' },
-  { key: 'encadreurNomComplet', label: 'Encadreur' },
+  { key: 'encadreurNomComplet', label: 'Encadreur', filterable: true },
   { key: 'dateDebutStage', label: 'Début' },
   { key: 'dateFinStage', label: 'Fin' },
-  { key: 'statut', label: 'Statut' }
+  { key: 'statut', label: 'Statut', filterable: true }
 ];
 
 export default function StagesPage({ navigate }) {
@@ -44,10 +44,10 @@ export default function StagesPage({ navigate }) {
 
       <EntityPage
         title="Participations"
-        description="Affectations des stagiaires aux stages."
+        description="Une participation relie un stagiaire à un stage, un encadreur et une période. Créez d’abord son dossier et son profil académique."
         renderActions={(row) => <AppLink to={`/participations/${row.id}`} navigate={navigate}>Consulter</AppLink>}
         columns={participationColumns}
-        renderCreate={(reload) => <BusinessEditor kind="participation" label="Créer la participation" save={createParticipation} onSaved={reload} />}
+        renderCreate={(reload) => <BusinessEditor kind="participation" label="Affecter un stagiaire" save={createParticipation} onSaved={reload} />}
         fetcher={listParticipations}
         creator={createParticipation}
         canCreate={canWrite}

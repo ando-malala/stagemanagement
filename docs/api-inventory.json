@@ -1668,10 +1668,8 @@
     "parameters": "@RequestBody RapportActiviteRequest request",
     "body": "RapportActiviteRequest",
     "success": "201",
-    "access": "hasAnyRole",
+    "access": "hasRole",
     "roles": [
-      "ADMIN",
-      "ENCADREUR",
       "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
@@ -1686,10 +1684,8 @@
     "parameters": "@PathVariable Integer id, @RequestBody RapportActiviteRequest request",
     "body": "RapportActiviteRequest",
     "success": "200",
-    "access": "hasAnyRole",
+    "access": "hasRole",
     "roles": [
-      "ADMIN",
-      "ENCADREUR",
       "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
@@ -1722,9 +1718,8 @@
     "parameters": "@PathVariable Integer id, @RequestBody RapportObservationRequest request, @AuthenticationPrincipal AuthMeResponse utilisateurConnecte",
     "body": "RapportObservationRequest",
     "success": "201",
-    "access": "hasAnyRole",
+    "access": "hasRole",
     "roles": [
-      "ADMIN",
       "ENCADREUR"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/RapportActiviteGestionController.java",
@@ -1741,7 +1736,6 @@
     "success": "200",
     "access": "hasAnyRole",
     "roles": [
-      "ADMIN",
       "ENCADREUR",
       "STAGIAIRE"
     ],

@@ -478,7 +478,7 @@ public class StageGestionService {
                 ? participant.getStatut().getCode()
                 : null;
 
-        return new StageParticipantResponse(
+        var response = new StageParticipantResponse(
                 participant.getId(),
                 stage.getId(),
                 stage.getLibelle(),
@@ -500,6 +500,8 @@ public class StageGestionService {
                 participant.getDateModification(),
                 participant.getDateCloture()
         );
+        response.setPeutRedigerRapport(access.canAuthorReport(participant));
+        return response;
     }
 
     // =========================
