@@ -1,4 +1,7 @@
 const paths = {
+  warning: 'M12 3 2 21h20L12 3z M12 9v5 M12 17v.1',
+  arrow: 'M5 12h14 M14 7l5 5-5 5',
+  refresh: 'M20 7v5h-5 M4 17v-5h5 M6 7a7 7 0 0 1 12-1l2 3 M4 15l2 3a7 7 0 0 0 12-1',
   MD: 'M4 4h16v16H4z M8 8h8 M8 12h5 M8 16h6',
   TB: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
   ST: 'M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M20 21v-2a4 4 0 0 0-3-3.87 M17 3.13a4 4 0 0 1 0 7.75',

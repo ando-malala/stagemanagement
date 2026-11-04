@@ -1,6 +1,7 @@
 import AppLink from '../../components/common/AppLink.jsx';
 import { formatDate, formatDateTime } from '../../utils/dateUtils.js';
 import { alerteLinks } from '../../utils/pilotage.js';
+import StatusBadge from '../../components/common/StatusBadge.jsx';
 
 export default function AlerteDetail({ alerte, navigate }) {
   return <div className="page-stack">
@@ -8,9 +9,9 @@ export default function AlerteDetail({ alerte, navigate }) {
     <p>{alerte.message}</p>
     <dl className="detail-grid">
       <div><dt>Type</dt><dd>{alerte.typeAlerteLibelle} ({alerte.typeAlerteCode})</dd></div>
-      <div><dt>Nature</dt><dd>{alerte.natureAlerte ?? 'Non renseignée'}</dd></div>
-      <div><dt>Priorité</dt><dd>{alerte.priorite}</dd></div>
-      <div><dt>Statut</dt><dd>{alerte.statut}</dd></div>
+      <div><dt>Nature</dt><dd>{alerte.natureAlerte ? <StatusBadge value={alerte.natureAlerte} /> : 'Non renseignée'}</dd></div>
+      <div><dt>Priorité</dt><dd><StatusBadge value={alerte.priorite} /></dd></div>
+      <div><dt>Statut</dt><dd><StatusBadge value={alerte.statut} /></dd></div>
       <div><dt>Échéance</dt><dd>{formatDate(alerte.dateEcheance)}</dd></div>
       <div><dt>Détection</dt><dd>{formatDateTime(alerte.dateDetection)}</dd></div>
       <div><dt>Traitement</dt><dd>{formatDateTime(alerte.dateTraitement)}</dd></div>

@@ -1,11 +1,20 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import EmptyState from './EmptyState.jsx';
 import Loader from './Loader.jsx';
 import Button from './Button.jsx';
 import Input from './Input.jsx';
 import { displayValue, selectTableRows } from '../../utils/tableUtils.js';
+import StatusBadge from './StatusBadge.jsx';
+
+const statusColumns = new Set(['statut', 'ancienStatut', 'etat', 'priorite', 'natureAlerte', 'statutRapport']);
+function renderCell(column, row) {
+  if (column.render) return column.render(row);
+  const value = displayValue(row[column.key]);
+  return statusColumns.has(column.key) && value !== '—' ? <StatusBadge value={value} /> : value;
+}
 
 export default function Table({ columns, data = [], loading, error, renderActions, caption = 'Résultats', searchable = true }) {
+  const scrollHintId = useId();
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -32,7 +41,9 @@ export default function Table({ columns, data = [], loading, error, renderAction
         {hasCriteria && <Button variant="secondary" onClick={() => { setQuery(''); setFilters({}); setSort(null); setPage(1); }}>Réinitialiser</Button>}
         <span role="status">{filtered.length} résultat(s)</span>
       </div>}
-      {!rows.length ? <EmptyState message={data.length ? 'Aucun résultat pour ces critères. Modifiez la recherche ou réinitialisez les filtres.' : undefined} /> : <div className="table-wrap">
+      {!rows.length ? <EmptyState message={data.length ? 'Aucun résultat pour ces critères. Modifiez la recherche ou réinitialisez les filtres.' : undefined} /> : <>
+        <p className="small table-scroll-hint" id={scrollHintId}>Faites défiler le tableau horizontalement pour consulter toutes les colonnes.</p>
+        <div className="table-wrap" role="region" aria-label={`${caption} — tableau défilant`} aria-describedby={scrollHintId} tabIndex={0}>
         <table>
           <caption>{caption}</caption>
           <thead><tr>
@@ -47,11 +58,11 @@ export default function Table({ columns, data = [], loading, error, renderAction
             {renderActions && <th scope="col">Actions</th>}
           </tr></thead>
           <tbody>{rows.map((row) => <tr key={row.id ?? JSON.stringify(row)}>
-            {columns.map((column) => <td key={column.key}>{column.render ? column.render(row) : displayValue(row[column.key])}</td>)}
+            {columns.map((column) => <td key={column.key}>{renderCell(column, row)}</td>)}
             {renderActions && <td>{renderActions(row)}</td>}
           </tr>)}</tbody>
         </table>
-      </div>}
+      </div></>}
       {filtered.length > 0 && <nav className="pagination" aria-label={`Pagination — ${caption}`}>
         <Input label="Lignes par page" type="select" value={pageSize} options={[10, 25, 50]} onChange={(event) => { setPageSize(Number(event.target.value) || 10); setPage(1); }} />
         <Button variant="secondary" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Précédent</Button>

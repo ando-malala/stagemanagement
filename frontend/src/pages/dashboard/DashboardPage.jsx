@@ -13,6 +13,14 @@ import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import PilotagePanel from './PilotagePanel.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { hasAnyRole } from '../../utils/roleUtils.js';
+import NavigationIcon from '../../components/layout/NavigationIcon.jsx';
+import StatusBadge from '../../components/common/StatusBadge.jsx';
+
+const indicatorStyles = {
+  totalStagiaires: ['ST', 'blue'], totalStages: ['SP', 'teal'],
+  totalParticipations: ['EN', 'violet'], totalRapports: ['RA', 'blue'],
+  totalAlertesATraiter: ['AL', 'amber'], totalAlertesTraitees: ['EV', 'teal']
+};
 
 const fetchSummary = async (options) => requireDashboard(await getDashboardResume(options));
 const fetchAlerts = async (options) => {
@@ -24,11 +32,11 @@ export default function DashboardPage({ navigate }) {
   const summary = useFetch(fetchSummary);
   const alerts = useFetch(fetchAlerts);
   return <div className="page-stack">
-    <div className="section-heading"><h2>Tableau de bord</h2><Button variant="secondary" disabled={summary.loading || alerts.loading}
-      onClick={() => { void summary.reload(); void alerts.reload(); }}>Actualiser</Button></div>
-    <DashboardShortcuts utilisateur={utilisateur} navigate={navigate} />
-    <p className="small">Vue d’ensemble des dossiers auxquels vous avez accès.</p>
+    <section className="dashboard-intro"><div><span className="eyebrow">Votre espace de pilotage</span><h2>Votre activité en un regard</h2>
+      <p>Vue d’ensemble des dossiers auxquels vous avez accès.</p></div><Button variant="secondary" disabled={summary.loading || alerts.loading}
+      onClick={() => { void summary.reload(); void alerts.reload(); }}><NavigationIcon name="refresh" />Actualiser</Button></section>
     {summary.loading ? <Loader label="Chargement des compteurs…" /> : summary.error ? <ErrorMessage error={summary.error} /> : <DashboardSummary resume={summary.data} navigate={navigate} />}
+    <section className="page-stack dashboard-shortcuts"><div className="section-heading"><h3>Accès rapides</h3><span className="small">Les actions du quotidien</span></div><DashboardShortcuts utilisateur={utilisateur} navigate={navigate} /></section>
     <Card><div className="section-heading"><h3>Alertes à traiter</h3><AppLink to="/alertes?statut=A_TRAITER" navigate={navigate}>Voir toutes les alertes à traiter</AppLink></div>
       {alerts.loading ? <Loader /> : alerts.error ? <ErrorMessage error={alerts.error} /> : <DashboardAlerts cards={alerts.data.cards} navigate={navigate} />}
     </Card>
@@ -39,7 +47,7 @@ export default function DashboardPage({ navigate }) {
 export function DashboardAlerts({ cards, navigate }) {
   if (!cards.length) return <EmptyState message="Aucune alerte à traiter." />;
   return <div className="alert-list">{cards.slice(0, 6).map(card => <article className="alert-card" key={card.key}>
-    <strong>{card.title}</strong><p>{card.message}</p><p>{card.priorite} · {card.natureAlerte}</p>
+    <strong>{card.title}</strong><p>{card.message}</p><div className="row-actions"><StatusBadge value={card.priorite} /><StatusBadge value={card.natureAlerte} /></div>
     <AppLink to={card.path} navigate={navigate}>{card.linkLabel}</AppLink>
   </article>)}</div>;
 }
@@ -55,13 +63,13 @@ export function DashboardShortcuts({ utilisateur, navigate }) {
     ['/stages', 'Suivre mes stagiaires', 'Accéder aux participations qui vous sont affectées.'],
     ['/evaluations', 'Évaluer un stage', 'Renseigner les critères et l’appréciation finale.']
   ];
-  return <nav className="quick-actions" aria-label="Actions courantes">{actions.map(([path, title, description]) =>
-    <AppLink key={path} to={path} navigate={navigate} className="quick-action"><strong>{title}</strong><span>{description}</span></AppLink>
+  return <nav className="quick-actions" aria-label="Actions courantes">{actions.map(([path, title, description], index) =>
+    <AppLink key={path} to={path} navigate={navigate} className="quick-action"><span className="icon-tile"><NavigationIcon name={(admin ? ['ST', 'SP', 'AL'] : ['RA', 'EN', 'EV'])[index]} /></span><div><strong>{title}</strong><span>{description}</span></div><span className="quick-action-arrow"><NavigationIcon name="arrow" /></span></AppLink>
   )}</nav>;
 }
 
 export function DashboardSummary({ resume, navigate }) {
-  return <section className="stat-grid">{dashboardCards.map(([key, label, path]) => <Card className="stat-card" key={key}>
-    <span>{label}</span><strong>{formatNumber(resume[key])}</strong><AppLink to={path} navigate={navigate}>Consulter</AppLink>
+  return <section className="stat-grid" aria-label="Indicateurs d’activité">{dashboardCards.map(([key, label, path]) => <Card className={`stat-card stat-${indicatorStyles[key][1]}`} key={key}>
+    <div className="stat-heading"><span>{label}</span><span className="icon-tile"><NavigationIcon name={indicatorStyles[key][0]} /></span></div><strong>{formatNumber(resume[key])}</strong><AppLink to={path} navigate={navigate} aria-label={`Consulter : ${label}`}>Consulter</AppLink>
   </Card>)}</section>;
 }

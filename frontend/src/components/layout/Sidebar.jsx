@@ -33,5 +33,6 @@ export default function Sidebar({ currentPath, navigate }) {
       })}
       {!items.length && <p>Aucun module disponible pour vos rôles actuels.</p>}
     </nav>
+    <div className="sidebar-footer"><strong>MEF · SIIGFP</strong><span>Ministère de l’Économie<br />et des Finances</span></div>
   </aside>;
 }

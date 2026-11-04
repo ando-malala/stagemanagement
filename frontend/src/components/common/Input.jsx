@@ -6,7 +6,7 @@ export default function Input({ label, name, type = 'text', options, error, hint
   const controlProps = { ...props, id, name, 'aria-invalid': Boolean(error), 'aria-describedby': describedBy };
   return (
     <div className="field">
-      <label htmlFor={id}>{label}{props.required ? ' *' : ''}</label>
+      <label htmlFor={id}>{label}{props.required && <span className="required-indicator"> *</span>}</label>
       {type === 'textarea' ? <textarea {...controlProps} /> : type === 'select' ? (
         <select {...controlProps}>
           <option value="">{emptyOptionLabel}</option>

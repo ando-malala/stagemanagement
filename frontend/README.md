@@ -31,9 +31,12 @@ Le backend actuel ne configure pas CORS. Privilégier le proxy local. En product
 npm.cmd test
 npm.cmd run lint
 npm.cmd run build
+npm.cmd run check:contrast
 ```
 
 Les tests Node utilisent les dépendances déjà installées. Ils couvrent le transport et les contrats de services avec fetch intercepté, les utilitaires, les permissions et le rendu SSR React. Ils ne remplacent pas les essais avec PostgreSQL ou dans un navigateur.
+
+La refonte visuelle est décrite dans le [design system](../docs/DESIGN_SYSTEM.md) et son [audit de réalisation](../docs/UI_UX_REFONTE.md). Les tokens sont centralisés dans `src/styles/global.css`. Le contrôle de contraste vérifie la palette ; la recette visuelle aux quatre largeurs reste à effectuer, l'accès au navigateur ayant été refusé pendant cette intervention.
 
 `npm.cmd run check:api` contrôle un backend déjà démarré sans navigateur ni écriture. La cible est `http://localhost:8080` par défaut (`MEF_API_URL` pour la changer). Sans `MEF_TEST_TOKEN`, seuls les refus d’accès anonymes sont contrôlés et le code de sortie est 2 si ces contrôles passent. Avec un jeton existant de test, les lectures et droits associés sont vérifiés; une erreur produit le code 1. Voir le [guide d’intégration](../docs/FRONTEND_VALIDATION.md) pour la portée exacte et les parcours restants.
 
