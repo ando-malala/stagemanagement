@@ -73,6 +73,7 @@ public class AlerteGestionService {
         return alerteRepository
                 .findByStatutOrderByDateDetectionDesc(AlerteStatut.A_TRAITER)
                 .stream().filter(access::readAlert)
+                .filter(AlerteClotureService::encorePertinente)
                 .map(this::toResponse)
                 .toList();
     }

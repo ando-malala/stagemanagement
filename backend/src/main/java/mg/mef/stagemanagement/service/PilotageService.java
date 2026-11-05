@@ -60,6 +60,7 @@ public class PilotageService {
         // Filtering only the final SQL view would disclose messages on an alert linked to multiple departments.
         Map<Integer, List<Alerte>> groups = alertes.findByStatutOrderByDateDetectionDesc(AlerteStatut.A_TRAITER).stream()
                 .filter(access::readAlert).filter(a -> participation(a) != null)
+                .filter(AlerteClotureService::encorePertinente)
                 .collect(Collectors.groupingBy(a -> participation(a).getId()));
         return groups.values().stream().map(rows -> {
             var p = participation(rows.get(0));

@@ -42,7 +42,7 @@ public class DashboardService {
                 stageRepository.findAll().stream().filter(access::readStage).count(),
                 stageParticipantRepository.findAll().stream().filter(access::readParticipation).count(),
                 rapportActiviteRepository.findAll().stream().filter(access::readReport).count(),
-                alerteRepository.findByStatutOrderByDateDetectionDesc(AlerteStatut.A_TRAITER).stream().filter(access::readAlert).count(),
+                alerteRepository.findByStatutOrderByDateDetectionDesc(AlerteStatut.A_TRAITER).stream().filter(access::readAlert).filter(AlerteClotureService::encorePertinente).count(),
                 alerteRepository.findByStatutOrderByDateDetectionDesc(AlerteStatut.TRAITEE).stream().filter(access::readAlert).count()
         );
     }

@@ -22,4 +22,17 @@ public interface AlerteRepository extends JpaRepository<Alerte, Integer> {
     Optional<Alerte> findByCleDeduplication(String cleDeduplication);
 
     List<Alerte> findByTypeAlerte_Code(String code);
+
+    @org.springframework.data.jpa.repository.Query("""
+            select a from Alerte a
+            left join a.stageParticipant p
+            left join a.rapport r
+            left join a.soutenance s
+            where a.statut = :statut
+            and (p.id = :participationId or r.stageParticipant.id = :participationId
+                 or s.stageParticipant.id = :participationId)
+            """)
+    List<Alerte> findByParticipationAndStatut(
+            @org.springframework.data.repository.query.Param("participationId") Integer participationId,
+            @org.springframework.data.repository.query.Param("statut") AlerteStatut statut);
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
-import NavigationIcon from '../../components/layout/NavigationIcon.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 
 export default function LoginPage() {
@@ -38,25 +37,15 @@ export default function LoginPage() {
 
   return (
     <main className="auth-screen">
-      <section className="auth-introduction" aria-labelledby="auth-introduction-title">
-        <div className="brand"><span className="brand-mark">MEF</span><div><strong>Suivi des stages</strong><span>SIIGFP · Madagascar</span></div></div>
-        <div className="auth-presentation">
-          <span className="eyebrow">Accompagner les talents</span>
-          <h2 id="auth-introduction-title">Chaque parcours mérite<br />un suivi de qualité.</h2>
-          <p>Un espace commun pour accompagner les stagiaires, faciliter l’encadrement et suivre chaque étape du stage.</p>
-          <div className="auth-features">
-            <div><span className="icon-tile"><NavigationIcon name="ST" /></span><span><strong>Des dossiers centralisés</strong><small>Parcours, affectations et documents</small></span></div>
-            <div><span className="icon-tile"><NavigationIcon name="RA" /></span><span><strong>Un accompagnement continu</strong><small>Rapports, évaluations et échéances</small></span></div>
-          </div>
+      <form className="auth-card login-card" onSubmit={handleSubmit} aria-labelledby="login-title">
+        <div className="login-brand">
+          <span className="brand-mark">MEF</span>
+          <div><strong>SIIGFP · Suivi des stages</strong><p>Ministère de l’Économie et des Finances</p></div>
         </div>
-        <p className="auth-ministry">Ministère de l’Économie et des Finances</p>
-      </section>
-      <div className="auth-form-panel">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <span className="icon-tile auth-form-icon"><NavigationIcon name="UT" /></span>
-        <span className="eyebrow">SIIGFP · Suivi des stages</span>
-        <h1>Connexion</h1>
-        <p>Accédez à votre espace de gestion selon vos habilitations.</p>
+        <header className="login-heading">
+          <h1 id="login-title">Connexion</h1>
+          <p>Connectez-vous à votre espace de suivi.</p>
+        </header>
 
         <Input
           label="Identifiant"
@@ -84,8 +73,6 @@ export default function LoginPage() {
         </Button>
         <p className="auth-help">Un problème d’accès ? Contactez votre administrateur.</p>
       </form>
-      <p className="auth-footer">MEF · SIIGFP — Gestion et suivi des stagiaires</p>
-      </div>
     </main>
   );
 }

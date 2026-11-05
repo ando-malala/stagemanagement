@@ -63,7 +63,7 @@ Les listes proposent la création et les fiches proposent la modification au rô
 
 Depuis la fiche stagiaire, consulter ou ajouter les profils académiques. Pour affecter un stagiaire, le sélectionner puis choisir l’un de ses profils. La fiche stage donne accès à ses participants. La fiche participation propose les actions compatibles avec son état, avec confirmation et contrôles des dates d’effet à Madagascar.
 
-La fiche participation affiche les historiques, événements et périodes attendues. Les actions et transitions sont chargées depuis le serveur : passer à « À clôturer », compléter les pièces obligatoires puis confirmer la clôture. La fiche encadreur permet le changement de statut et affiche sa charge réelle; celle-ci apparaît aussi dans le formulaire d’affectation. Aucun navigateur n’est lancé par les commandes de test, lint ou build.
+La fiche participation affiche les historiques, événements et périodes attendues. Les actions et transitions sont chargées depuis le serveur : passer à « À clôturer », puis vérifier le dossier avant confirmation. Les pièces obligatoires absentes sont affichées sous « Dossiers manquants ». ADMIN peut choisir « Clôturer quand même », y compris si des rapports sont manquants, non soumis ou non validés. Cette confirmation envoie `forcerCloture: true` ; le serveur consigne la décision administrative, les documents absents et les périodes de rapport non validées dans l’événement et l’historique. Sans cette option, les contrôles habituels restent appliqués. La fiche encadreur permet le changement de statut et affiche sa charge réelle; celle-ci apparaît aussi dans le formulaire d’affectation. Aucun navigateur n’est lancé par les commandes de test, lint ou build.
 
 ## Suivi métier
 

@@ -41,7 +41,7 @@ public interface StageParticipantRepository
                 JOIN sp.statut s
                 WHERE sp.dateFinStage < :dateActuelle
                 AND sp.dateCloture IS NULL
-                AND s.code NOT IN ('ANNULEE', 'ABANDONNEE')
+                AND s.code NOT IN ('CLOTUREE', 'ANNULEE', 'ABANDONNEE')
         """)
         List<StageParticipant> findStagesDepassesNonClotures(
                 @Param("dateActuelle") LocalDate dateActuelle

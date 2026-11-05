@@ -3,13 +3,13 @@ import Modal from './Modal.jsx';
 import { useRef } from 'react';
 import Button from './Button.jsx';
 
-export default function ConfirmDialog({ open, title, children, onConfirm, onClose, confirmLabel = 'Confirmer' }) {
+export default function ConfirmDialog({ open, title, children, onConfirm, onClose, confirmLabel = 'Confirmer', confirmDisabled = false }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const pending = useRef(false);
   const close = () => { if (!pending.current) { setError(''); onClose(); } };
   async function confirm() {
-    if (pending.current) return;
+    if (pending.current || confirmDisabled) return;
     pending.current = true;
     setSaving(true);
     setError('');
@@ -23,7 +23,7 @@ export default function ConfirmDialog({ open, title, children, onConfirm, onClos
       {error && <p className="alert alert-danger" role="alert">{error}</p>}
       <div className="row-actions">
         <Button variant="secondary" onClick={close} disabled={saving}>Annuler</Button>
-        <Button variant="danger" onClick={confirm} disabled={saving}>{saving ? 'Enregistrement…' : confirmLabel}</Button>
+        <Button variant="danger" onClick={confirm} disabled={saving || confirmDisabled}>{saving ? 'Enregistrement…' : confirmLabel}</Button>
       </div>
     </Modal>
   );

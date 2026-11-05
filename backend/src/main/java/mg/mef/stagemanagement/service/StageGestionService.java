@@ -59,6 +59,7 @@ public class StageGestionService {
     private final UtilisateurRepository utilisateurRepository;
     private final mg.mef.stagemanagement.repository.TransitionStatutRepository transitions;
     private final DocumentCatalogueService documents;
+    private final AlerteClotureService alertesCloture;
 
     public StageGestionService(
             StageRepository stageRepository,
@@ -73,7 +74,7 @@ public class StageGestionService {
             TypeEvenementParticipationRepository typeEvenementParticipationRepository,
             UtilisateurRepository utilisateurRepository,
             mg.mef.stagemanagement.repository.TransitionStatutRepository transitions,
-            DocumentCatalogueService documents
+            DocumentCatalogueService documents, AlerteClotureService alertesCloture
     , DossierAccessService access, ParticipationRulesService rules) {
         this.access = access; this.rules = rules;
         this.stageRepository = stageRepository;
@@ -89,6 +90,7 @@ public class StageGestionService {
         this.utilisateurRepository = utilisateurRepository;
         this.transitions = transitions;
         this.documents = documents;
+        this.alertesCloture = alertesCloture;
     }
 
     // =========================
@@ -833,12 +835,39 @@ public class StageGestionService {
         if (!Boolean.TRUE.equals(typeEvenement.getActif())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Type evenement inactif");
         }
+        String motifEvenement = request != null ? request.getMotif() : null;
         if ("CLOTURE".equals(typeEvenementCode)) {
             if (participant.getDateCloture() != null) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Participation deja cloturee");
             }
-            documents.verifierCloture(participationId);
-            rules.closureReports(participant);
+            boolean forcerCloture = request != null && Boolean.TRUE.equals(request.getForcerCloture());
+            if (forcerCloture) {
+                String decision = "Clôture forcée par décision administrative";
+                motifEvenement = motifEvenement == null || motifEvenement.isBlank()
+                        ? decision : motifEvenement + "\n" + decision;
+            }
+            if (forcerCloture || (request != null && Boolean.TRUE.equals(request.getIgnorerDocumentsManquants()))) {
+                // Re-read the real missing files while the participation is locked.
+                var manquants = documents.obligatoires(participationId).stream()
+                        .filter(document -> !document.present())
+                        .map(DocumentCatalogueService.DocumentObligatoire::libelle).toList();
+                if (!manquants.isEmpty()) {
+                    String derogation = "Clôture malgré documents manquants : " + String.join(", ", manquants);
+                    motifEvenement = motifEvenement == null || motifEvenement.isBlank()
+                            ? derogation : motifEvenement + "\n" + derogation;
+                }
+            } else {
+                documents.verifierCloture(participationId);
+            }
+            if (forcerCloture) {
+                var rapportsManquants = rules.missingClosureReports(participant).stream()
+                        .map(periode -> "du " + periode.debut() + " au " + periode.fin()).toList();
+                if (!rapportsManquants.isEmpty()) {
+                    motifEvenement += "\nRapports manquants ou non validés : " + String.join(", ", rapportsManquants);
+                }
+            } else {
+                rules.closureReports(participant);
+            }
             participant.setDateCloture(LocalDateTime.now());
         }
 
@@ -922,7 +951,7 @@ public class StageGestionService {
         evenement.setTypeEvenement(typeEvenement);
         evenement.setDateEvenement(LocalDateTime.now());
         evenement.setDateEffet(dateEffet);
-        evenement.setMotif(request != null ? request.getMotif() : null);
+        evenement.setMotif(motifEvenement);
         evenement.setResponsable(responsable);
 
         stageParticipantEvenementRepository.save(evenement);
@@ -940,10 +969,14 @@ public class StageGestionService {
         historique.setAncienStatut(ancienStatut);
         historique.setStatut(nouveauStatut);
         historique.setResponsable(responsable);
-        historique.setMotif(request != null ? request.getMotif() : null);
+        historique.setMotif(motifEvenement);
         historique.setDateModification(LocalDateTime.now());
 
         stageParticipantStatutHistoriqueRepository.save(historique);
+
+        if ("CLOTURE".equals(typeEvenementCode)) {
+            alertesCloture.expirerPourParticipation(participationId);
+        }
 
         return toParticipantResponse(participantEnregistre);
     }

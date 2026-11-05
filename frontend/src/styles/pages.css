@@ -1,26 +1,19 @@
-.auth-screen { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(360px, 46%) minmax(0, 1fr); background: var(--surface-subtle); }
-.auth-introduction { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-10); padding: clamp(32px, 4vw, 72px); color: var(--on-brand); background: linear-gradient(155deg, var(--primary), var(--sidebar-deep)); }
-.auth-introduction .brand { padding: 0 0 var(--space-6); }
-.auth-presentation { display: grid; gap: var(--space-6); max-width: 480px; }
-.auth-presentation .eyebrow { color: var(--nav-accent); }
-.auth-presentation h2 { font-size: clamp(1.75rem, 2.5vw, 2.75rem); line-height: 1.2; letter-spacing: -.04em; }
-.auth-presentation > p { color: var(--on-brand-muted); font-size: var(--font-base); line-height: 1.8; max-width: 400px; }
-.auth-features { display: grid; gap: var(--space-5); margin-top: var(--space-5); }
-.auth-features > div { display: flex; align-items: center; gap: var(--space-4); }
-.auth-features .icon-tile { color: var(--nav-accent); background: var(--nav-icon-bg); }
-.auth-features > div > span:last-child { display: grid; gap: var(--space-1); }
-.auth-features strong { font-size: var(--font-md); font-weight: 600; }
-.auth-features small { font-size: var(--font-sm); color: var(--on-brand-muted); }
-.auth-ministry { color: var(--on-brand-muted); font-size: var(--font-xs); }
-.auth-form-panel { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--space-8); padding: var(--space-10); }
+.auth-screen { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: var(--space-6); background: var(--bg); }
 .auth-card { width: min(100%, 440px); display: grid; gap: var(--space-5); padding: var(--space-10); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-hover); }
 .auth-card h1 { font-size: 2rem; }
 .auth-card > p { color: var(--muted); font-size: var(--font-md); }
-.auth-card .auth-form-icon { width: 48px; height: 48px; background: var(--accent-soft); color: var(--accent); margin-bottom: var(--space-2); }
 .auth-card .alert-danger { color: var(--danger); }
 .auth-card .btn { width: 100%; margin-top: var(--space-2); }
 .auth-card .auth-help { font-size: var(--font-xs); text-align: center; }
-.auth-footer { color: var(--muted); font-size: var(--font-xs); text-align: center; }
+.login-card { padding: var(--space-8); border-top: 3px solid var(--primary); border-radius: var(--radius); box-shadow: var(--shadow); }
+.login-brand { display: flex; align-items: center; gap: var(--space-3); padding-bottom: var(--space-5); border-bottom: 1px solid var(--border); }
+.login-brand .brand-mark { background: var(--primary-soft); }
+.login-brand strong { color: var(--primary); font-size: var(--font-md); font-weight: 650; }
+.login-brand p { margin-top: var(--space-1); color: var(--muted); font-size: var(--font-xs); }
+.login-heading { display: grid; gap: var(--space-2); }
+.login-heading h1 { font-size: 1.625rem; }
+.login-heading p { color: var(--muted); font-size: var(--font-md); }
+.login-card .auth-help { padding-top: var(--space-4); border-top: 1px solid var(--border); }
 
 .page-stack { display: grid; gap: var(--space-6); min-width: 0; }
 .section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
@@ -95,25 +88,15 @@
 
 @media (min-width: 1600px) { .stat-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 @media (max-width: 980px) {
-  .auth-screen { grid-template-columns: minmax(280px, 42%) minmax(0, 1fr); }
-  .auth-introduction { padding: var(--space-8); }
-  .auth-form-panel { padding: var(--space-6); }
   .auth-card { padding: var(--space-6); }
 }
 @media (max-width: 720px) {
-  .auth-screen { grid-template-columns: minmax(0, 1fr); }
-  .auth-introduction { padding: var(--space-6); gap: var(--space-5); }
-  .auth-presentation { gap: var(--space-3); }
-  .auth-presentation h2 { font-size: 1.75rem; }
-  .auth-presentation h2 br { display: none; }
-  .auth-features, .auth-ministry { display: none; }
-  .auth-introduction .brand { padding-bottom: var(--space-4); }
-  .auth-form-panel { padding: var(--space-6) var(--space-4); gap: var(--space-5); }
   .alert-list, .detail-grid, .entity-form { grid-template-columns: minmax(0, 1fr); }
   .dashboard-intro { padding: var(--space-6); }
   .page-stack { gap: var(--space-4); }
 }
 @media (max-width: 480px) {
+  .auth-screen { padding: var(--space-4); }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
   .stat-card { padding: var(--space-4); }
   .stat-heading { align-items: start; flex-direction: column-reverse; }

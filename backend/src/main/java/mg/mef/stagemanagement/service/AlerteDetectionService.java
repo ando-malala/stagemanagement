@@ -332,7 +332,8 @@ public class AlerteDetectionService {
 
                         // Ne pas demander de rapport pour un stage
                         // annulé ou abandonné.
-                        if ("ANNULEE".equals(statutParticipation)
+                        if (AlerteClotureService.cloturee(participation)
+                                || "ANNULEE".equals(statutParticipation)
                                 || "ABANDONNEE".equals(statutParticipation)
                                 || "PLANIFIEE".equals(statutParticipation)) {
                         continue;
@@ -488,7 +489,8 @@ public class AlerteDetectionService {
 
                 for (RapportActivite rapport : rapports) {
 
-                        if (rapport.getStatut() == null
+                        if (AlerteClotureService.cloturee(rapport.getStageParticipant())
+                                || rapport.getStatut() == null
                                 || !"SOUMIS".equals(rapport.getStatut().getCode())
                                 || rapport.getDateSoumission() == null) {
                         continue;
@@ -601,7 +603,8 @@ public class AlerteDetectionService {
 
                 for (StageParticipant participation : participations) {
 
-                        if (participation.getStatut() == null
+                        if (AlerteClotureService.cloturee(participation)
+                                || participation.getStatut() == null
                                 || !"A_CLOTURER".equals(
                                         participation.getStatut().getCode())) {
                         continue;
@@ -814,6 +817,9 @@ public class AlerteDetectionService {
                                 ));
 
                         String cle = "SOUTENANCE_PROCHE_" + soutenanceId;
+                        if (AlerteClotureService.cloturee(soutenance.getStageParticipant())) {
+                                continue;
+                        }
                         clesActives.add(cle);
 
                         Alerte alerte = alerteRepository

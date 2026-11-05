@@ -39,6 +39,7 @@ class CompleteIntegrationTests {
     @Autowired JdbcTemplate jdbc;
     @Autowired PasswordEncoder encoder;
     @Autowired mg.mef.stagemanagement.service.AlerteDetectionService detection;
+    @Autowired mg.mef.stagemanagement.service.AlerteClotureService alertesCloture;
     @MockitoBean AlerteOrchestrationService schedulerOnly;
     final JsonMapper json = JsonMapper.builder().build();
     final HttpClient http = HttpClient.newHttpClient();
@@ -422,6 +423,52 @@ class CompleteIntegrationTests {
     Map<String, Object> participationBody(Fixture f, int academic, LocalDate start, LocalDate end) {
         return Map.of("stageId", f.stage(), "stagiaireAcademiqueId", academic, "cadreStageId", f.cadre(), "encadreurId", f.mentor(), "dateDebutStage", start.toString(), "dateFinStage", end.toString());
     }
+    @Test void administratorCanExplicitlyCloseWithMissingDocuments() throws Exception {
+        for (String reportState : List.of("MANQUANT", "BROUILLON", "SOUMIS")) {
+            assertForcedClosure(reportState);
+        }
+    }
+    private void assertForcedClosure(String reportState) throws Exception {
+        var f = fixture("closure-" + UUID.randomUUID().toString().substring(0, 8));
+        LocalDate yesterday = LocalDate.now(ZoneId.of("Indian/Antananarivo")).minusDays(1);
+        int participation = create("/stage-participants", participationBody(f, f.academic(), yesterday, yesterday));
+        String base = "/stage-participants/" + participation;
+        var override = Map.of("forcerCloture", true, "motif", "Décision administrative");
+        request("POST", base + "/cloturer", override, 409); // Availability of the transition still matters.
+        request("PATCH", base + "/statut", Map.of("statutCode", "EN_COURS"), 200);
+        request("PATCH", base + "/statut", Map.of("statutCode", "A_CLOTURER"), 200);
+        request("POST", base + "/cloturer", Map.of("ignorerDocumentsManquants", true), 409);
+        var period = get(base + "/periodes-rapports").get(0);
+        token = f.traineeToken();
+        request("POST", base + "/cloturer", override, 403);
+        if (!"MANQUANT".equals(reportState)) {
+            int report = create("/rapports-activite", Map.of("stageParticipantId", participation, "moisStageId", f.month(),
+                "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString()));
+            if ("SOUMIS".equals(reportState)) {
+                request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+            }
+        }
+        token = f.mentorToken();
+        request("POST", base + "/cloturer", override, 403);
+        token = f.adminToken();
+        var missing = get(base + "/documents-obligatoires");
+        assertFalse(missing.isEmpty());
+        for (JsonNode document : missing) assertFalse(document.get("present").asBoolean());
+        request("POST", base + "/cloturer", Map.of(), 409);
+        request("POST", base + "/cloturer", Map.of("forcerCloture", false), 409);
+        var closed = request("POST", base + "/cloturer", override, 200);
+        assertEquals("CLOTUREE", closed.get("statut").asString());
+        assertFalse(closed.get("dateCloture").isNull());
+        var events = get(base + "/evenements");
+        assertEquals(1, events.size());
+        String motif = events.get(0).get("motif").asString();
+        assertTrue(motif.startsWith("Décision administrative\nClôture forcée par décision administrative\n"));
+        assertTrue(motif.contains("Rapports manquants ou non validés : du " + period.get("debut").asString() + " au " + period.get("fin").asString()));
+        for (JsonNode document : missing) assertTrue(motif.contains(document.get("libelle").asString()));
+        var history = get(base + "/historique-statuts");
+        assertEquals(motif, history.get(history.size() - 1).get("motif").asString());
+        request("POST", base + "/cloturer", override, 409);
+    }
     @Test void onlyTheOwnerSubmitsAndOnlyTheAssignedMentorReviewsReports() throws Exception {
         String prefix = "reports-" + UUID.randomUUID().toString().substring(0, 8);
         var f = fixture(prefix);
@@ -506,6 +553,52 @@ class CompleteIntegrationTests {
         assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update rapports_activite set fin_semaine=fin_semaine+1 where id=?", report));
         assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("insert into stage_participant(stage_id,stagiaire_academique_id,cadre_stage_id,encadreur_id,date_debut_stage,date_fin_stage,statut_id) select stage_id,stagiaire_academique_id,cadre_stage_id,encadreur_id,date_debut_stage+1,date_fin_stage,statut_id from stage_participant where id=?", id));
         assertEquals(1, jdbc.queryForObject("select count(*) from stage_participant p join stagiaire_academique a on a.id=p.stagiaire_academique_id where a.stagiaire_id=?", Integer.class, f.trainee()));
+    }
+    @Test void closureExpiresAlertsAndDetectorsDoNotReopenThem() throws Exception {
+        var f = fixture("closed-alerts-" + UUID.randomUUID().toString().substring(0, 8));
+        LocalDate today = LocalDate.now(ZoneId.of("Indian/Antananarivo"));
+        int p = create("/stage-participants", participationBody(f, f.academic(), today.minusDays(28), today.minusDays(1)));
+        String base = "/stage-participants/" + p;
+        request("PATCH", base + "/statut", Map.of("statutCode", "EN_COURS"), 200);
+        request("PATCH", base + "/statut", Map.of("statutCode", "A_CLOTURER"), 200);
+        int defense = create("/soutenances", Map.of("stageParticipantId", p, "dateSoutenance", today.plusDays(1) + "T14:00:00"));
+        var period = get(base + "/periodes-rapports").get(0);
+        token = f.traineeToken();
+        int report = create("/rapports-activite", Map.of("stageParticipantId", p, "moisStageId", f.month(),
+                "debutSemaine", period.get("debut").asString(), "finSemaine", period.get("fin").asString()));
+        request("PATCH", "/rapports-activite/" + report + "/statut", Map.of("statutCode", "SOUMIS"), 200);
+        token = f.adminToken();
+        jdbc.update("update rapports_activite set date_soumission=? where id=?", java.sql.Timestamp.valueOf(today.minusDays(21).atStartOfDay()), report);
+        create("/alertes", Map.of("typeAlerteCode", "VALIDATION_EN_RETARD", "rapportId", report, "message", "Rapport seul", "priorite", "AVERTISSEMENT"));
+        create("/alertes", Map.of("typeAlerteCode", "SOUTENANCE_PROCHE", "soutenanceId", defense, "message", "Soutenance seule", "priorite", "INFORMATION"));
+        var controls = new AlerteOrchestrationService(detection);
+        controls.executerControlesQuotidiens();
+        String related = " from alertes where (stage_participant_id=? or rapport_id=? or soutenance_id=?)";
+        var ids = jdbc.queryForList("select id" + related + " and statut='A_TRAITER'", Integer.class, p, report, defense);
+        assertTrue(ids.size() >= 6);
+        long before = get("/dashboard/resume").get("totalAlertesATraiter").asLong();
+        request("POST", base + "/cloturer", Map.of("forcerCloture", true), 200);
+        assertEquals(before - ids.size(), get("/dashboard/resume").get("totalAlertesATraiter").asLong());
+        for (int id : ids) {
+            assertEquals("EXPIREE", jdbc.queryForObject("select statut from alertes where id=?", String.class, id));
+            assertNotNull(jdbc.queryForObject("select date_traitement from alertes where id=?", java.sql.Timestamp.class, id));
+        }
+        assertEquals(0, jdbc.queryForObject("select count(*)" + related + " and statut='A_TRAITER'", Integer.class, p, report, defense));
+        long historyCount = jdbc.queryForObject("select count(*)" + related, Long.class, p, report, defense);
+        controls.executerControlesQuotidiens();
+        assertEquals(historyCount, jdbc.queryForObject("select count(*)" + related, Long.class, p, report, defense));
+        assertEquals(0, jdbc.queryForObject("select count(*)" + related + " and statut='A_TRAITER'", Integer.class, p, report, defense));
+        // Simulate an old active alert, before startup reconciliation has run.
+        jdbc.update("update alertes set statut='A_TRAITER', date_traitement=null where id=?", ids.get(0));
+        long expected = get("/dashboard/resume").get("totalAlertesATraiter").asLong();
+        for (var alert : get("/alertes/non-lues")) assertFalse(ids.contains(alert.get("id").asInt()));
+        for (var priority : get("/dashboard/priorites")) assertNotEquals(p, priority.get("participationId").asInt());
+        alertesCloture.expirerAlertesDejaCloturees();
+        assertEquals(expected, get("/dashboard/resume").get("totalAlertesATraiter").asLong());
+        var archived = java.util.stream.StreamSupport.stream(get("/alertes").spliterator(), false)
+                .filter(a -> ids.contains(a.get("id").asInt())).toList();
+        assertEquals(ids.size(), archived.size());
+        assertTrue(archived.stream().allMatch(a -> "EXPIREE".equals(a.get("statut").asString())));
     }
     @Test void realSevenAlertDetectorsDeduplicateAndResolve() throws Exception {
         var f = fixture("detect-" + UUID.randomUUID().toString().substring(0, 8));

@@ -10,6 +10,7 @@ import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import { formatDate } from '../../utils/dateUtils.js';
 import { listActionsParticipation } from '../../api/suiviApi.js';
 import { useFetch } from '../../hooks/useFetch.js';
+import ClotureConfirmation from './ClotureConfirmation.jsx';
 
 export default function ParticipationActions({ participation, onSaved }) {
   const { utilisateur } = useAuth();
@@ -28,6 +29,18 @@ export default function ParticipationActions({ participation, onSaved }) {
     catch (failure) { setError(failure.message); }
   }
   const update = (event) => setValues((current) => ({ ...current, [event.target.name]: event.target.value }));
+  async function confirm(payload) {
+    if (action.code === 'statut') await startParticipation(participation.id, payload);
+    else await applyParticipationEvent(participation.id, action.code, payload);
+    setPending(null);
+    setAction(null);
+    await onSaved();
+  }
+  const confirmation = <>
+    <p>Confirmer « {action?.label} » pour {participation.stagiaireNomComplet}, participation n° {participation.id} ?</p>
+    {(pending?.dateEffet || pending?.nouvelleDateFin) && <p>Date : {formatDate(pending.dateEffet ?? pending.nouvelleDateFin)}</p>}
+    <p>Motif : {pending?.motif || 'Non renseigné'}</p>
+  </>;
   return <section className="page-stack">
     <h3>Suivi de la participation</h3>
     {loaded.loading && <p role="status">Chargement des actions autorisées…</p>}
@@ -44,18 +57,12 @@ export default function ParticipationActions({ participation, onSaved }) {
         <ErrorMessage error={error} />
         <div className="row-actions"><Button type="submit">Vérifier et confirmer</Button><Button variant="secondary" onClick={() => setAction(null)}>Fermer</Button></div>
       </form>}
-      <ConfirmDialog open={Boolean(pending)} title={action?.label ?? 'Confirmer'} onClose={() => setPending(null)} onConfirm={async () => {
-        if (action.code === 'statut') await startParticipation(participation.id, pending);
-        else await applyParticipationEvent(participation.id, action.code, pending);
-        setPending(null);
-        setAction(null);
-        await onSaved();
-      }}>
-        <p>Confirmer « {action?.label} » pour {participation.stagiaireNomComplet}, participation n° {participation.id} ?</p>
-        {(pending?.dateEffet || pending?.nouvelleDateFin) && <p>Date : {formatDate(pending.dateEffet ?? pending.nouvelleDateFin)}</p>}
-        <p>Motif : {pending?.motif || 'Non renseigné'}</p>
-        {action?.code === 'cloturer' && <p>La clôture sera refusée si une pièce obligatoire manque. Le serveur revérifie le dossier lors de l’enregistrement.</p>}
-      </ConfirmDialog>
+      {pending && action?.code === 'cloturer' ? <ClotureConfirmation participationId={participation.id}
+        onClose={() => setPending(null)}
+        onConfirm={() => confirm({ ...pending, forcerCloture: true })}>
+        {confirmation}
+      </ClotureConfirmation> : <ConfirmDialog open={Boolean(pending)} title={action?.label ?? 'Confirmer'}
+        onClose={() => setPending(null)} onConfirm={() => confirm(pending)}>{confirmation}</ConfirmDialog>}
     </>}
   </section>;
 }
