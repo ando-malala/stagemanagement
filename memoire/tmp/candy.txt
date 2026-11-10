@@ -1,0 +1,1462 @@
+=== PAGE PDF 1 ===
+ 
+ 
+ 
+ 
+ 
+ 
+Application de gestion point de vente 
+ 
+Par 
+RIJARILANTO Helena Candy 
+ 
+ 
+Mémoire présenté 
+en vue de l’obtention du grade de licence 
+En informatique 
+Option développement 
+ 
+Novembre, 2025 
+ 
+Jury : 
+M. RAKOTOMALALA Vahatriniaina, encadreur pédagogique 
+M. Tahina Razafinjoelina, examinateur 
+Mlle. RASOLONJATOVO Maherifinoana, encadreur professionnel 
+ 
+©RIJARILANTO Helena Candy, 2025
+ 
+ 
+ 
+ 
+  
+
+
+=== PAGE PDF 2 ===
+ 
+ 
+ 
+ 
+Table des matières 
+Liste des tableaux .................................................................................................................. 3 
+Liste des figures ..................................................................................................................... 4 
+Glossaire ................................................................................................................................ 6 
+Avant-propos ......................................................................................................................... 8 
+L’IT University .................................................................................................................. 8 
+Ichtus IT ............................................................................................................................. 9 
+Remerciements ................................................................................................................ 10 
+Introduction ......................................................................................................................... 11 
+1 Présentation du projet .................................................................................................. 12 
+1.1 Objectifs du projet ............................................................................................... 12 
+1.2 Planning de réalisation ........................................................................................ 12 
+1.3 Architecture logicielle ......................................................................................... 13 
+1.4 Technologies utilisées ......................................................................................... 14 
+1.4.1 Choix du langage pour la couche de présentation : ......................................... 14 
+1.4.2 Choix du langage pour la couche de traitement: ............................................. 15 
+1.4.3 Choix de base de données: .............................................................................. 16 
+1.4.4 Outils utilisés : ................................................................................................. 16 
+1.5 Analyse et conception .......................................................................................... 17 
+1.5.1 Analyse de l'existant ........................................................................................ 17 
+1.5.2 Conception de l’application ............................................................................. 19 
+1.6 Développement par fonctionnalité ou module..................................................... 22 
+1.6.1 Gestion des utilisateurs .................................................................................... 22 
+1.6.2 Gestion des entreprises .................................................................................... 26 
+1.6.3 Gestion des points de vente ............................................................................. 29 
+1.6.4 Gestion des produits ou services ..................................................................... 31 
+1.6.5 Gestion de prise de commande et panier ......................................................... 34 
+1.7 État d’Analyse et Statistiques .............................................................................. 38 
+1.7.1 Vue d’Entreprise — Synthèse Globale ............................................................ 38 
+1.7.2 Analyse Graphique —Tendances et Répartition ............................................. 39 
+1.8 Problèmes rencontrés et solutions ....................................................................... 41 
+2 Évaluation du projet et connaissances acquises .......................................................... 42 
+2.1 Bilan pour l'entreprise .......................................................................................... 42 
+
+=== PAGE PDF 3 ===
+ 
+2 
+ 
+2.2 Bilan personnel .................................................................................................... 42 
+2.3 Extension et évolution de l’application ............................................................... 43 
+Conclusion ........................................................................................................................... 44 
+Bibliographie ....................................................................................................................... 45 
+Annexe .................................................................................................................................... i 
+1. Annexe 1 : Gestion des Rôles des utilisateurs dans l’application .................................. i 
+2. Annexe 2 : Gestion des catégories des PDV ................................................................. ii 
+3. Annexe 3 : Association d’un employé à un point de vente (PDV) .............................. iii 
+4. Annexe 4 : Gestion des tables d’un PDV ..................................................................... iv 
+5. Annexe 5 : Gestion des catégories produits d’une entreprise ....................................... v 
+6. Annexe 6 : Association Produit a une PDV ................................................................. vi 
+7. Annexe 7 : Planning de réalisation .............................................................................. vii 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 4 ===
+ 
+3 
+ 
+Liste des tableaux 
+Tableau 1: Comparaison entre Next.js et Nuxt.js ................................................................ 14 
+Tableau 2  : Comparaison entre NestJS et Spring Boot ...................................................... 15 
+Tableau 3 : Analyse de l’existant et valeur ajoutée d’I_Varotra ........................................ 18 
+Tableau 4 : Tableau récapitulatif des tables, classes et écrans de l’application ................ 19 
+ 
+  
+
+=== PAGE PDF 5 ===
+ 
+4 
+ 
+Liste des figures 
+Figure 1: Planning de réalisation ....................................................................................... 12 
+Figure 2 : Architecture 3 tiers ............................................................................................. 13 
+Figure 3 : Top 10 des bases de données en 2025 ................................................................ 16 
+Figure 4 : Modèle Conceptuel de données -partie 1 ........................................................... 20 
+Figure 5 : Modèle Conceptuel de données -partie 2 ........................................................... 21 
+Figure 6 : Inscription - Ajout d'un utilisateur ..................................................................... 23 
+Figure 7 : Connexion ........................................................................................................... 24 
+Figure 8 : Listes des utilisateurs ......................................................................................... 25 
+Figure 9 : Profil ................................................................................................................... 26 
+Figure 10 : Ajout d'une nouvelle entreprise - Informations générales ............................... 27 
+Figure 11: Ajout d'une nouvelle entreprise - Documents de l’entreprise ........................... 27 
+Figure 12 : Gestion des entreprises .................................................................................... 28 
+Figure 13: Fiche de détail d'une entreprise ........................................................................ 29 
+Figure 14 : Liste des points de vente ................................................................................... 30 
+Figure 15 : Création d'un nouveau PDV ............................................................................. 31 
+Figure 16 : Liste des produits créés pour une entreprise.................................................... 33 
+Figure 17 : Formulaire d'ajout produit pour une entreprise .............................................. 33 
+Figure 18 : Gestion des tables ............................................................................................. 35 
+Figure 19 :Commande et panier ......................................................................................... 36 
+Figure 20 : Paiement - méthode 1 ....................................................................................... 37 
+Figure 21 : Paiement -méthode 2 ........................................................................................ 37 
+Figure 22 : Dashboard - partie 1 ........................................................................................ 39 
+Figure 23 : Dashboard -partie 2 ......................................................................................... 39 
+Figure 24 : Dashboard - partie 3 ........................................................................................ 40 
+Figure 25: Dashboard -partie 4 .......................................................................................... 40 
+Figure 26 : Gestion des rôles ................................................................................................. i 
+Figure 27 : Formulaire d'ajout d'un rôle .............................................................................. ii 
+Figure 28 : Listes des catégories de PDV ............................................................................. ii 
+Figure 29 : Listes des employés dans un pdv ....................................................................... iii 
+Figure 30 : Association User à un pdv ................................................................................. iii 
+Figure 31: Création d'une table pour un pdv type resto ...................................................... iv 
+Figure 32: Gestion des tables dans un point de vente .......................................................... iv 
+
+=== PAGE PDF 6 ===
+ 
+5 
+ 
+Figure 33: Création d'une catégorie de produit pour une entreprise ................................... v 
+Figure 34: Liste des catégories de produit pour une entreprise ........................................... v 
+Figure 35: Association Produit a une PDV.......................................................................... vi 
+Figure 36: Gestion des produits dans un point de vente ..................................................... vii 
+Figure 37 : Extrait planning de réalisation -Partie 1 ......................................................... vii 
+Figure 38 : Extrait planning de réalisation -Partie 2 ........................................................ viii 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 7 ===
+ 
+6 
+ 
+Glossaire 
+ANDROID : Système d’exploitation mobile développé par Google, principalement utilise 
+pour les smartphones et tablettes. 
+API (Application Programming Interface) :  Interface qui permet à des applications de 
+communiquer entre elles, en exposant des fonctionnalités pour permettre des échanges de 
+données.  
+CDN (Content Delivery Network)  : un réseau de serveurs répartis dans le monde qui 
+diffuse les contenus statiques plus rapidement aux utilisateurs. 
+CRUD (Create, Read, Update, Delete) : Ensemble des opérations de base pour manipuler 
+des données dans une base de données ou un système. Cela inclut la création, la lecture, la 
+mise à jour et la suppression de données.  
+CSS (Cascading Style Sheets) : Langage de style utilisé pour décrire la présentation visuelle 
+des documents HTML, comme la mise en forme des couleurs, des polices et de la disposition 
+des éléments.  
+EMV : Standard pour les cartes à puce (Europay, MasterCard, Visa) 
+HTML (HyperText Markup Language) :  Langage standard pour créer et structurer des 
+pages web et son contenu. 
+ HTTP (HyperText Transfer Protocol) : Protocole de communication pour le transfert de 
+données sur le web, permettant d’échanger des information s entre un client (comme un 
+navigateur) et un serveur. 
+ISR (Interrupt Service Routine) : Routine qui gère automatiquement une interruption 
+matérielle ou logicielle dans un ordinateur.  
+ JS (JavaScript) :  Langage de programmation utilisé principalement pour ajouter des 
+fonctionnalités interactives aux pages web. Il est exécuté côté client dans le navigateur.  
+JSON (JavaScript Object Notation) : Format de données léger et facile à lire, utilisé pour 
+l'échange de données entre un serveur et une application web ou entre des systèmes. 
+ JWT (JSON Web Token) :  Standard ouvert utilisé pour échanger des informations entre 
+un client et un serveur sous forme d'un jeton sécurisé, souvent utilisé pour l'authentification 
+et l'autorisation.  
+MCD (Modèle Conceptuel de Données) : Représentation visuelle des entités d'une base de 
+données et des relations entre elles, utilisée pour concevoir la structure d'une base de 
+données. 
+MDM (Mobile Device Management) : gestion des terminaux mobiles. 
+PDV (Point de vente) : boutique ou magasin où s’effectue une transaction. 
+
+=== PAGE PDF 8 ===
+ 
+7 
+ 
+PSP (Payment Service Provider) : prestataire de services de paiement.  
+RBAC. (Role-Based Access Control) : contrôle d’accès basé sur les rôles 
+REST (Representational State Transfer) :  Architecture utilisée pour créer des API. Elle 
+se base sur des requêtes HTTP simples pour accéder à des ressources ou manipuler des 
+données sur un serveur. 
+RSC ( Remote System Control )  : Système  permettant d’administrer et de controler un 
+ordinateur ou serveur a distance. 
+SCRUM : est une méthode Agile  qui organise le travail d’une équipe en cycles appelés 
+sprints 
+SEO (Search Engine Optimization) : Ensemble de pratiques visant à optimiser la visibilité 
+d’un site dans les moteurs de recherche, afin d’améliorer son classement et sa découvrabilité. 
+ 
+Sprint : Période de temps définie dans la méthodologie de développement Agile pendant 
+laquelle un ensemble spécifique de tâches ou de fonctionnalités doit être réalisé.  
+SQL (Structured Query Langage) :  Langage standardisé utilisé pour interagir avec des 
+bases de données relationnelles, permettant de créer, lire, mettre à jour et supprimer des 
+données. 
+SSG (Static Site Generation)  : Méthode qui génè re les pages à l’avance, au moment du 
+build, pour obtenir un site très rapide et facilement déployable sur un CDN.  
+SSR (Server-Side Rendering): Technique de rendu où les pages sont générées côté serveur 
+à chaque requête, ce qui améliore la vitesse d’affichage initiale et le référencement naturel. 
+TPE : Terminal de Paiement Électronique. 
+ 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 9 ===
+ 
+8 
+ 
+Avant-propos 
+Le présent mémoire présente les résultats du travail effectué lors de mon stage de fin d’études 
+de Licence en Informatique de l’IT University ; stage effectué au département informatique 
+de Ichtus It durant 3 mois et demi, de juillet à octobre 2025. 
+Afin de poser clairement le contexte de ce mémoire, je vais présenter succinctement d’une 
+part l’IT University et d’autre part mon entreprise d’accueil. 
+L’IT University 
+Fondée en 2011, l’IT University  (ou ITU)  est une université privée , spécialisée en 
+informatique, formant les jeunes bacheliers, de préférence scientifiques :  
+• En trois ans, pour l‘obtention d’une : 
+o Licence, option Développement, Réseaux et Bases de Données ou Web et 
+Design 
+o Licence, option Graphic Design ou Communication Digitale 
+• En cinq ans, pour l’obtention d’un : 
+o  Master MBDS en coopération avec l’Université Côte d’Azur à Nice Sophia 
+Antipolis – France 
+o Master BIHAR en coopération avec l’ESTIA du Pays Basque - France 
+Étant une formation professionnalisante, l’ITU a tissé des liens forts avec ses partenaires 
+industriels, dont l’opérateur convergent YAS et la plupart des entreprises et institutions du 
+secteur des TIC1. Ces partenaires participent effectivement à la formation par la fourniture 
+de connexion Internet à haut débit, l’envoi de conférenciers ou par l’accueil des étudiants en 
+stage. Beaucoup de ces partenaires recrutent aussi les sortants dès leur sortie d’École . 
+D’autre part, le corps enseignant de l’ITU est constitué intégralement de spécialistes de très 
+haut niveau et obl igatoirement actifs professionnellement dans leurs domaines respectifs.  
+ 
+ 
+1 TIC : Technologies de l’Information et de la Communication 
+
+=== PAGE PDF 10 ===
+ 
+9 
+ 
+Ichtus IT 
+L'entreprise a été créée en 2020 par Ny Hakanto RATREMA en France, avec pour  
+ambition de répondre aux besoins croissants en solutions technologiques de qualité dans un 
+marché en  constante évolution. Dès sa création, l'entreprise a été référencée à Syntec 
+Numérique, aujourd'hui NUMEUM, le syndicat professionnel des entreprises de services du 
+numérique en  France, ce qui lui permet de s'intégrer dans un réseau de profession nels 
+reconnus du secteur.  L'entreprise compte aujourd'hui plusieurs collaborateurs qualifiés,  
+engagés dans des projets variés pour accompagner ses clients dans leur transformation  
+numérique. Les valeurs de l'entreprise reposent sur trois principes simples : Partage, Humain 
+et Entraide. Il n’y a pas besoin de longs discours pour décrire ces valeurs, elles se retrouvent 
+naturellement au sein de l’agence. 
+Ichtus propose des prestations de services en clientèle axées sur le Testing, le 
+Développement, et la Gest ion de projets, permettant ainsi d'offrir une expertise de qualité 
+directement auprès de  ses clients. L'entreprise prend en charge des projets depuis la 
+conception jusqu'à la mise en  production, en incluant la maintenance et la promotion des 
+produits. Pour garantir une visibilité optimale, Ichtus offre également des services de SEO 
+et de Community management. Depuis 2022, l'entreprise a étendu ses services en proposant 
+la délocalisation et la décentralisation des  processus business vers Madagascar (BPO), to ut 
+en maintenant une présence locale en France avec des référents technico-commerciaux pour 
+assurer un suivi de proximité. En parallèle, Ichtus développe des applications sur mesure, 
+que ce soi ent pour des plateformes Web ou mobiles, en utilisant des technol ogies 
+multiplateformes adaptées aux besoins des clients. Enfin,  l'entreprise propose des services 
+de test d'applications, garantissant des solutions fiables, performantes et sécurisées. 
+ 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 11 ===
+ 
+10 
+ 
+Remerciements  
+Je tiens tout d’abord à exprimer ma profonde gratitude envers Dieu, qui m’a accordé la force, 
+la persévérance et la protection durant chacune des étapes de réalisation de ce projet. Cette 
+expérience n’aurait pu voir le jour sans Sa présence et Sa bénédiction dans ma vie. 
+ 
+Je remercie sincèrement l’IT University pour la qualité de l’enseignement dispensé et le 
+cadre formateur offert. Je témoigne ma reconnaissance à l’ensemble du corps professoral, 
+dont l’engagement et la disponibilité ont été précieux pour le développement d e mes 
+compétences et mon épanouissement tout au long de mon parcours. Un merci tout particulier 
+à mes enseignants pour leur accompagnement qui ont su faire naître en moi le sens du 
+dépassement et m’inspirer confiance. 
+ 
+J’adresse mes remerciements les plus chaleureux à l’équipe d’Ichtus IT, qui m’a accueilli 
+avec bienveillance au sein de son entreprise. Grâce à leur esprit d’ouverture et leur volonté 
+de transmettre, j’ai découvert de multiples facettes du métier et eu l’occasion d’appliquer 
+concrètement mes acquis. 
+Je souhaite souligner l’aide précieuse et l’écoute attentive de mon encadreur professionnel, 
+Mlle. RASOLONJATOVO Maherifinoana. Sa rigueur, ses conseils avisés et son soutien ont 
+guidé mes choix et enrichi ma réflexion tout au long de ce stage. 
+J’exprime également ma reconnaissance à mon encadreur pédagogique, M. 
+RABENANAHARY, pour son suivi bienveillant, ses orientations méthodologiques qui 
+m’ont permis d’avancer. 
+ 
+Je tiens à remercier tout particulièrement mes parents et ma famille, qui ont été une source 
+inépuisable d’amour, de motivation et d’encouragement. Leur patience, leur soutien moral 
+et leurs sacrifices ont été indispensables pour mener à bien ce projet et croire en mes 
+ambitions. 
+ 
+Enfin, j’aimerais dire merci à tous mes amis et collègues , leur esprit d’entraide et leur aide 
+précieuse au quotidien. Leur présence, échange et soutien ont rendu cette aventure plus 
+agréable, enrichissante et propice à l’épanouissement, tant sur le plan humain que 
+professionnel. 
+ 
+À chacun d’entre vous, je vous remercie du fond du cœur pour avoir contribué, de près ou 
+de loin, à la réussite de ce projet.  
+
+=== PAGE PDF 12 ===
+ 
+11 
+ 
+Introduction 
+L’essentiel du travail que j’ai réalisé a porté sur le thème : 
+I-Varotra (Ichtus-Varotra) une application PDV sur TPE Android avec une système 
+de gestion en Web. 
+ 
+            Ce projet revêt une grande importance dans le domaine de l’informatique, 
+particulièrement pour la gestion des processus opérationnels des points de vente  
+(restaurants, boutiques ou magasins). La digitalisation de ces processus est essentielle pour 
+améliorer l’efficacité, réduire les erreurs et accroître la compétitivité. 
+À Madagascar, de nombreux PDV continuent encore de gérer manuellement des 
+tâches telles que la prise de com mande (dans le cas des restaurants), la comptabilité ou la 
+gestion des stocks. Cette méthode non digitalisée reste sujette à des erreurs humaines, au 
+risque de perte de données et à un manque d’efficacité dans la gestion quotidienne. De plus, 
+les solutions existantes sur le marché sont souvent inaccessibles aux petites structures en 
+raison de leur coût élevé. 
+C’est dans ce contexte que s’inscrit mon projet. L’objectif est de développer une 
+application de gestion de PDV sous TPE, spécialement conçue pour répondre aux besoins 
+des petites aux grandes structures. Elle permet, selon le type d’établissement : 
+• Pour les restaurants : la prise de commande sur place ou en livraison, 
+• Pour les boutiques et magasins : la gestion des ventes et du stock, 
+Tout en intégrant la gestion des rapports financiers. L’application propose également des 
+options de paiement modernes et diversifiées : carte bancaire, espèces ou mobile money , 
+afin de faciliter les transactions et s’adapter à la réalité des commerçants malgaches. 
+Durant mon stage, j’ai réalisé plusieurs éléments essentiels : 
+• Module Utilisateur : mise en place de l’authentification ainsi que de la gestion des 
+rôles et des permissions. 
+•  Module Entreprise et PDV : creation et gestion des entités liées. 
+• Module Produit : développement du CRUD avec gestion du stock et intégration des 
+fonctionnalités associées.  
+• Module Commande : CRUD avec gestion panier 
+• Dashboard  
+Dans ce mémoire nous allons commencer par la présentation du projet, ensuite nous allons 
+voir la réalisation du projet et nous terminerons par le bilan du projet.   
+
+=== PAGE PDF 13 ===
+ 
+12 
+ 
+1 Présentation du projet 
+1.1 Objectifs du projet 
+L’objectif de ce projet est de créer une application de gestion de PDV sur TPE Android 
+avec une système de gestion en Web dédié aux entreprise malgaches pour pouvoir gérer leurs 
+activités et leurs établissements. On y trouvera les fonctionnalités suivantes :  
+o Création et configuration d’entreprise et de PDV 
+o Gestion des utilisateurs avec permission  
+o Gestion des produits 
+o Prise de commande sur place selon catégorie du PDV  
+o Multi-payement  
+o Gestion de stock  
+o Gestion des caisses 
+1.2 Planning de réalisation 
+   Mon stage au sein de Ichtus a commencé le 15 Juillet 2025 et s’est achevé le 15 
+Octobre 2025, soit une durée de 3 mois. Le planning de réalisation2 s’est déroulé comme 
+suit :  
+ 
+Figure 1: Planning de réalisation 
+ 
+2 Voir Annexe 7: Pour plus de détail 
+
+
+=== PAGE PDF 14 ===
+ 
+13 
+ 
+1.3 Architecture logicielle 
+L’application adopte une architecture en trois tiers , comprenant une couche de 
+présentation, une couche de traitement et une couche d’accès aux données :  
+1. Couche de présentation (Frontend) :  
+a. Comprend : 
+o Le backoffice web (gestion interne) 
+o L’application Android sous TPE (interface client/point 
+de vente) 
+b. Rôle :  gérer l’interface utilisateur, l’expérience utilisateur, 
+l’affichage des pages, la navigation et la validation côté client 
+ 
+2. Couche de traitement (Backend / API) : 
+a. Rôle : gérer la logique métier, les traitements des requêtes, la 
+sécurité, et orchestrer les interactions entre le frontend et la 
+base de données. 
+3. Couche d’accès aux données (Base de données) : 
+a. Rôle : stockage et gestion des données, traitement des requêtes 
+SQL envoyées par le backend. 
+ 
+ 
+ 
+Figure 2 : Architecture 3 tiers 
+
+
+=== PAGE PDF 15 ===
+ 
+14 
+ 
+1.4 Technologies utilisées 
+Notre équipe a choisi d’utiliser React comme couche de présentation, Node.js avec 
+NestJs comme couche de métier et MySQL pour la base de données. Néanmoins, on trouvera 
+en comparaison les technologies alternatives proposées. 
+1.4.1 Choix du langage pour la couche de présentation : 
+Pour notre couche de présentation l’équipe a choisi d’utiliser Next.js. C’est un 
+Framework moderne basé sur React qui permet de construire des interfaces utilisateur 
+performantes et optimisées. Pour la couche de présentation, il offre des avantages clés : 
+le rendu côté serveur (SSR)  pour améliorer le SEO et la vitesse de ch argement, le 
+rendu statique (SSG) pour une meilleure performance, ainsi qu’une intégration simple 
+avec des APIs. Grâce à sa flexibilité et son écosystème riche, Next.js est idéal pour 
+développer une couche de présentation claire, réactive et évolutive. 
+ 
+ 
+Critère Next.js Nuxt.js 
+Popularité Plus utilisé (13,5 % devs, 2,1 % 
+sites) 
+Moins utilisé (3,8 % devs, 
+0,7 % sites) 
+Communauté Énorme, beaucoup de 
+ressources  
+Plus petite mais active 
+Performance ISR, RSC  Léger pour contenu 
+statique 
+Courbe 
+d’apprentissage 
+Plus flexible mais plus 
+complexe 
+Plus simple, conventions 
+intégrées 
+SEO / SSR / SSG Excellent, ISR unique Excellent aussi, Nitro 
+performant 
+Écosystème Très vaste (plugins, CMS, API, 
+etc.) 
+Moins riche mais cohérent 
+Déploiement Optimisé pour Vercel/Edge Polyvalent via Nitro 
+Tableau 1: Comparaison entre Next.js et Nuxt.js 
+ 
+
+=== PAGE PDF 16 ===
+ 
+15 
+ 
+1.4.2 Choix du langage pour la couche de traitement: 
+NestJS est un Framework backend moderne basé sur Node.js et TypeScript, inspiré 
+d’Angular. Il offre une architecture modulaire, claire et maintenable, idéale pour construire 
+des API robustes et scalables. Il intègre nativement des concepts avancés (injection de 
+dépendances, middlewares, pipes, guards) qui facilitent le développement d’a pplications 
+complexes tout en gardant le code lisible et structuré. D’où notre choix comme techno de 
+traitement car on a besoin d’API robustes pour faciliter l’intégration avec l’app mobile sous 
+TPE. 
+ 
+Critère NestJS Spring Boot 
+Langage TypeScript / Node.js Java / JVM 
+Performance Excellent pour I/O et API 
+temps réel 
+Excellent pour CPU & gros 
+traitements 
+Démarrage Rapide, léger Plus lent (JVM), lourd 
+Architecture Modulaire, simple Robuste 
+Courbe d’apprentissage Facile si connaissance en 
+JS/TS  
+ 
+Plus raide 
+Productivité Rapide à mettre en place Plus de configuration 
+ 
+Scalabilité Très bonne, Modulaire,  
+micro services 
+Excellente, Robuste 
+Tableau 2  : Comparaison entre NestJS et Spring Boot 
+ 
+
+=== PAGE PDF 17 ===
+ 
+16 
+ 
+1.4.3 Choix de base de données: 
+Pour le choix de la base de données, l’équipe a choisi  MySQL. C’est un système de 
+gestion de base de données relationnelle SQL qui facilite le stockage, la manipulation et le 
+partage de données. MySQL est particulièrement adapté pour des applications nécessitant 
+des opérations simples de lecture et d’écriture, et il est souvent choisi pour sa stabilité et sa 
+large adoption. Nous avons choisi MySQL pour sa simplicité d’installation et d’utilisation, 
+ce qui permet de structurer et gérer facilement des données en constante évolution. MySQL 
+est également performant pour les transactions fréquentes et les requêtes rapides, avec une 
+large communauté et un support accessible qui facilitent le développement et la maintenance. 
+C’était le meilleur choix pour notre projet. 
+ 
+ 
+Figure 3 : Top 10 des bases de données en 2025 
+1.4.4 Outils utilisés : 
+1. Github : une plateforme de développement logiciel qui permet de gérer le 
+code source en utilisant Git, un système de contrôle de version décentralisé. 
+Nous avons utilisé Git Hub pour héberger notre code et faciliter la 
+collaboration entre les membres de l’équipe. 
+2. Trello : une plateforme de gestion de projet qui permet d’organiser et de 
+suivre les tâches de manière visuelle à l’aide de tableaux, listes et cartes. Elle 
+facilite la planification, le suivi de l’avancement et la collaboration entre les 
+membres de l’équipe. 
+
+
+=== PAGE PDF 18 ===
+ 
+17 
+ 
+1.5 Analyse et conception 
+1.5.1 Analyse de l'existant 
+Le secteur du commerce de dé tail à Madagascar fait face à une transformation 
+accélérée. Les boutiques, pharmacies, épiceri es ou magasins de prêt -à-porter cherchent à 
+moderniser leurs systèmes de gestion et d’encaissement. Pourtant, la plupart d’entre elles 
+fonctionnent encore avec des méthodes traditionnelles : tenue manuelle des ventes, absence 
+de traçabilité financière, ou encore recours limité aux paiements électroniques. Ces 
+contraintes freinent la productivité, augmentent les erreurs, et nuisent à la transparence 
+financière. 
+Avec la généralisation des paiements par Mobile Money (Mvola, Orange Money, 
+Airtel Money) et le dé veloppement des terminaux TPE Android, une opportunité se 
+présente : celle de digitaliser et sécuriser les transactions. Cependant, les solutions importées 
+de gestion de point de vente restent souvent trop coûteuses ou mal adaptées au contexte local 
+notamment en matière de réseau, de langue, et de support technique. 
+C’est dans ce contexte qu’intervient I_VAROTRA, une solution complète conçue 
+par Ichtus IT, combinant une application de point de vente sur TPE Android et un système 
+web de gestion (back -office). I_VAROTRA ambitionne de rendre la gestion de commerce 
+plus fluide, sécurisée et accessible, tout en intégrant pleinement les modes de paiement 
+électroniques locaux. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 19 ===
+ 
+18 
+ 
+Existant Contraintes / Problèmes Solution proposée (I_Varotra) 
+Méthodes traditionnelles 
+(carnets, calculs manuels, 
+reçus papier)  
+Risque d’erreurs, perte de données, 
+manque de traçabilité  
+Automatisation complète du 
+point de vente sur TPE Android, 
+génération de reçus numériques 
+et journaux de caisse  
+Solutions étrangères (POS 
+internationaux)  
+Coût élevé, absence de support 
+local, dépendance Internet, manque 
+d’intégration Mobile Money  
+Solution locale adaptée au 
+contexte économique malgache, 
+fonctionnant hors -ligne et 
+intégrée aux services Mobile 
+Money 
+Paiement majoritairement en 
+espèces 
+Risques de vol, absence 
+d’historique, manque de 
+transparence comptable  
+Intégration des paiements 
+électroniques : NFC, EMV, 
+Mvola, Orange Money, Airtel 
+Money 
+Absence de back -office 
+centralisé 
+Difficulté à suivre les ventes, le 
+stock ou les utilisateurs à distance  
+Système web de gestion 
+multi-boutiques :  stocks, 
+utilisateurs, finances, rapports en 
+temps réel 
+Solutions existantes limitées 
+aux applications mobiles 
+simples 
+Peu d’options de gestion, interface 
+non professionnelle  
+Plateforme hybri de : application 
+TPE Android + dashboard web 
+(React/Node.js), compatible avec 
+imprimantes et outils 
+professionnels  
+Manque de sécurité et de 
+conformité 
+Risques de fraude, non -conformité 
+aux normes PCI -DSS 
+Système conforme PCI -DSS, 
+chiffrement des données, 
+authentification, gestion des 
+rôles  
+Tableau 3 : Analyse de l’existant et valeur ajoutée d’I_Varotra 
+ 
+ 
+ 
+
+=== PAGE PDF 20 ===
+ 
+19 
+ 
+1.5.2 Conception de l’application 
+La conception sert à traduire les besoins du client ou des utilisateurs en solutions 
+concrètes : organisation des fonctionnalités, choix techniques, gestion des risques. Elle 
+permet de représenter sous forme de schémas ou de modèles les différentes parties du 
+système : comment elles fonctionnent, comment elles interagissent, et comment elles seront 
+développées. 
+Elle évite de nombreux problèmes, oublis ou erreurs qui peuvent survenir si on 
+commence directement sans analyse (ex : fonctionnalités manquantes, incompatibilités, 
+dépassement de budget). Elle facilite la communication entre toutes les parties prenantes du 
+projet (développeurs, chef de projet, client, etc.), car tout le monde partage la même vision. 
+Elle permet d’anticiper les risques et de planifier les ressources (temps, budget, 
+compétences) nécessaires pour réussir le projet.. 
+En résumé,  elle permet d’avoir une base solide, d’éviter les erreurs coûteuses et 
+d’assurer une meilleure cohérence et qualité du logiciel livré. 
+ 
+Elément Détail Nombre 
+Base de données Table 22 
+Code source Module 22 
+Entity 
+Controller 23 
+Service 23 
+Backoffice  Page 17 
+Service 16 
+Tableau 4 : Tableau récapitulatif des tables, classes et écrans de l’application 
+ 
+ 
+ 
+Le Modèle Conceptuel de Données (MCD) est essentiel à la conception. Il structure 
+et relie les données, assurant le bon fonctionnement de l’application et une gestion efficace 
+des informations. 
+ 
+ 
+ 
+
+=== PAGE PDF 21 ===
+ 
+20 
+ 
+ 
+ 
+ 
+Figure 4 : Modèle Conceptuel de données -partie 1 
+ 
+ 
+ 
+ 
+
+
+=== PAGE PDF 22 ===
+ 
+21 
+ 
+ 
+ 
+ 
+Figure 5 : Modèle Conceptuel de données -partie 2 
+
+
+=== PAGE PDF 23 ===
+ 
+22 
+ 
+ 
+ 
+1.6 Développement par fonctionnalité ou module 
+1.6.1 Gestion des utilisateurs 
+a. Description 
+L’authentification est une étape clé pour accéder à l’application. Pour gérer 
+ses entreprises ainsi que ses points de vente, le client vendeur doit s’inscrire en 
+fournissant ses informations personnelles, ses informations d’authentification via 
+un responsable chez Ichtus. 
+L’application gère plusieurs types de profils utilisateurs selon leur rôle au 
+sein de l’entreprise : 
+• Propriétaire : Le propriétaire a accès à toutes les informations 
+concernant la gestion de son entreprise ainsi qu'aux autres 
+entreprises qu'il décide de créer avec les points de ventes. 
+• Administrateur PDV  : Ce profil a accès à la plupart des 
+fonctionnalités de gestion de son point de vente. 
+• Caissier : Le caissier peut gérer les entrées et sorties d’argent, et 
+marquer les commandes comme payées ou non. 
+• Consommateur : ce sont les consommateurs des produits. 
+Pour garantir la sécurité des utilisateurs, une fonction de hachag e 
+robuste, bcrypt, est utilisée pour protéger les mots de passe. De plus, 
+l'authentification repose sur l'utilisation de JWT pour sécuriser et gérer les 
+sessions des utilisateurs. 
+b. Objectif 
+L’authentification est mise en place pour limiter l’accès à certain es parties de 
+l’application pour des raisons de confidentialité et de sécurité. 
+ 
+
+=== PAGE PDF 24 ===
+ 
+23 
+ 
+c. Scénarios 
+• Inscription : avant d'utiliser l'application, le client vendeur doit s’inscrire en 
+fournissant ses informations personnelles, ses informations de connexion via 
+un responsable Ichtus, après on lui assigne le rôle de propriétaire 3. C’est le 
+même formulaire pour création des autres utilisateurs du plateforme, on peut 
+ajouter un ou plusieurs rôle a un utilisateur. 
+ 
+Figure 6 : Inscription - Ajout d'un utilisateur 
+ 
+• Connexion : si l’utilisateur possède déjà un compte, il doit simplement 
+s'authentifier en saisissant son adresse email et son mot de passe. Les 
+informations sont alors envoyées à la couche métier pour vérifier l'exi stence 
+de l'utilisateur dans la base de données. En cas d'erreur dans les informations 
+d’identification, un message d'erreur s'affiche. Si les informations sont 
+correctes, la couche métier renvoie un JWT contenant les données de 
+ 
+3  Voir Annexe 1 
+
+
+=== PAGE PDF 25 ===
+ 
+24 
+ 
+l'utilisateur et son rôle. Ce jeton est utilisé par la couche d'affichage pour 
+rediriger l'utilisateur vers les fonctionnalités qui lui sont accessibles. 
+ 
+ 
+     
+Figure 7 : Connexion 
+  Une fois connecté, l’utilisateur a accès à la gestion des utilisateurs, où il peut 
+consulter la liste des utilisateurs existants et leurs informations. Cette fonctionnalité permet 
+également d’ajouter, de modifier , de changer statuts ou de supprimer des utilisateurs. 
+Cependant, cette fonctionnalité n'est accessible qu'aux propriétaires ou aux administrateurs. 
+ 
+
+
+=== PAGE PDF 26 ===
+ 
+25 
+ 
+ 
+Figure 8 : Listes des utilisateurs 
+o Cet écran permet de gérer les utilisateurs de l’application. Il affiche la liste 
+des utilisateurs avec leurs informations principales : nom, adresse email, 
+rôle, statut (actif ou bloqué) et numéro de téléphone. L’administrateur peut 
+filtrer la liste, modifier ou supprimer un utilisateur, et voir le nombre total 
+d’utilisateurs ainsi que ceux qui sont bloqués. Il est aussi possible d’ajouter 
+un nouvel utilisateur via le bouton.  
+ 
+Profil : Si un utilisateur est connecté, il pourra voir ses informations personnelles et 
+ses permissions, et ses rôles. 
+
+
+=== PAGE PDF 27 ===
+ 
+26 
+ 
+ 
+Figure 9 : Profil 
+ 
+1.6.2 Gestion des entreprises 
+a. Description : 
+Ce module permet aux administrateurs et propriétaires de gérer les informations de 
+leurs entreprises dans l'application. Ils peuvent ajouter de nouvelles entreprises, mettre à jour 
+les informations des entreprises existantes, supprimer celles qui ne sont plus utiles, et choisir 
+l'entreprise qu'ils souhaitent gérer durant la session. 
+b. Objectif : 
+Ce module aide les administrateurs à avoir un contrôle complet sur leurs entreprises 
+et rend la gestion des informations plus simple et plus pratique. 
+c. Scenarios : 
+• Ajout d’une nouvelle entreprise : Un administrateur ou un propriétaire veut 
+ajouter une nouvelle entreprise  dans le système pour pouvoir la gérer dans 
+l'application. 
+o Cette première partie du formulaire permet de saisir les informations 
+essentielles d’une entreprise : nom, email, téléphone, numéro NIF et 
+
+
+=== PAGE PDF 28 ===
+ 
+27 
+ 
+numéro Stat. L’utilisateur peut également sélectionner les 
+propriétaires associés à l’entreprise parmi une liste. Cet  écran sert à 
+la création ou la modification de fiche société dans l’application.  
+ 
+ 
+Figure 10 : Ajout d'une nouvelle entreprise - Informations générales 
+ 
+ 
+Figure 11: Ajout d'une nouvelle entreprise - Documents de l’entreprise 
+ 
+• Cet écran permet d’ajouter les documents nécessaires à 
+l’enregistrement d’une entreprise : le logo, la photo CIF (recto) et la 
+
+
+=== PAGE PDF 29 ===
+ 
+28 
+ 
+photo CIF (verso). L’utilisateur peut choisir les fichiers à importe r 
+pour chaque document. Il est aussi possible d’annuler ou de valider 
+la création de l’entreprise avec le s boutons “Ajouter” et “Annuler ”. 
+ 
+• Listes des entreprises : 
+  
+ 
+ 
+Figure 12 : Gestion des entreprises 
+• Cet écran affiche la gestion des entreprises dans l’application. Il 
+présente la liste des entreprises enregistrées, avec leurs informations 
+principales : nom, propriétaire, numéro NIF/Stat, statut (actif ou 
+bloqué) et numéro de téléphone. Des filtres permettent de rechercher 
+et de trier les entreprises selon le nom ou le statut. Pour chaque 
+entreprise, l’administrateur peut activer/désactiver, afficher le détail , 
+modifier ou supprimer l’entreprise. Un bouton permet aussi d’ajouter 
+une nouvelle entreprise. 
+ 
+• Fiche de détail d’une entreprise : 
+ Cet écran affiche la fiche détaillée d’une entreprise : logo, nom, email, 
+téléphone, propriétaire, numéros fiscaux (NIF et Stat) et statut actuel (actif ou 
+bloqué). Il permet de consulter rapidement toutes les informations 
+importantes sur l’entreprise sélectionnée. Ainsi que les documents associés à 
+
+
+=== PAGE PDF 30 ===
+ 
+29 
+ 
+l’entreprise : photos recto et verso de la carte CIF. L’utilisateur peut visualiser 
+ces documents en grand format et dispose de boutons pour fermer la fiche ou 
+la modifier les informations sur l’entreprise. 
+ 
+ 
+Figure 13: Fiche de détail d'une entreprise 
+1.6.3 Gestion des points de vente                
+a. Description : 
+Le module de gestion des points de vente centralise toutes les opérations liées à 
+l’administration, la configuration et la supervision des sites physiques où l’activité 
+commerciale a lieu (magasin, restauration, fast -food…). Il permet à l’entreprise de cré er, 
+
+
+=== PAGE PDF 31 ===
+ 
+30 
+ 
+modifier, organiser et suivre chaque PDV indépendamment, tout en facilitant l’accès aux 
+détails opérationnels et aux actions courantes.  
+b. Objectif : 
+Grâce à ce module, l’entreprise peut adapter en temps réel la structure de ses points 
+de vente, piloter leur activité, et répondre rapidement aux besoins de gestion, d’organisation 
+ou d’extension de ses PDV. 
+c. Scenarios : 
+• Liste des points de vente :  
+Cet écran permet de gérer l’ensemble des points de vente (PDV) de s 
+entreprises de l’utilisateur connecter sauf si admin PDV . Chaque fiche 
+affiche les informations essentielles d’un point de vente : nom, entreprise 
+associée, adresse, type (Magasin, Fast Food), téléphone, horaires 
+d’ouverture, et statut d’activité. Des boutons permettent d’associer des 
+employées a un PDV 4 , de gérer les tables  5, associer produit cette PDV 6 , de 
+modifier ou de supprimer le point de vente. Des filtres avancés facilitent la 
+recherche et la sélection de PDV selon le nom, l’entreprise, la catégorie ou 
+le statut. 
+ 
+Figure 14 : Liste des points de vente 
+ 
+4  Voir Annexe 3 
+5  Voir Annexe 4 
+6  Voir Annexe 6 
+
+
+=== PAGE PDF 32 ===
+ 
+31 
+ 
+ 
+Création d’un nouveau PDV : 
+ 
+Figure 15 : Création d'un nouveau PDV 
+Ce formulaire  permet à l’utilisateur de saisir les informations nécessaires pour créer un 
+nouveau point de vente (PDV) au sein du système. Il comprend des champs pour renseigner 
+le nom du PDV, la localisation, les coordonnées GPS, le téléphone, l’entreprise associée, la 
+catégorie  7, ainsi que les horaires d’ouverture et de fermeture. La prése nce de listes 
+déroulantes pour l’entreprise et la catégorie facilite la sélection parmi les valeurs 
+enregistrées. Les boutons “Annuler” et “Créer” permettent respectivement de revenir en 
+arrière ou de valider la création du nouveau point de vente après avo ir rempli tous les 
+champs obligatoires. Cet écran vise à simplifier et à structurer l’enregistrement de nouveaux 
+sites d’activité commerciale de façon intuitive et sécurisée.  
+1.6.4 Gestion des produits ou services                
+a. Description : 
+Le module de gestion des produits est un composant essentiel du système qui permet 
+d’administrer l’ensemble des produits commercialisés par l’entreprise, ainsi que leur stock. 
+Il offre les fonctionnalités nécessaires pour créer, modifier, retirer ou archiv er des fiches 
+produit, tout en intégrant une gestion dynamique des niveaux de stock, des alertes en cas de 
+seuil critique, et de la traçabilité des mouvements (entrées, sorties, inventaires). Ce module 
+centralise ainsi toutes les informations relatives aux  références produits, prix, quantités 
+ 
+7  Voir Annexe 2 
+
+
+=== PAGE PDF 33 ===
+ 
+32 
+ 
+disponibles, fournisseurs et catégories, facilitant la supervision et le suivi des marchandises 
+sur chaque site de vente. 
+ 
+b. Objectif : 
+Grâce à ce module, l’entreprise peut optimiser la gestion et la disponibilité de ses  
+produits : anticiper les besoins de réapprovisionnement, éviter les ruptures de stock, 
+contrôler la rotation des articles et améliorer la qualité du service client. L’automatisation 
+du suivi des stocks permet de prendre des décisions rapides, de réduire les pertes liées à des 
+erreurs humaines et d’assurer une cohérence entre les opérations sur site et la réalité du 
+stock théorique. Ce module contribue à la rentabilité et à l’organisation efficace de la chaîne 
+d’approvisionnement, tout en offrant une vue d’ ensemble sur les ressources matérielles de 
+l’entreprise. 
+ 
+c. Scenarios : 
+• Liste des produits : 
+L’administrateur ouvre le module “Gestion des produits”. Il visualise 
+la liste des produits existants : chaque ligne affiche le nom du produit (ex : 
+Cheese Burger, N uggets), la référence, la catégorie  8, le  prix, la TVA, et 
+l’entreprise propriétaire du produit. Il peut utiliser le champ de recherche pour 
+retrouver rapidement un produit ou filtrer par catégorie.  Depuis l’écran 
+principal, l’administrateur peut consulte r le détail d’un produit, le modifier 
+ou le supprimer via les icônes d’action affichées à droite de chaque ligne. 
+ 
+ 
+8 Voir annexe 5 
+
+=== PAGE PDF 34 ===
+ 
+33 
+ 
+ 
+Figure 16 : Liste des produits créés pour une entreprise 
+• Creation d’un nouveau produit pour l’entreprise  
+ 
+Figure 17 : Formulaire d'ajout produit pour une entreprise 
+ 
+
+
+=== PAGE PDF 35 ===
+ 
+34 
+ 
+L’administrateur clique sur le bouton “Ajouter un produit” situé en haut à droite de 
+la page. Le formulaire d’ajout s’ou vre il renseigne les champs obligatoires . Il sélectionne 
+une catégorie existante qui est réservée à l’entreprise Java Company Co propriétaire du PDV 
+(ex : “Desserts”) . On peut associer plusieurs images a un produit. 
+ 
+1.6.5 Gestion de prise de commande et panier 
+a. Description : 
+Ce module permet à un caiss ier de gérer tout le cycle de vente en point de vente : 
+ajout des produits au panier, gestion des tables (si service en salle), choix des quantités, 
+affichage automatique du total, puis sélection du ou des modes de paiement pour finaliser et 
+enregistrer la transaction.  L’interface propose un affichage intuitif : recherche rapide des 
+articles, tri par catégorie, visualisation immédiate des commandes en cours, et options 
+avancées de paiement (multimodes, répartition). 
+ 
+b. Objectif : 
+L’objectif principal est de fluidifier et sécuriser la réalisation des ventes, pour :  
+• Faciliter et accélérer la prise de commande client.  
+• Réduire les erreurs humaines lors de la sélection ou du paiement.  
+• Donner au caissier une visibilité permanente sur la commande, le total à 
+payer et le détail du panier.  
+• Accepter plusieurs moyens de paiement (espèces, mobile money, etc.), y 
+compris le paiement mixte. 
+• Gérer simplement les tables en restauration (attribution, disponibilité, suivi). 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 36 ===
+ 
+35 
+ 
+ 
+c. Scenarios : 
+• Gestion des tables et démarrage d’une commande :  
+L’opérateur visualise la liste des tables  du point de vente 9  avec leur statut 
+(libre, occupée, réservée…). Il clique sur une table libre pour débuter une 
+nouvelle prise de commande pour l’un de ses clients ou groupes.  
+ 
+Figure 18 : Gestion des tables 
+ 
+ 
+• Ajout des articles au panier : 
+Après a voir choisi la table, l’opérateur sélectionne les produits  désirés 
+disponible dans ce point de vente 10 en cliquant sur “Ajouter”. Les produits 
+s’ajoutent au panier à droite, où il peut ajuster les quantités, supprimer un 
+article, et voir le total cumulé. Lorsque tous les articles sont saisis et validés, 
+l’opérateur clique sur le bouton “Payer” pour passer au paiement.  
+ 
+ 
+ 
+9  Voir Annexe 4 
+10 Voir annexe 6 
+
+
+=== PAGE PDF 37 ===
+ 
+36 
+ 
+ 
+Figure 19 :Commande et panier 
+ 
+ 
+• Choix du mode de paiement : 
+Une fenêtre s’ouvre : l’opérateur choisit comment le client règle sa 
+commande (ex : Espèces, Mvola, Orange Money…). Il peut sélectionner 
+“Paiement réparti” (“Activer” ou “Désactiver”) pour accepter plusieurs 
+moyens sur la même transaction (ex : 10 000 Ar e n espèces, le reste en 
+Mvola). Si “Paiement réparti” est activé : l’opérateur saisit les montants reçus 
+pour chaque méthode, le système calcule automatiquement la différence à 
+payer/restant à régler, jusqu’à validation totale.  Un résumé des paiements 
+apparaît, offrant la possibilité d'annuler, modifier ou confirmer.  Enfin, la 
+transaction est enregistrée ! 
+ 
+
+
+=== PAGE PDF 38 ===
+ 
+37 
+ 
+ 
+Figure 20 : Paiement - méthode 1 
+ 
+ 
+Figure 21 : Paiement -méthode 2 
+
+
+=== PAGE PDF 39 ===
+ 
+38 
+ 
+1.7 État d’Analyse et Statistiques 
+1.7.1 Vue d’Entreprise — Synthèse Globale 
+Le Dashboard commence par une vue d’ensemble regroupée de toutes les statistiques 
+clées de l’un des entreprises que l’admin administre. Il visualise immédiatement : 
+• Chiffre d’affaires du jour : la somme des ventes réalisées dans l’ensemble 
+des points de vente rattachés à l’entreprise. Ce montant reflète l’état financier 
+instantané du groupe géré. 
+• Nombre total de transactions : toutes les ventes encaissées, toutes méthodes 
+confondues, sur la période sélectionnée (jour/semaine/mois/année). Cela 
+permet à l’admin de suivre le rythme des ventes, repérer les pics d’activité, et 
+anticiper le besoin en personnel ou approvisionnement. 
+• Ticket moyen : calcul automatique du chiffre d’affaires divisé par le nombre 
+de transactions, permettant d’évaluer la tendance d’achat des clients. 
+• Total des produits vendus :  volume cumulé des unités écoulées, utile pour 
+comparer avec les objectifs et déceler les évolutions de la demande. 
+• Filtres dynamiques :  L’administrateur a accès à un ensemble de filtres 
+puissants qui lui permettent d’analyser les données selon plusieurs axes : 
+o Le choix de l’entreprise (en cas de gestion multi-entreprise) permet 
+de basculer entre différentes sociétés rattachées à son compte. 
+o La sélection du point de vente , disponible pour chaque entreprise, 
+offre la possibilité d’étudier le cas précis d’un site ou d’un magasin 
+en filtrant tous les indicateurs du Dashboard selon ce PDV. 
+o Le filtre par période  comprend des options standards (aujourd’hui, 
+semaine, mois, année) et un filtre personnalisé avec choix libre des 
+dates de début et de fin. 
+Tous ces filtres s’appliquent de façon globale à l’ensemble des contenus du 
+Dashboard : chaque graphique, tableau, indicateur et synthèse se met à jour 
+instantanément selon la combinaison choisie, garantissant une analyse précise 
+et adaptée au besoin opérationnel ou stratégique de l’admin. 
+ 
+
+=== PAGE PDF 40 ===
+ 
+39 
+ 
+ 
+Figure 22 : Dashboard - partie 1 
+1.7.2 Analyse Graphique —Tendances et Répartition 
+Sur la seconde partie du Dashboard, la section centralise les graphiques interactifs 
+permettant de visualiser rapidement les grandes tendances : 
+• Évolution des ventes : graphique en barres présentant l’historique du chiffre 
+d’affaires ou du volume de transactions sur les 7 ou 30 derniers jours. Ce suivi 
+temporel aide l’admin à repérer l’impact des actions commerciales, des week-
+ends et jours fériés sur les ventes. 
+• Moyens de paiement :  affichage sous forme de diagramme circulaire (pie 
+chart) de la répartition des encaissements par type : espèces, paiements 
+mobiles (Mvola, Orange Money, Airtel Money). Chaque segment affiche le 
+pourcentage des transactions et le montant total reçu, ce qui permet de suivre 
+les préférences des clients selon le PDV ou la période. On a aussi un tableau 
+synthétique listant pour chaque moyen le montant encaissé et son poids relatif 
+sur la période, facilitant l’audit et la comparaison entre les modes de paiement 
+ 
+Figure 23 : Dashboard -partie 2 
+• Top 5 des produits  les plus vendus dans le point de vente ou l’entreprise, 
+représentés par un graphique à barres. 
+• Graphique des moments d’affluence : l’admin découvre par un graphique 
+à barres le nombre de clients (transactions) par heure ou par jour. Cette vue 
+
+
+=== PAGE PDF 41 ===
+ 
+40 
+ 
+permet de comprendre les habitudes d’achat, adapter les horaires d’ouverture 
+ou gérer le staffing du personnel lors des pics de fréquentation . 
+ 
+Figure 24 : Dashboard - partie 3 
+ 
+Figure 25: Dashboard -partie 4 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+=== PAGE PDF 42 ===
+ 
+41 
+ 
+1.8 Problèmes rencontrés et solutions 
+Durant le stage, plusieurs défis techniques se sont présentés, notamment concernant le 
+stockage des images et la gestion de la taille des token d’authentification : 
+ 
+Pour éviter les problèmes d’itinérance et garantir la sécurité ainsi que l’accessibilité d es 
+images utilisateurs ou documents, il a été décidé de stocker l’ensemble des fichiers 
+directement sur le serveur plutôt que dans les sessions utilisateur s ou leurs périphériques. 
+Cette approche centralisée assure une bonne gestion des accès et simplifie le partage des 
+ressources entre différents utilisateurs de l’application. 
+ 
+Un autre problème important s’est posé lors de la création du token d’authentification : 
+lorsque le payload (données encodées dans le token) contenait trop d’informations, la taille 
+du token devenait excessive et dépassait la limite autorisée pour le stockage dans les cookies 
+(4 096 bytes). Ceci empêchait d’utiliser certains mécanismes de stockage et 
+d’authentification côté navigateur. 
+ 
+Pour résoudre ce problème, la solution retenue a consisté à minimiser le contenu du payload 
+en y insérant uniquement les informations importantes  de l’utilisateur. Cela permet de 
+réduire la taille du token tout en gardant les informations essentielles pour l’authentification. 
+Grâce à cette optimisation, le token reste suffisamment petit pour être stocké dans les cookies 
+et, ainsi, garantir une gestion efficace et sécurisée de la session de l’utilisateur.  
+
+=== PAGE PDF 43 ===
+ 
+42 
+ 
+2 Évaluation du projet et connaissances acquises 
+2.1 Bilan pour l'entreprise 
+La réalisation de ce projet mar que une étape clé e pour l’entreprise en renforçant sa 
+digitalisation et en optimisant la gestion des points de vente. Grâce à l’application 
+développée, la gestion centralisée des utilisateurs, des entreprises et des points de vente 
+devient plus simple, plus rapide et plus fiable. L’entreprise dispose désormais d’un outil qui 
+améliore la traçabilité des opérations, facilite l’accès aux données essentielles et permet un 
+contrôle accru sur l’ensemble de ses activités. Ce projet a également permis de poser les 
+bases solides pour l’intégration de modules avancés tels que le suivi des documents, la 
+gestion des propriétaires ou l’automatisation de certaines tâches, ouvrant la voie à de futures 
+améliorations. L’application en développement contribue ainsi activement à la 
+transformation numérique de l’organisation et prépare l’entreprise à relever les défis de 
+croissance et d’extension future.  
+2.2 Bilan personnel 
+Ce stage de 3 mois chez Ichtus IT fut pour moi une expérience formatrice et 
+stimulante. J’ai pu mettre en pratique et approfondir mes compétences en développement 
+web, gestion de projet, et travail collaboratif. J’ai notamment appris à : 
+• Utiliser des outils modernes de développement (React, NestJS, gestion de 
+base de données MySQL…) 
+• Améliorer mon organisation, l’auto discipline et mon autonomie au cours des 
+différentes phases du projet 
+• Collaborer efficacement avec les membres de l’équipe et mon encadreur 
+Cette expérience m’a permis de gagner en confiance, de renforcer mon intérêt pour le 
+développement d’applications métiers et de mieux comprendre les enjeux techniques et 
+stratégiques d’un projet informatique concret. 
+ 
+
+=== PAGE PDF 44 ===
+ 
+43 
+ 
+2.3 Extension et évolution de l’application 
+L’application dispose aujourd’hui d’une architecture solide répondant aux besoins 
+essentiels de gestion des utilisateurs, des entreprises et des points de vente. Son évolution 
+future pourra s’orienter vers plusieurs axes majeurs : 
+• Les nouveaux propriétaires peuvent s’inscrire directement via l’application. 
+• L’ajout d’un mode hors -ligne afin de garantir la continuité des opérations 
+même en l’absence de connexion internet. 
+• L’implémentation de nouveaux modules, tels que l’export des données au 
+format PDF. 
+• L’optimisation de l’int erface et des notifications pour offrir une meilleure 
+expérience utilisateur. 
+À noter que l’application est encore en phase de développement : certaines fonctionnalités, 
+comme le paiement  via mobile money , l’export PDF et le mode hors -ligne, ne sont pas 
+encore finalisées, mais représentent des axes d’amélioration prioritaires pour les prochaines 
+phases du projet. 
+  
+
+=== PAGE PDF 45 ===
+ 
+44 
+ 
+ 
+Conclusion 
+Au terme de mon stage chez Ichtus IT, le développement de la solution Ichtus I-Varotra 
+a apporté une réelle valeur ajoutée à l’entreprise. Les objectifs définis au début du stage ont 
+été atteints : la gestion des points de vente a été digitalisée, le suivi des ventes et la gestion 
+des stocks  et des produits . Bien que l’application mobile ne soit pas encore finalisée, 
+l’avancement des m odules essentiels du projet correspond pleinement aux attentes, et la 
+solution est sur la voie d’un déploiement complet. 
+ 
+Sur le plan personnel, cette expérience a été particulièrement formatrice et enrichissante. 
+J’ai pu mettre en pratique mes connaissances techniques dans un contexte concret, tout en 
+prenant part à la résolution de problématiques réelles : gestion de projet, adaptation aux 
+imprévus, et travail en équipe. Cette immersion professionnelle m’a permis de gagner en 
+autonomie, d’affin er mon sens de l’organisation et de renforcer mes compétences 
+relationnelles, dans une atmosphère bienveillante et motivante. 
+ 
+En perspective, le projet I -Varotra reste ouvert à des évolutions majeures : finalisation 
+de l’application mobile, accès hors -ligne, intégration de la gestion par abonnement des 
+clients-vendeurs, et optimisation de l’interface utilisateur. Ces extensions permettront 
+d’offrir une solution encore plus complète, adaptée aux besoins évolutifs des commerçants, 
+et d’accompagner la digitalisation du secteur sur le long terme. L’application bénéficie ainsi 
+d’une base solide pour poursuivre son développement et répondre efficacement aux futurs 
+défis du marché. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+=== PAGE PDF 46 ===
+ 
+45 
+ 
+Bibliographie 
+Documentation sur l’architecture 3 tiers 
+https://sokeo.fr/architecture-3-tier-application-web (consultée le 10-09-2025)  
+https://fr.wikipedia.org/wiki/Architecture_trois_tiers (consultée le 10-09-2025)  
+Documentation sur Next.js 
+https://strapi.io/blog/ssr-vs-ssg-in-nextjs-differences-advantages-and-use-cases (consultée 
+le 12-09-2025)  
+https://prismic.io/blog/nextjs-seo-tutorial (consultée le 12-09-2025) 
+https://tailkits.com/blog/nextjs-vs-nuxt/ (consultée le 13-09-2025) 
+Documentation sur Nest.js : 
+https://codysolutions.com/blog/nestjs-vs-java-spring-which-is-faster (consultée le 13 -09-
+2025) 
+https://www.linkedin.com/pulse/nestjs-vs-spring-boot-comparison-backend-development-
+asfar-aman-b6luf/ (consultée le 13-09-2025) 
+https://leapcell.io/blog/nestjs-2025-backend-developers-worth-it 
+(consultée le 13-09-2025) 
+https://medium.com/%40julskim/nestjs-vs-spring-which-one-is-better-
+9d518d63ca41(consultée le 13-09-2025) 
+https://www.stackshare.io/stackups/nestjs-vs-spring-boot (consultée le 13-09-2025) 
+Documentation sur Mysql : 
+https://www.zucisystems.com/be/blog/bases-de-donnees-les-plus-populaires/ (consultée le 
+13-09-2025) 
+https://www.cowigo.fr/base-de-donnees/decouvrez-le-top-10-des-bases-de-donnees-2023/ 
+(consultée le 13-09-2025) 
+Documentation sur bcrypt : 
+a-quelle-point-est-il-difficile-a-craquer-bcrypt (consultée le 02-11-2025) 
+ 
+ 
+ 
+ 
+  
+ 
+
+=== PAGE PDF 47 ===
+ 
+ 
+i 
+Annexe 
+1. Annexe 1 : Gestion des Rôles des utilisateurs dans l’application   
+• Gestion des rôles : 
+ 
+Figure 26 : Gestion des rôles 
+Cet écran montre la gestion des rôles dans le système. Il permet à un 
+administrateur de consulter, filtrer et gérer les rôles disponibles pour les 
+utilisateurs. 
+Pour chaque rôle, les éléments affichés sont : 
+o Le nom du rôle (ex : Admin Company, Admin User) 
+o Une description du rôle 
+o Le statut (actif ou désactivé) 
+o Des actions rapides : activer/désactiver le rôle, voir le détail, modifier, 
+créer ou supprimer. 
+Un champ de recherche permet de filtrer la liste par nom de rôle, et un bouton 
+en haut à droite permet d’ajouter un nouveau rôle. 
+Cet écran est essentiel pour organiser et sécuriser les permissions attribuées 
+aux utilisateurs  du système, afin de personnaliser l’accès et les droits de 
+chacun en fonction de sa fonction dans l’application. 
+ 
+
+
+=== PAGE PDF 48 ===
+ 
+ 
+ii 
+ 
+Figure 27 : Formulaire d'ajout d'un rôle 
+2. Annexe 2 : Gestion des catégories des PDV  
+Cet écran de gestion des catég ories PDV permet d’ajouter, de modifier ou de 
+supprimer les types de points de vente disponibles dans le système. L’ajout d’une nouvelle 
+catégorie est très simple : il suffit de renseigner uniquement le nom de la catégorie via le 
+bouton “Ajouter”. La liste  affiche ensuite toutes les catégories existantes, comme 
+“Magasin” ou “Fast Food”, avec des actions rapides de modification et suppression pour 
+chaque entrée.  
+ 
+Figure 28 : Listes des catégories de PDV 
+
+
+=== PAGE PDF 49 ===
+ 
+ 
+iii 
+3. Annexe 3 : Association d’un employé à un point de vente (PDV) 
+ 
+Figure 29 : Listes des employés dans un pdv 
+Ce premier écran affiche les utilisateurs associés à un point de vente précis (ici “Java 
+Cosmétique”). En haut, on retrouve les informations du PDV (nom, localisation, entité) et 
+le nombre total d’utilisateurs associés. En dessous, une liste présente les e mployés liés à ce 
+PDV avec leurs informations de contact et une option de suppression. Un champ de 
+recherche permet de filtrer par nom ou email.  
+Le bouton “Ajouter un Utilisateur” en haut à droite ouvre le formulaire d’association.  
+ 
+Figure 30 : Association User à un pdv 
+Un formulaire simple pour lier un utilisateur au PDV sélectionné. Le PDV s’affiche en 
+haut. Dans la liste déroulante “Utilisateur”, ne sont proposés que les utilisateurs de 
+
+
+=== PAGE PDF 50 ===
+ 
+ 
+iv 
+l’entreprise du PDV qui ne sont pas encore associés à un poste pour un PDV : cela empêche 
+les doublons. Le formulaire comporte deux boutons pour annuler ou confirmer 
+l’association. 
+4. Annexe 4 : Gestion des tables d’un PDV 
+ 
+Figure 31: Création d'une table pour un pdv type resto 
+ 
+Figure 32: Gestion des tables dans un point de vente 
+Après la création, cet écran montre la liste des tables existantes pour un point de vente 
+donné (ici « Java Cosmetique » à Iavoloha). Chaque table affiche son numéro/référence, sa 
+capacité, et son statut (libre, réservé, etc.). Des boutons permettent de réserver une table, de 
+la prendre, de modifier ses caractéristiques ou de la supprimer. Une barre de recherche et 
+un filtre par statut permettent de retrouver rapidement une table spécifique.  
+
+
+=== PAGE PDF 51 ===
+ 
+ 
+v 
+5. Annexe 5 : Gestion des catégories produits d’une entreprise 
+ 
+Figure 33: Création d'une catégorie de produit pour une entreprise 
+ 
+Figure 34: Liste des catégories de produit pour une entreprise  
+Lord de la création d’une nouvelle catégorie de produit. L’utilisateur doit renseigner le 
+nom de la catégorie (par exemple : “Accompagnements”).  L’entreprise associée (ici : Java 
+Company Co) est automatiquement sélectionnée et ne peut pas être modifiée  car c’est 
+l’entreprise qu’on a décidé de gérer, ce qui signifie que la catégorie créée sera rattachée 
+exclusivement à cette entreprise.  Le formulaire propose deux boutons : “Annuler” pour 
+quitter sans enregistrer, et “Ajouter” pour valider la création de la catégorie.  
+
+
+=== PAGE PDF 52 ===
+ 
+ 
+vi 
+Une fois la catégorie ajoutée, elle apparaît dans la liste de gestion des catégories. 
+Cet écran affiche toutes les catégories liées à l’entreprise connectée. Pour chaque catégorie, 
+sont affichés le nom et les actions disponibles : visualiser les détails, modifier ou supprimer. 
+La barre de recherche en haut permet de filtrer facilement les catégories existantes.  
+ 
+6. Annexe 6 : Association Produit a une PDV  
+ 
+Figure 35: Association Produit a une PDV 
+
+
+=== PAGE PDF 53 ===
+ 
+ 
+vii 
+ 
+Figure 36: Gestion des produits dans un point de vente 
+Ce module permet à une entreprise de configurer quels produits (ou services) sont 
+disponibles à la vente dans chacun de ses points de vente (PDV). Depuis un catalogue global 
+(produits de l’entreprise), l’opérateur va “associer” chaque produit à un PDV en définissant 
+son prix, la TVA applicable, et la devise. Certains éléments, comme les services proposés 
+(ex : coiffure, prestations), ne nécessitent pas de gestion de stock, alors que le s 
+marchandises physiques oui. 
+7. Annexe 7 : Planning de réalisation 
+ 
+Figure 37 : Extrait planning de réalisation -Partie 1 
+
+
+=== PAGE PDF 54 ===
+ 
+ 
+viii 
+ 
+Figure 38 : Extrait planning de réalisation -Partie 2 
+ 
+ 

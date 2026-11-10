@@ -998,7 +998,6 @@ JOIN types_statut ts ON ts.code=v.type_code;
 
 INSERT INTO roles(code,libelle) VALUES
 ('ADMIN','Administrateur'),
-('RESPONSABLE_STAGE','Responsable des stages'),
 ('ENCADREUR','Encadreur professionnel'),
 ('STAGIAIRE','Stagiaire');
 

@@ -1,0 +1,497 @@
+# Glossaire
+
+API — Interface de programmation exposant les opérations du serveur à l’interface web.
+
+BCrypt — Fonction de hachage adaptative utilisée pour vérifier les mots de passe des comptes.
+
+CRUD — Opérations de création, lecture, mise à jour et suppression. La présence d’un contrôleur CRUD ne signifie pas que ses routes sont autorisées.
+
+DTO — Objet de transfert qui définit les données reçues ou retournées par une opération de l’API.
+
+HTTP — Protocole des échanges entre le navigateur et le serveur. HTTPS ajoute une protection du transport.
+
+JPA — API de persistance Java employée pour représenter les tables par des entités et accéder aux données.
+
+JSON — Format des messages structurés échangés par les opérations courantes de l’API.
+
+MEF — Ministère de l’Économie et des Finances de Madagascar, organisme d’accueil indiqué pour ce stage.
+
+MCD, MLD et MPD — Modèle conceptuel, modèle logique et modèle physique des données. Les schémas de ce mémoire sont des vues du modèle relationnel physique observé.
+
+Mio — Mébioctet, soit 1 048 576 octets. La limite applicative des pièces jointes est de 10 Mio.
+
+SIIGFP — Sigle du contexte d’accueil fourni pour le projet ; développement officiel et rattachement administratif [À CONFIRMER].
+
+SQL — Langage utilisé pour définir les tables, leurs contraintes et les vues, et interroger la base relationnelle.
+
+SSR — Rendu de composants React côté serveur utilisé dans certains tests. Sa présence dans les tests ne signifie pas que l’application est livrée comme site à rendu serveur.
+
+Transaction — Ensemble d’opérations sur la base dont la validation ou l’annulation forme une unité.
+
+Trigger — Fonction déclenchée par la base lors d’une opération sur les données afin d’appliquer une règle complémentaire.
+
+# Avant-propos
+
+Ce mémoire porte sur la conception et la réalisation d’une application web de gestion et de suivi des stagiaires dans le cadre d’un stage au Ministère de l’Économie et des Finances de Madagascar, au sein du contexte SIIGFP indiqué pour le projet. Il est préparé en vue de l’obtention d’une Licence en Informatique à IT University, option Développement d’applications. L’intitulé administratif exact de la formation, la promotion et les dates officielles du stage restent [À CONFIRMER].
+
+IT University constitue le cadre universitaire de ce travail. Le mémoire met en relation les compétences de développement d’applications, de conception relationnelle et de validation logicielle avec un système métier concret. Une présentation institutionnelle détaillée de l’établissement pourra être ajoutée à partir de la notice officielle applicable à la promotion. Les mémoires fournis en référence servent de repères de structure et de présentation ; leurs descriptions institutionnelles ne sont pas reprises comme des informations administratives actuelles.
+
+Le MEF est l’organisme d’accueil désigné dans le sujet. Le nom complet de l’unité SIIGFP, sa place dans l’organigramme, les fonctions de ses responsables et le périmètre précis de son intervention dans l’accueil des stagiaires restent [À CONFIRMER]. Le présent travail décrit le logiciel du dépôt Stagemanagement ; il ne prétend pas documenter l’ensemble du système d’information du ministère ni démontrer une intégration avec un système financier existant.
+
+La version du projet examinée est identifiée par la révision Git 9e1a7d8. Les constats techniques et les nouvelles vérifications consignées dans ce document sont arrêtés au 10 novembre 2026. Cette date correspond à la préparation du mémoire, et non à une date de soutenance ou à une borne de stage. Les affirmations importantes renvoient à des preuves repérées P01 à P36, présentées en annexe et détaillées dans la matrice documentaire associée.
+
+# Remerciements
+
+[À CONFIRMER — texte personnel à valider avant dépôt]
+
+Je remercie IT University pour le cadre de formation dans lequel s’inscrit ce mémoire, ainsi que le Ministère de l’Économie et des Finances pour l’accueil associé à ce stage.
+
+Je souhaite également remercier mon encadreur pédagogique, [À CONFIRMER : nom et fonction], et mon encadreur professionnel, [À CONFIRMER : nom et fonction]. Leur contribution précise à ce travail sera décrite après validation personnelle.
+
+[À CONFIRMER : ajouter les personnes effectivement concernées et personnaliser les remerciements selon l’expérience vécue.]
+
+
+# Introduction générale
+
+Le suivi d’un stage ne se limite pas à enregistrer l’identité d’une personne. Il associe un parcours académique, une structure d’accueil, un encadreur, une période de présence, des travaux à rendre et des décisions administratives. Dans l’application étudiée, ces informations sont reliées à des documents, à des observations et à des événements qui doivent rester compréhensibles au fil du dossier. Le projet présenté dans ce mémoire organise ces relations au sein d’une application web destinée à la gestion et au suivi des stagiaires du MEF dans le contexte SIIGFP.
+
+La question centrale est la suivante : comment construire un dossier de stage cohérent et traçable, accessible à chaque acteur selon ses responsabilités, tout en conservant les règles et les décisions qui déterminent son évolution ? Cette problématique est formulée à partir du périmètre effectivement développé. Elle ne suppose ni un nombre d’utilisateurs, ni une perte de documents, ni un délai de traitement ancien qui n’auraient pas été mesurés.
+
+L’objectif général consiste à mettre en relation les informations administratives et pédagogiques nécessaires au suivi. Les objectifs techniques sont de séparer l’interface des traitements métier, de préserver l’intégrité relationnelle, de contrôler les accès au niveau des ressources et d’exposer les échéances utiles à l’action. Le code comporte des parcours d’admission, d’affectation, de rédaction et d’examen des rapports, de gestion documentaire, d’évaluation, de soutenance, de clôture et de pilotage. L’authentification et les rôles traversent l’ensemble de ces parcours.
+
+La démarche de présentation s’appuie sur une lecture du schéma PostgreSQL, des entités et services Java, des contrôleurs REST, des composants React et des tests disponibles. Les résultats de campagnes antérieures sont distingués des vérifications effectuées pour cette rédaction. Ces dernières ont permis d’exécuter 36 tests unitaires backend et 126 tests frontend avec succès, ainsi que le contrôle ESLint et la construction Vite. Elles ne constituent pas une recette complète de l’installation cible : les interactions navigateur, l’intégration PostgreSQL complète et l’exploitation restent à documenter dans le périmètre de cette version.
+
+Le mémoire comporte trois chapitres. Le premier présente le projet, les besoins déduits de ses fonctions et l’architecture existante. Le deuxième développe la conception et les principaux mécanismes de réalisation, avec une attention particulière à la sécurité, aux rapports et à la clôture administrative. Le troisième évalue les résultats démontrés, les limites et les évolutions envisageables. Les annexes rassemblent les repères de preuve, l’inventaire relationnel et les vérifications à compléter.
+
+# 1 Présentation du projet
+
+## 1.1 Contexte et objectifs
+
+Le sujet fourni situe le stage au Ministère de l’Économie et des Finances de Madagascar et rattache le projet au SIIGFP. Le produit développé est une application de suivi des stagiaires. Son périmètre observable concerne des dossiers de personnes, leurs participations à des stages, les encadreurs, les productions périodiques et les éléments nécessaires à la clôture. Le rattachement à l’organisme d’accueil fournit le contexte du travail ; aucune connexion à une application financière du ministère n’est démontrée dans le dépôt.
+
+L’application distingue l’existence administrative d’un stagiaire de ses participations successives. Cette distinction permet de conserver une identité générale tout en associant chaque participation à un profil académique, un stage, un cadre de travail et un encadreur. L’objectif n’est donc pas seulement de disposer d’un annuaire : il s’agit de rendre possible un suivi contextualisé, depuis l’affectation jusqu’à la clôture, sans confondre les événements de plusieurs périodes. [P10, P32]
+
+Les services de synthèse et de pilotage poursuivent un objectif complémentaire. Ils regroupent les informations réparties dans les tables pour rendre visibles les échéances, les pièces manquantes, l’avancement des rapports et les alertes. La présence de ces calculs démontre une capacité de consolidation dans le code. L’utilité effectivement constatée auprès du service d’accueil et les critères d’acceptation institutionnels restent [À CONFIRMER]. [P22, P34]
+
+## 1.2 Analyse de l’existant et périmètre documenté
+
+Le dépôt permet d’étudier l’état du logiciel et des corrections techniques, mais ne contient pas de description administrative validée du processus antérieur. Il serait donc infondé d’affirmer que les dossiers étaient tenus sur papier, dans un tableur précis ou dans un autre logiciel. Les supports anciens, les personnes intervenantes, les étapes d’approbation et les difficultés observées sur le terrain restent [À CONFIRMER] à partir du cahier des charges ou d’entretiens documentés.
+
+L’existant technique est mieux documenté. Les rapports d’audit et de recette mentionnent notamment une évolution vers des contrôles d’accès par dossier, l’association explicite des comptes stagiaires, l’enrichissement du pilotage et la correction d’un ancien mapping départemental. Ces éléments décrivent l’histoire du projet informatique. Ils ne constituent pas, à eux seuls, une étude du fonctionnement antérieur du service. Le code actuel est retenu lorsque ces documents décrivent une règle devenue obsolète. [P07, P26, P31]
+
+Le périmètre retenu comprend les fonctions présentes dans les pages et services de gestion. Les routes de manipulation brute des sessions, des associations de rôles ou d’autres données sensibles restent fermées par la configuration de sécurité. À l’inverse, l’existence d’une table ne suffit pas à déduire l’existence d’un écran d’administration. L’administration complète des paramètres de suivi et des seuils techniques n’est pas présentée comme une réalisation achevée.
+
+## 1.3 Acteurs et besoins
+
+Les acteurs applicatifs correspondent aux trois rôles effectivement supportés : ADMIN, ENCADREUR et STAGIAIRE. Le tableau 1 présente leurs principales responsabilités observées. La figure 1 en donne une vue de lecture simplifiée. Les responsabilités précises doivent être interprétées avec les restrictions propres à chaque opération : un droit global de gestion ne donne pas automatiquement le droit de rédiger ou de valider le rapport d’un autre acteur. [P05, P07, P13]
+
+:::table Acteurs et responsabilités observées
+Rôle | Périmètre | Opérations caractéristiques
+ADMIN | Gestion globale | Créer les dossiers, affecter les participations, administrer les comptes, gérer les pièces et les décisions de clôture.
+ENCADREUR | Participations affectées au compte | Consulter les dossiers autorisés, examiner les rapports, gérer les évaluations autorisées et suivre les alertes accessibles.
+STAGIAIRE | Dossier associé à son compte | Consulter son dossier, rédiger et soumettre ses rapports, consulter les informations et observations autorisées.
+:::
+
+:::figure acteurs.png|Acteurs et principaux parcours observés|Sources : SecurityConfig et DossierAccessService ; vue fonctionnelle simplifiée, hors matrice exhaustive des permissions.
+
+Les besoins fonctionnels se répartissent en quatre ensembles. Le premier rassemble les données de référence, les comptes, l’identité du stagiaire et son parcours académique. Le deuxième organise les affectations et les événements du stage. Le troisième concerne les rapports, les documents, les évaluations et les soutenances. Le quatrième expose les synthèses, les alertes, les bilans et le journal d’audit. Cette répartition est une lecture des modules présents, et non la transcription d’un cahier des charges signé qui n’a pas été fourni.
+
+Les exigences non fonctionnelles observables portent sur la confidentialité des dossiers, la cohérence des données et la traçabilité des décisions. Elles se traduisent respectivement par des contrôles de rôle et de propriété, des contraintes relationnelles complétées par les services, et des historiques associés aux événements. D’autres exigences nécessitent une mesure dans l’environnement réel : disponibilité, temps de réponse, charge admissible, accessibilité et restauration. Aucun seuil de performance contractuel n’est inventé dans ce mémoire.
+
+## 1.4 Démarche de travail et planning
+
+La structure du dépôt met en évidence plusieurs activités : modélisation SQL, réalisation des services et de l’API, développement de l’interface, contrôles automatiques et préparation de la recette. Les documents de suivi conservent des campagnes datées de fin octobre et de début novembre 2026. Ces dates attestent les comptes rendus correspondants ; elles ne permettent pas de reconstituer la durée complète des phases du stage ni le temps consacré individuellement à chaque module.
+
+La démarche retenue pour ce mémoire procède par correspondance entre besoin, règle, implémentation et vérification. Par exemple, la confidentialité d’un rapport est étudiée dans le contrôleur, dans la politique d’accès, dans la réponse DTO et dans les tests. Une lecture limitée au nom d’une classe ne suffirait pas à expliquer le comportement devant un jury. La matrice de preuves permet de retrouver ces points d’appui.
+
+Le calendrier officiel, les jalons approuvés, les périodes de réalisation et les éventuelles itérations avec l’encadreur restent [À CONFIRMER]. Aucun diagramme de Gantt n’est produit sans ces éléments. De même, le projet n’est pas présenté comme ayant appliqué Scrum ou une autre méthode formalisée en l’absence de documents attestant ses rituels et ses livrables.
+
+## 1.5 Technologies et justification de la solution
+
+Le tableau 2 décrit la pile technique du projet. Les versions déclarées sont distinguées des versions d’une installation cible. Java 17, Spring Boot 4.1.0 et PDFBox 3.0.8 sont lus dans le fichier Maven. Les versions frontend sont précisées dans les manifestes et leur fichier de verrouillage. La présence de PostgreSQL 15 dans les procédures locales ne permet pas d’affirmer que toute instance d’exploitation utilise exactement cette version. [P01, P02, P25]
+
+:::table Technologies et responsabilités
+Élément | Version ou preuve | Responsabilité dans le projet
+Java et Spring Boot | Java 17 ; Spring Boot 4.1.0 dans pom.xml | Exécuter les services, exposer les routes HTTP et assembler les composants.
+Spring Security et JPA | Dépendances Spring déclarées | Authentification et autorisations ; mapping des entités et accès relationnel.
+PostgreSQL | Scripts SQL ; version 15 dans les procédures locales | Tables, clés étrangères, contraintes, triggers et vues.
+React et React DOM | 19.2.8 dans le verrouillage frontend | Composition des pages, formulaires et états de l’interface.
+Vite | 8.2.2 dans le verrouillage frontend | Serveur de développement et construction des ressources web.
+PDFBox | 3.0.8 dans pom.xml | Analyse des pièces PDF et génération des bilans.
+Maven, Node et ESLint | Fichiers de construction et commandes exécutées | Gestion des dépendances, tests et contrôle statique frontend.
+:::
+
+La solution existante sépare les responsabilités : React compose les vues et gère les interactions, tandis que les services Java décident des opérations autorisées et valident les règles métier. Cette organisation est cohérente avec la décomposition en composants et états décrite par la documentation React consultée [R5]. Elle ne constitue pas la preuve d’une comparaison historique entre plusieurs frameworks.
+
+L’usage de PostgreSQL correspond à un domaine riche en relations et en contraintes : une participation doit référencer des éléments existants, un rapport doit correspondre à une période, et une évaluation possède une identité propre. Les contraintes SQL empêchent certaines incohérences indépendamment de la page qui a émis la demande ; leur rôle général est décrit dans la documentation PostgreSQL [R4]. La justification présentée est technique et rétrospective. Aucun classement de performances entre bases ou langages n’a été réalisé pour ce travail.
+
+## 1.6 Architecture générale
+
+La figure 2 représente les composants d’exécution observés. Le navigateur charge l’interface React et adresse des requêtes HTTP à l’API. Le backend interroge PostgreSQL par les repositories JPA et accède séparément au stockage des fichiers. Les octets des documents ne sont donc pas contenus intégralement dans les tables de métadonnées. Cette distinction conditionne la sauvegarde et la restauration. [P03, P18]
+
+:::figure architecture.png|Architecture générale de l’application|Sources : apiClient.js, vite.config.js, application.properties, repositories et FichierGestionService. Le reverse proxy de production reste à installer et à vérifier.
+
+Le client HTTP centralise la construction des URL, l’ajout de l’en-tête Authorization, la conversion des réponses et le traitement des erreurs. Les données courantes transitent sous forme JSON. Les téléversements utilisent FormData, tandis que les téléchargements sont traités comme des contenus binaires. Le client distingue notamment les réponses 401, 403, 409 et 413, afin d’expliquer respectivement un problème de session, de droits, de cohérence ou de taille. [P03]
+
+En développement, le proxy Vite permet de relayer les appels vers le backend. Pour l’exploitation, la documentation envisage une origine HTTPS unique servant les ressources web et relayant /api vers Spring. Il s’agit d’une architecture de déploiement proposée, non d’une installation vérifiée. Une API sur une autre origine nécessiterait une configuration serveur adaptée ; le simple changement d’une variable frontend ne démontre pas cette capacité. [P31]
+
+
+# 2 Conception et réalisation
+
+## 2.1 Organisation des données
+
+La conception observée repose sur trois niveaux distincts : la personne stagiaire, son profil académique et sa participation à un stage. La table stagiaires porte l’identité et les coordonnées. La table stagiaire_academique associe cette personne à un niveau, une filière, un établissement et une année d’études. La table stage_participant relie ensuite ce profil à un stage, un cadre de stage, un encadreur, des dates et un statut. Cette organisation évite de placer les données d’une participation particulière dans l’identité générale. [P09, P10]
+
+La figure 3 représente les principales clés étrangères du modèle physique. Elle ne constitue pas un MCD reconstruit : les noms sont ceux des tables SQL et les flèches vont de la table porteuse de la clé étrangère vers la table référencée. Les relations accessoires vers les référentiels, les comptes et les statuts sont volontairement regroupées dans le texte pour préserver la lisibilité. L’inventaire complet des tables figure en annexe.
+
+:::figure donnees.png|Relations principales du modèle physique PostgreSQL|Source : conception/Conception2.sql. Chaque flèche représente une clé étrangère ; les relations représentées sont un extrait du schéma.
+
+Un stagiaire peut posséder plusieurs profils académiques ; chaque profil se rattache à un seul stagiaire. Plusieurs participations peuvent référencer un même stage, mais chacune porte ses propres dates et son encadreur. Les rapports, événements et associations de fichiers référencent la participation. Les évaluations finales et les soutenances disposent chacune d’une contrainte d’unicité sur stage_participant_id : le schéma admet donc au plus une ligne de chacune de ces catégories par participation.
+
+L’organisation administrative suit une autre chaîne : le stage référence une structure d’accueil, elle-même rattachée à un département. L’entité Stagiaire actuelle ne possède pas de champ departement, conformément à la table stagiaires du script examiné. Il faut donc éviter d’expliquer les permissions comme un filtrage fondé sur un département directement enregistré sur la personne. Le code courant utilise l’administration globale, l’affectation de l’encadreur et l’association du compte stagiaire. [P07, P10]
+
+Le tableau 3 résume les ensembles du modèle. Les tables d’historique conservent des transitions et leurs responsables, tandis que les événements décrivent les actes tels qu’une suspension ou une prolongation. Ces objets sont complémentaires : un changement de date de fin peut être un événement sans constituer, à lui seul, un changement de statut.
+
+:::table Ensembles du modèle relationnel
+Ensemble | Tables représentatives | Fonction
+Identité et études | stagiaires, stagiaire_academique | Identifier la personne et contextualiser son parcours académique.
+Organisation | departements, structures_accueil, encadreurs, stages, cadres_stage | Définir le cadre d’accueil et les responsabilités.
+Participation | stage_participant, stage_participant_evenements | Porter les dates, les affectations et les actes de gestion.
+Suivi pédagogique | rapports_activite, rapport_observations, evaluations_finales, evaluation_criteres | Conserver les productions, observations et notes.
+Pièces et échéances | fichiers, stage_participant_fichiers, soutenances, alertes | Relier les documents, rendez-vous et situations à traiter.
+Sécurité et traçabilité | utilisateurs, utilisateurs_role, sessions_utilisateur, journal_audit | Authentifier, habiliter et conserver certaines traces d’opération.
+:::
+
+## 2.2 Architecture backend et transactions
+
+La figure 4 présente l’organisation logicielle. Les contrôleurs de gestion reçoivent les requêtes et transmettent les données aux services. Les DTO définissent le contrat échangé avec le navigateur. Les repositories encapsulent les opérations de persistance sur les entités JPA. Des services transversaux portent la politique d’accès, les règles des participations et les calculs de suivi. Cette répartition peut être observée dans StageGestionController, StageGestionService, StageParticipantRepository et StageParticipant. [P10, P11]
+
+:::figure composants.png|Composants de traitement d’une requête métier|Sources : contrôleurs de gestion, DTO, DossierAccessService, ParticipationRulesService et repositories. Le schéma présente des responsabilités, pas des services déployés séparément.
+
+Les services de gestion apportent une valeur qui dépasse les opérations CRUD. La création d’une participation vérifie l’affectation, résout les références, contrôle les dates, recherche les chevauchements et détermine le statut initial. Une clôture examine la transition, applique les règles de complétude ou la décision administrative, puis écrit le statut et les traces associées. Les contrôleurs CRUD historiques encore présents ne doivent pas être considérés comme des chemins alternatifs autorisés : la configuration ferme les accès qui ne sont pas explicitement admis.
+
+Les annotations transactionnelles délimitent les opérations métier qui doivent être validées ensemble. Dans Spring, leur portée dépend de l’interception des appels par l’infrastructure transactionnelle [R3]. Pour le projet, l’intention transactionnelle est visible sur les méthodes de gestion. La présence de l’annotation ne suffit toutefois pas à prouver tous les scénarios d’annulation en base : les tests unitaires exécutés ne simulent pas un échec réel au moment d’un commit PostgreSQL.
+
+Le verrouillage pessimiste de la participation et le verrou par personne pour les affectations réduisent les possibilités de concurrence incohérente dans les chemins applicatifs concernés. ParticipationRulesService rafraîchit notamment l’entité avec PESSIMISTIC_WRITE avant de vérifier sa mutabilité. L’état clôturé, annulé ou abandonné, ainsi que la présence d’une date de clôture, bloque les modifications soumises à cette règle. La protection d’une opération dépend donc de son passage effectif par ces services. [P11]
+
+## 2.3 Authentification et contrôle d’accès
+
+Le mécanisme d’authentification repose sur une session opaque. Lors de la connexion, AuthService recherche le compte, vérifie le mot de passe avec BCrypt et contrôle que le statut est ACTIF. Il génère ensuite 32 octets aléatoires, les encode pour former le jeton transmis au client et enregistre uniquement son empreinte SHA-256 dans la table des sessions. La date d’expiration est fixée à huit heures après la création. Le jeton n’est pas un JWT : aucune charge utile signée contenant les droits n’est utilisée par ce mécanisme. [P04]
+
+À chaque requête protégée, SessionAuthenticationFilter exploite le jeton Bearer et rétablit l’identité et les autorités à partir des données valides. La configuration STATELESS concerne la session HTTP gérée par Spring ; elle n’interdit pas l’existence de sessions applicatives persistées dans PostgreSQL. Cette distinction explique pourquoi l’application peut révoquer une session et prendre en compte les rôles actifs sans attendre la fin d’un jeton autonome.
+
+La première barrière d’autorisation est la route. SecurityConfig ordonne les règles par méthode et chemin, ouvre la connexion, autorise les opérations prévues aux rôles concernés et termine par un refus par défaut. La documentation Spring Security décrit ce niveau d’autorisation par requête [R6]. La seconde barrière est la ressource : DossierAccessService vérifie si le compte peut accéder à la participation ou à l’objet lié. Un identifiant valide transmis dans l’URL ne constitue donc pas une preuve de droit. [P06, P07]
+
+Les rôles actifs supportés sont ADMIN, ENCADREUR et STAGIAIRE. Les anciennes attributions RESPONSABLE_STAGE sont interprétées comme ADMIN en lecture. Cette compatibilité ne crée pas un quatrième rôle dans le fonctionnement courant. Pour les rapports, le cumul des rôles ne dispense pas du contrôle de propriété : seul le stagiaire associé rédige et soumet, et seul l’encadreur affecté peut examiner, à condition de ne pas être lui-même propriétaire du dossier. [P05, P13]
+
+L’interface conserve le jeton dans localStorage et le joint aux appels authentifiés. Cette décision simplifie la persistance de session entre chargements, mais rend nécessaire la maîtrise des scripts exécutés dans l’origine web. L’absence de JWT ou l’usage de BCrypt ne suffisent pas à conclure à une sécurité exhaustive. La protection du transport, les paramètres de l’environnement cible, la politique de mots de passe et les essais adverses doivent être validés en exploitation. La réinitialisation du mot de passe comporte une révocation des sessions dans le code ; le parcours HTTP correspondant n’a pas été rejoué pour cette rédaction. [P03, P33]
+
+## 2.4 Admission et affectation
+
+L’admission commence par la création du stagiaire et l’ajout de son profil académique. Les services vérifient les champs requis et résolvent les références académiques. Le schéma impose l’unicité de la combinaison personne, niveau, filière, établissement et année d’études. Cette règle évite d’enregistrer plusieurs fois le même contexte académique, tout en autorisant des profils différents pour une même personne. Les formulaires React utilisent les catalogues de référence pour produire les identifiants attendus par l’API. [P32]
+
+L’association d’un compte au dossier constitue une opération explicite. L’identité numérique n’est pas déduite d’une ressemblance de nom ou d’adresse électronique. PortailStagiaireService et les pages du dossier personnel s’appuient sur cette liaison. La séparation entre compte et personne permet aussi de représenter un dossier administratif avant l’ouverture d’un accès au portail. Les conditions d’ouverture des comptes dans le service d’accueil restent à confirmer sur le plan organisationnel. [P08]
+
+L’affectation crée une participation comportant les références du stage, du profil académique, du cadre et de l’encadreur, ainsi que les dates de début et de fin. La fin ne peut précéder le début. Le contrôle de chevauchement s’effectue par personne, y compris lorsque deux participations utilisent des profils académiques différents. La création prend un verrou sur le stagiaire avant la vérification afin de sérialiser les affectations concurrentes empruntant ce chemin. Le statut initial recherché est PLANIFIEE. [P10, P11]
+
+La modification des dates doit également tenir compte des rapports déjà saisis. Si une nouvelle période rend une semaine de rapport incompatible avec le calendrier calculé, le service refuse la modification. Cette règle relie une donnée administrative, la durée du stage, à une production pédagogique déjà conservée. Elle évite qu’un changement apparemment isolé rende incohérent le suivi existant.
+
+## 2.5 Événements et clôture des participations
+
+Le cycle de vie comporte des opérations dédiées de prolongation, suspension, reprise, abandon, annulation et clôture. La prolongation conserve l’ancienne et la nouvelle date de fin. La suspension et la reprise exigent une date d’effet contrôlée par rapport à la période et aux événements antérieurs. Les services vérifient les transitions autorisées dans le référentiel. Les historiques de statut et les événements permettent ensuite de distinguer le résultat courant de la décision qui l’a produit.
+
+La clôture mérite une distinction entre trois modalités présentes dans le code, présentées au tableau 4 et dans la figure 5. En mode ordinaire, le service exige les pièces obligatoires actives et les rapports validés pour les périodes achevées. Le calcul des rapports attendus retient les périodes dont la fin est au plus égale à la date courante à Madagascar. Les périodes futures ne sont pas exigées. La soutenance n’est pas un prérequis appelé par la branche de clôture examinée. [P14, P35]
+
+:::table Modalités de clôture présentes dans le code
+Modalité | Pièces manquantes | Rapports achevés non validés | Trace
+Ordinaire | Bloquantes | Bloquants | Événement CLOTURE et historique de statut.
+Dérogation documentaire | Autorisées si ignorerDocumentsManquants vaut vrai | Restent bloquants | Liste réelle des pièces manquantes ajoutée au motif.
+Forcée | Autorisées | Autorisés | Décision administrative et listes des pièces et périodes manquantes ajoutées au motif.
+:::
+
+:::figure cloture.png|Décision de clôture et contrôles conservés|Sources : StageGestionService, ParticipationRulesService, EvenementParticipationRequest et ClotureParticipationTests.
+
+Le mode forcé est activé par forcerCloture. Il maintient les contrôles d’accès, de transition et de participation déjà terminée, mais remplace l’exigence de complétude par une trace de décision administrative. Les listes de pièces et de périodes manquantes sont recalculées côté serveur pendant le verrouillage ; elles ne sont pas simplement recopiées depuis un affichage susceptible d’être ancien. Le statut devient CLOTUREE, une date de clôture est enregistrée et les traces associées sont conservées. [P15, P16]
+
+L’interface actuelle transmet forcerCloture=true lorsque l’administrateur confirme le dialogue de clôture. Le texte de confirmation indique que des documents ou rapports peuvent rester manquants ou non validés. Le mémoire doit donc expliquer ce comportement effectif, même si un rapport ancien décrit seulement une clôture stricte. La présence d’une trace technique ne vaut pas approbation institutionnelle de cette dérogation : les conditions administratives d’emploi et les justificatifs à exiger restent [À CONFIRMER].
+
+Les tests unitaires couvrent notamment le refus d’une transition, la clôture déjà effectuée, le mode ordinaire, la dérogation documentaire et le mode forcé. Ils vérifient également que les dérogations ne suppriment pas les gardes d’accès. Les 13 scénarios de ClotureParticipationTests ont réussi dans la campagne actuelle. Cette observation porte sur les services testés avec leurs doubles ; la persistance complète sur PostgreSQL doit être rejouée après rétablissement des prérequis d’intégration.
+
+## 2.6 Rapports hebdomadaires et observations
+
+CalculPeriodesRapportService découpe la durée de la participation en semaines terminant le dimanche. La première et la dernière période sont tronquées aux bornes du stage. L’échéance correspond au lundi suivant le dimanche utilisé pour le calcul, y compris lorsque la dernière période s’arrête avant ce dimanche. Le calendrier est calculé à partir des dates du stage ; la suspension n’introduit pas, dans ce calcul, une exclusion automatique de semaines. [P12]
+
+L’interface présente les périodes attendues dans une grille. Une période vide permet d’ouvrir un formulaire prérempli avec les dates et la participation. Une période déjà renseignée renvoie au rapport correspondant. Les indicateurs de droits transmis par le serveur déterminent les actions proposées. Cette approche réduit la divergence entre la page et la règle métier : le navigateur n’a pas à reconstituer seul le propriétaire ou l’encadreur autorisé.
+
+La figure 6 décrit le parcours principal. Le stagiaire propriétaire crée un brouillon, puis demande la transition vers SOUMIS. L’encadreur affecté examine le rapport soumis et peut demander une correction ou valider. Après correction, le stagiaire soumet à nouveau. Le service interdit de déplacer un rapport existant vers une autre participation et restreint l’édition du contenu aux états BROUILLON et A_CORRIGER. [P13]
+
+:::figure rapports.png|Séquence simplifiée de soumission et d’examen d’un rapport|Sources : RapportActiviteGestionService, DossierAccessService, clients API et pages de rapports. Les contrôles et écritures sont regroupés pour la lisibilité.
+
+Les transitions utilisent le PATCH de statut du rapport ; il n’est pas nécessaire d’inventer des routes distinctes de soumission ou de validation. La date de soumission est renseignée lors du passage à SOUMIS, et la date de validation lors du passage à VALIDE. Les contraintes et triggers PostgreSQL encadrent également les dates, les transitions et les chevauchements de périodes. Un rapport « remis » et un rapport « validé » correspondent donc à des états différents qui ne doivent pas être confondus dans les indicateurs.
+
+Les observations sont liées à un auteur, un type, un commentaire et un indicateur de visibilité au stagiaire. Le parcours du stagiaire seul filtre les observations privées. La rédaction de commentaires et l’examen restent soumis à l’affectation réelle de l’encadreur. Les synthèses et exports doivent conserver cette même restriction afin que le téléchargement ne devienne pas un moyen de contourner ce qui est masqué à l’écran. [P07, P13, P34]
+
+## 2.7 Gestion documentaire
+
+Les fichiers sont associés soit à un stagiaire, soit à une participation. Le catalogue des types de pièce indique leur périmètre, leur caractère obligatoire pour la clôture et la multiplicité autorisée. Le service consulte ce catalogue au moment du dépôt et lors du contrôle de complétude. Une liste codée dans le navigateur ne remplace donc pas le référentiel effectif de la base. [P17, P18]
+
+DocumentContentValidator contrôle la taille, le nom, l’extension, le type MIME et le contenu. Les formats admis sont PDF, JPEG et PNG. La limite est de 10 Mio par fichier ; l’enveloppe multipart est configurée à 11 MB côté Spring. Les images doivent être décodables et respecter la limite de pixels du validateur. Les PDF sont analysés avec PDFBox, avec notamment un refus des fichiers chiffrés, des nombres de pages hors des bornes prévues et de structures actives détectées. Ces contrôles ciblés ne constituent pas un antivirus exhaustif. [P17]
+
+Le stockage attribue un nom fondé sur un UUID. Les métadonnées SQL conservent le lien avec l’objet métier et le chemin de stockage. Le téléchargement vérifie les droits, l’existence et la lisibilité du fichier, puis que son chemin réel reste dans le répertoire autorisé. Lorsqu’un fichier est lié à plusieurs dossiers, la politique exige l’accès à toutes ses associations pour un utilisateur non administrateur. Ce choix évite qu’une association accessible expose indirectement un autre dossier. [P07, P18]
+
+Une transaction SQL ne restaure pas automatiquement un fichier écrit sur disque. Le service prévoit donc un nettoyage si l’opération transactionnelle n’est pas validée. Le mécanisme est présent dans le code, mais une panne disque ou un arrêt du processus à un instant critique n’a pas été injecté pendant les vérifications actuelles. En exploitation, la sauvegarde doit couvrir conjointement les tables et les octets des pièces ; une sauvegarde de PostgreSQL seule serait incomplète.
+
+## 2.8 Évaluations et soutenances
+
+L’évaluation finale se rattache à une participation et à l’encadreur correspondant. Les notes sont enregistrées par critère, dans l’intervalle de 0 à 5. Le catalogue précise notamment les critères actifs, leur caractère obligatoire, leur ordre et leur coefficient. La présence d’un coefficient dans le modèle ne justifie pas d’affirmer qu’une moyenne générale est calculée et présentée : cette restitution n’est pas démontrée par les réponses examinées. [P19]
+
+La finalisation vérifie que tous les critères actifs obligatoires disposent d’une note. Elle marque ensuite l’évaluation comme finalisée et renseigne la date correspondante. Les écritures ultérieures sur cette évaluation sont refusées par les gardes du service. L’auteur de la finalisation est transmis à la journalisation. La politique d’évaluation autorise l’administrateur ou l’encadreur affecté dans les conditions du service ; elle ne doit pas être confondue avec la règle plus restrictive d’examen des rapports. [P07, P19, P36]
+
+La soutenance représente un rendez-vous lié à la participation, avec une date, un lieu et une observation. Sa saisie et sa consultation utilisent les services et routes dédiés. Les éléments administratifs d’évaluation et de soutenance ne sont pas automatiquement exposés au portail d’un compte possédant seulement le rôle STAGIAIRE. Le bilan de cette séparation doit être confirmé avec les utilisateurs, mais le mémoire décrit le périmètre effectivement codé. [P34, P35]
+
+## 2.9 Alertes et pilotage
+
+Le planificateur appelle l’orchestration quotidienne à 06 h 00 dans le fuseau Indian/Antananarivo. Sept contrôles sont enchaînés : fins de stage proches, stages dépassés, rapports manquants, validations en retard, dossiers incomplets, surcharge des encadreurs et soutenances proches. Cette planification est un fait du code ; son déclenchement effectif à l’heure prévue sur la cible n’a pas été observé pendant la rédaction. [P20]
+
+Les alertes disposent d’un type, d’une priorité, d’un statut et d’une clé de déduplication unique. Le statut A_TRAITER représente une situation active, tandis que TRAITEE, IGNOREE ou EXPIREE décrivent d’autres états du cycle. La nature de l’alerte est une notion distincte de sa priorité. Une information n’est donc pas nécessairement une action à acquitter. Les contrôles métier, et non seulement les libellés de l’interface, déterminent les actions admises.
+
+AlerteClotureService expire les alertes à traiter liées à une participation clôturée, directement ou par l’intermédiaire d’un rapport ou d’une soutenance. Un traitement au démarrage rapproche également les anciennes alertes encore actives avec les dossiers déjà clôturés. L’historique n’est pas supprimé : l’état et la date de traitement sont modifiés. Les tests unitaires de cette règle ont réussi dans la campagne actuelle. [P21]
+
+PilotageService filtre les alertes selon les accès avant de les regrouper par participation. Il additionne les poids du type d’alerte et applique les seuils de 20 et 50, en tenant également compte des priorités AVERTISSEMENT et URGENT. Le résultat est une classification déterministe NORMALE, HAUTE ou URGENTE. Il ne s’agit pas d’une prédiction statistique ni d’un système d’intelligence artificielle. Les alertes sans participation identifiable ne sont pas transformées artificiellement en ligne de dossier prioritaire. [P22]
+
+Le pilotage expose aussi les échéances, les rapports attendus ou manquants, les pièces manquantes, la charge accessible des encadreurs et les soutenances à trente jours. Ces éléments sont construits à partir des dossiers autorisés. Les listes sont encore souvent chargées avant filtrage en mémoire, ce qui impose une réserve sur les volumes importants. Le dépôt ne fournit pas de campagne actuelle permettant de chiffrer cette limite.
+
+Les synthèses réunissent les données du dossier et les exports produisent des CSV ou des bilans PDF. ExportService échappe les cellules CSV et neutralise les chaînes susceptibles d’être interprétées comme des formules. Les PDF sont paginés avec PDFBox, mais la police standard ne couvre pas tous les caractères ; les caractères indisponibles peuvent être remplacés. Les filtres locaux d’une table ne sont pas nécessairement repris par l’export global des dossiers accessibles. [P23, P34]
+
+## 2.10 Interface utilisateur et parcours
+
+Le frontend est organisé autour de pages métier, de composants communs et de clients API. Les composants Table, BusinessForm, ConfirmDialog, ErrorMessage et Loader structurent les interactions récurrentes. Les pages de détail regroupent les informations d’une ressource et ses actions, tandis que les formulaires réutilisent les référentiels pour proposer des choix métier. Cette architecture vise une cohérence des parcours ; elle ne constitue pas une validation ergonomique par les utilisateurs.
+
+Le routage est implémenté avec la History API du navigateur. AppRoutes utilise pushState, replaceState et popstate ; routeConfig associe chemins, pages, titres et rôles. Il n’y a pas lieu de présenter React Router comme une dépendance de cette version. Les routes de détail contrôlent le format de l’identifiant, et les destinations de retour après connexion sont limitées aux chemins internes admis. [P24]
+
+La session possède des états d’initialisation, de disponibilité et d’authentification. Une indisponibilité du serveur peut produire une proposition de réessai au lieu d’une fausse confirmation de connexion. Le traitement du 401 évite également qu’une réponse tardive concernant un ancien jeton déconnecte une session plus récente. Les contrôles d’interface améliorent le parcours, tandis que l’autorité finale reste le serveur. [P03]
+
+Le tableau 5 présente les parcours à illustrer lors de la recette visuelle. Les emplacements d’images demandés figurent en annexe sous la forme [CAPTURE À FOURNIR]. Aucune maquette ou image artificielle n’est présentée comme un écran réel de l’application.
+
+:::table Parcours et pages existantes
+Parcours | Pages ou composants | Vérification complémentaire
+Admission et consultation | StagiairesPage, StagiaireDetailPage, AcademiquesPanel | Saisie, validation et navigation avec données de recette.
+Suivi individuel | MonDossierPage, ParticipationDetailPage | Portée du compte et visibilité des informations.
+Production hebdomadaire | MesRapports, RapportWeeks, RapportActions | Préremplissage, soumission, correction et validation.
+Décision administrative | ParticipationActions, ClotureConfirmation | Information comprise et confirmation de la clôture forcée.
+Pilotage | DashboardPage, PilotagePanel, AlertesPage | Lisibilité des échéances et accès aux dossiers concernés.
+:::
+
+## 2.11 Contraintes SQL et cohérence avec JPA
+
+Le script Conception2.sql déclare 44 tables, 6 vues et 16 triggers. Les vues couvrent notamment la charge des encadreurs, les échéances de participation, les rapports en attente, les pièces manquantes, les soutenances prochaines et les actions prioritaires. Le fait qu’une vue soit définie ne signifie pas qu’elle est utilisée directement pour chaque réponse : le calcul des priorités est repris côté service après filtrage des accès. [P09, P22]
+
+Les contraintes UNIQUE empêchent des doublons identifiés, les clés étrangères préservent les références et les CHECK valident certaines valeurs. Les triggers complètent ces mécanismes pour vérifier le type d’un statut, la cohérence d’une transition, la période d’un rapport ou le périmètre d’une pièce. La table des rapports limite notamment une période à sept jours inclus au maximum. Le contrôle d’une semaine canonique calculée par le serveur constitue une exigence applicative supplémentaire.
+
+La comparaison automatique des 44 entités avec les déclarations SQL n’a relevé aucune table ni colonne explicitement nommée dans les annotations qui soit absente du script. Cette observation porte sur les noms ; elle ne prouve pas une équivalence exhaustive des types, longueurs, valeurs par défaut et règles. Par exemple, la base autorise une note NULL alors que le service de notation exige une valeur. Les deux niveaux n’ont pas nécessairement la même responsabilité de validation.
+
+Hibernate est configuré en validate, avec open-in-view désactivé. L’application attend donc un schéma préexistant compatible, au lieu de demander sa création automatique au démarrage. Le script d’initialisation contient néanmoins des instructions de suppression et création de base. Il n’a pas été exécuté pour ce travail et ne doit pas être assimilé à une migration additive. Les migrations et précontrôles référencés dans les anciens documents sont absents de cette copie ; leurs garanties ne sont pas attribuées au schéma courant sans récupération et vérification. [P25, P26]
+
+## 2.12 Tests et validation
+
+La validation est présentée à trois niveaux : les tests présents, les tests exécutés pour ce mémoire et les essais restant à réaliser. Le tableau 6 rapporte les résultats observés le 10 novembre 2026. Les tests backend sélectionnés sont unitaires et n’utilisent pas la campagne Spring/HTTP/PostgreSQL complète. Les tests frontend associent fonctions, contrats HTTP et rendu de composants ; ils ne pilotent pas un navigateur avec les interactions d’un utilisateur. [P27, P28]
+
+:::table Résultats des vérifications réalisées
+Vérification | Résultat observé | Portée et limite
+Backend unitaire | 36 réussis ; 0 échec ; 0 erreur ; 0 ignoré | Accès, clôture, périodes, documents, exports et alertes de clôture ; sans recette PostgreSQL complète.
+Frontend premier essai | 115 réussis ; 11 échecs | Échecs React useContext dans les tests de rendu ; chemins de casse différente dans les traces.
+Frontend chemin canonique | 126 réussis ; 0 échec ; 0 ignoré | Relance sans modification du code depuis stagemanagement.
+ESLint | Code de sortie 0 | Vérification statique du frontend, sans garantie fonctionnelle exhaustive.
+Construction Vite | Réussie | Ressources web produites ; ne prouve pas le déploiement de ces ressources.
+Intégration complète | Non exécutée pour cette rédaction | Précontrôles et migrations attendus absents de la copie.
+Recette navigateur et exploitation | Non exécutée pour cette rédaction | Responsive, clavier, impression, charge, restauration et cron restent à vérifier.
+:::
+
+Le premier lancement frontend a utilisé une graphie du chemin différente de celle observée dans certaines résolutions de modules. Les traces montrent React et React DOM chargés au travers de chemins variant par la casse. Une relance depuis le chemin canonique a permis aux 126 tests de réussir sans changement de source. La casse du chemin constitue une explication étayée de l’incident ; une instrumentation complète de la résolution des modules n’a pas été effectuée. L’échec initial reste conservé dans le journal au lieu d’être effacé du bilan. [P29]
+
+Les documents antérieurs rapportent des campagnes d’intégration et d’autres nombres de tests à des dates précédentes. Ces résultats historiques ne sont pas additionnés aux tests actuels et ne sont pas présentés comme un nouveau succès de la version auditée. Les fichiers préexistants de rapports Surefire ne suffisent pas davantage à attester une campagne actuelle complète. La sélection, la commande et les journaux des vérifications présentes sont conservés avec les livrables documentaires.
+
+Les scénarios à compléter doivent notamment vérifier une création de dossier, une affectation, le cycle complet du rapport, les refus croisés entre comptes, le téléchargement des pièces et les modalités de clôture. Leur exécution doit utiliser une base isolée et des identités de recette. Les campagnes de charge, de reprise et d’ergonomie répondent à des questions différentes des tests unitaires ; elles doivent donc produire leurs propres observations.
+
+## 2.13 État du déploiement
+
+La construction frontend a réussi et le projet fournit des paramètres externes pour la connexion PostgreSQL et le répertoire documentaire. La documentation prépare une installation avec origine HTTPS unique, des sauvegardes et une recette cible. Aucun de ces éléments ne constitue une preuve de service accessible en production au moment de la rédaction. Le statut réel de livraison et d’utilisation par l’organisme reste [À CONFIRMER]. [P25, P31]
+
+Le répertoire backend/migrations mentionné par la procédure et par le lanceur d’intégration n’est pas présent. Avant de rejouer cette procédure, il faut récupérer les scripts nécessaires ou faire valider une procédure mise à jour. Exécuter le script d’initialisation sur une base existante serait une opération différente et potentiellement destructrice ; cette opération n’a pas été réalisée.
+
+L’exploitation doit en outre définir les droits du compte PostgreSQL, le stockage persistant, le reverse proxy, les règles de sauvegarde et les essais de restauration. Les chemins des fichiers enregistrés dans les métadonnées doivent rester cohérents avec les octets restaurés. La rotation des anciens secrets évoquée dans la documentation, la charge et l’observation du traitement planifié sont des travaux à vérifier, sans reproduire de secrets dans le mémoire.
+
+## 2.14 Difficultés attestées et solutions
+
+Une difficulté historique documentée concerne l’attente d’une colonne departement_id dans la table stagiaires. Le compte rendu de recette décrit un échec de validation Hibernate, suivi de la suppression du mapping et du champ de formulaire devenus incompatibles avec le schéma retenu. L’inspection actuelle confirme l’absence de ce mapping. Cette correction illustre l’importance de distinguer le modèle attendu par l’application du schéma effectivement livré.
+
+Une autre difficulté réside dans l’évolution des règles. Les anciens rapports et le code actuel ne décrivent pas la même modalité de clôture. La solution documentaire consiste à exposer les trois branches réellement présentes, leurs contrôles et leur traçabilité, puis à isoler la validation institutionnelle encore requise. Modifier le code pour le faire correspondre au récit aurait masqué l’état du projet ; aucun fichier applicatif n’a été modifié pour ce mémoire.
+
+Enfin, les essais actuels ont révélé une sensibilité des tests de rendu à l’environnement de résolution des modules et un accès initialement insuffisant au cache Maven. La relance depuis le chemin canonique et l’accès autorisé au cache local ont permis de terminer les vérifications annoncées. Ces résultats montrent pourquoi un compte rendu de test doit préciser son environnement et sa portée, au lieu de résumer toute validation par un unique message de construction réussie.
+
+
+# 3 Évaluation du projet et connaissances acquises
+
+## 3.1 Bilan fonctionnel
+
+L’application rassemble un ensemble cohérent de modules autour de la participation à un stage. Le dossier administratif, le profil académique, l’affectation, les rapports, les pièces et les décisions ne sont pas traités comme des listes indépendantes : ils sont reliés par le modèle de données et par les services métier. Les pages de synthèse et de pilotage rendent ces relations consultables dans un même parcours. Cette capacité est observée dans le code ; sa validation complète en situation d’exploitation reste à réaliser.
+
+Le tableau 7 utilise des catégories explicites pour éviter de confondre présence du code et qualification d’un parcours. « Vérifié » désigne ici un périmètre effectivement exercé par les tests cités. Un module peut être implémenté et disposer de tests partiels sans que son usage complet dans le navigateur et la base cible soit confirmé.
+
+:::table Bilan des réalisations et niveau de validation
+Élément | État retenu | Justification et limite
+Règles d’accès aux dossiers | Implémentées et vérifiées sur scénarios unitaires | Tests DossierAccessTests réussis ; refus HTTP complets à rejouer.
+Clôture et dérogations | Implémentées et vérifiées sur scénarios unitaires et frontend | Trois branches et traces testées ; acceptation administrative à confirmer.
+Calendrier, documents et export | Implémentés et vérifiés sur scénarios ciblés | Tests de services et fonctions réussis ; rendu final des exports à contrôler.
+Admission, évaluation et soutenance | Implémentées ; parcours complet non testé ici | Sources, DTO, routes et pages présents ; campagne actuelle d’intégration non exécutée.
+Interface React | Implémentée avec tests automatisés réussis | 126 tests ; interactions visuelles et recette humaine non effectuées.
+Alertes planifiées | Implémentées ; planification non observée | Cron et orchestration présents ; exécution à heure réelle à vérifier.
+Impression et exploitation | Partiellement validées | Code et procédure disponibles ; recette, restauration et environnement cible non confirmés.
+Pagination SQL et automatisation CI/CD | Perspectives non réalisées ou non démontrées | Chargements en mémoire et absence de preuve d’une chaîne CI/CD complète.
+Déploiement de production | Impossible à confirmer | Aucun procès-verbal de livraison ni observation de la cible dans ce travail.
+:::
+
+La réalisation se distingue particulièrement par la prise en compte de l’identité du propriétaire et de l’affectation de l’encadreur. Le contrôle d’une ressource traverse la lecture, la mutation et le téléchargement. La présence de ces gardes dans un service partagé favorise une politique cohérente. Elle n’exonère pas d’ajouter des tests lors de l’ouverture de nouvelles routes, notamment lorsque plusieurs objets peuvent être liés au même document ou à la même alerte.
+
+## 3.2 Bilan technique
+
+Les principales qualités observées sont la séparation des responsabilités, la centralisation de certaines règles transversales et l’association de contrôles Java et SQL. Les tests de clôture montrent que les règles ne se réduisent pas à un simple changement de statut : ils vérifient aussi les conditions d’accès, l’état antérieur, la complétude et les traces. Les tests des exports et des fichiers traitent des cas de contenu, et non uniquement l’existence d’une méthode.
+
+Les résultats actuels ne doivent cependant pas être convertis en pourcentage global de fiabilité. Aucun taux de couverture n’a été calculé et la campagne PostgreSQL complète n’a pas été relancée. La réussite de 36 tests unitaires et de 126 tests frontend atteste les scénarios sélectionnés et leur environnement. Elle ne démontre pas toutes les combinaisons de statuts, la concurrence réelle de plusieurs utilisateurs, les pannes de stockage ou le comportement d’un jeu historique de données.
+
+La première limite structurelle concerne les volumes. Plusieurs services utilisent findAll puis filtrent les objets accessibles. Cette démarche facilite la réutilisation de la politique d’accès, mais son coût peut croître avec les dossiers et leurs relations. Une pagination côté base et des requêtes tenant compte du périmètre pourraient réduire les chargements ; leur efficacité devra être mesurée plutôt que présumée.
+
+Une deuxième limite porte sur la reproductibilité. Le projet dispose de scripts de test et de procédures, mais des fichiers de migration auxquels ils font référence sont absents de la copie. L’explication d’un état validé doit inclure l’ensemble des sources nécessaires pour le reproduire. Récupérer les scripts, fixer la procédure et rejouer les vérifications sur une base vierge isolée sont donc des préalables à une conclusion plus forte sur l’intégration.
+
+Une troisième limite concerne la restitution et l’exploitation : couverture des caractères dans les PDF, qualité de l’impression, comportement mobile, sauvegarde coordonnée et configuration HTTPS. Ces éléments dépassent les seules fonctions métier. Ils déterminent pourtant la qualité d’une livraison utilisable et doivent faire partie de la recette finale.
+
+## 3.3 Apport potentiel à l’organisme d’accueil
+
+L’application peut offrir un point de consultation commun pour les informations d’un stage, une meilleure explicitation des échéances et un historique des décisions. Les contrôles de rôle et d’affectation peuvent limiter l’accès aux dossiers aux acteurs concernés. Les alertes et les synthèses peuvent aider à identifier les actions à examiner. Ces apports découlent du fonctionnement développé ; ils sont formulés comme une valeur attendue tant qu’aucune mesure d’usage n’a été recueillie.
+
+Un gain de productivité ne peut pas être déduit du seul nombre de modules réalisés. Il faudrait comparer des situations observables, par exemple le temps nécessaire pour retrouver un dossier, le délai entre dépôt et examen d’un rapport ou la proportion de dossiers complets au moment d’une décision. Les définitions, la période d’observation, les volumes et la méthode de collecte devraient être approuvés avec le service. Aucun résultat chiffré n’est attribué à ces indicateurs dans le présent mémoire.
+
+La clôture forcée apporte une souplesse administrative, mais demande une règle d’usage claire. Sa trace permet de conserver l’existence d’un manque au moment de la décision ; elle ne transforme pas une pièce absente en pièce reçue ni un rapport non validé en rapport validé. Les responsables doivent donc confirmer qui décide, dans quelles circonstances et avec quel niveau de justification. Cette validation organisationnelle conditionne l’interprétation correcte des bilans.
+
+## 3.4 Bilan personnel à valider
+
+[À CONFIRMER — attribution personnelle des réalisations et formulation définitive]
+
+Le travail présenté mobilise la traduction d’un domaine métier en tables, relations, contrôles d’accès et parcours web. Il permet d’illustrer la conception d’un modèle où une personne conserve son identité au-delà d’une participation particulière. Il met aussi en évidence le lien entre des règles temporelles, comme le découpage hebdomadaire, et des opérations administratives, comme la modification des dates ou la clôture.
+
+Sur le plan du développement, les compétences représentées concernent l’organisation de services Java, les DTO et les repositories, ainsi que la composition de pages React et la gestion des réponses HTTP. La séparation entre authentification, autorisation par route et autorisation par ressource constitue un point d’apprentissage important à expliciter lors de la soutenance. Le même rôle peut conduire à des décisions différentes selon la propriété du dossier ou l’affectation de l’encadreur.
+
+La validation apporte une autre dimension : un test unitaire, un test HTTP avec PostgreSQL et un essai dans le navigateur répondent à des questions différentes. Les écarts observés entre documentation historique et code courant soulignent également l’importance de maintenir des preuves datées. L’auteur pourra préciser ici les parties qu’il a réalisées personnellement, les échanges effectivement menés avec ses encadreurs et les difficultés qu’il a lui-même rencontrées. Aucun sentiment, niveau d’autonomie acquis ou expérience de collaboration n’est présumé.
+
+## 3.5 Perspectives d’évolution
+
+La première perspective consiste à rendre la livraison reproductible : rétablir les migrations et précontrôles, documenter leurs prérequis et exécuter l’intégration complète sur une base isolée. Cette étape doit être accompagnée d’une clarification de la clôture administrative et d’une recette des trois rôles avec des dossiers distincts. L’objectif est de rapprocher l’état du dépôt, les procédures et la décision métier.
+
+La deuxième perspective porte sur les performances et les volumes. Des requêtes filtrées selon les droits, une pagination SQL et une réduction des lectures répétées peuvent être étudiées sur un jeu représentatif. Les tests devront mesurer les temps de réponse et les ressources consommées avant et après modification. La conservation d’une politique de confidentialité identique est une condition de cette optimisation.
+
+La troisième perspective concerne la qualité d’usage et l’exploitation : essais clavier et mobile, contrôle de l’impression, police Unicode dans les exports PDF, surveillance des tâches et restauration coordonnée de la base et des pièces. Des tests de navigateur automatisés pourraient compléter les tests de rendu existants. Une chaîne CI/CD pourrait ensuite rejouer les contrôles et produire des versions identifiées, sans confondre construction automatique et autorisation de mise en production.
+
+Enfin, l’administration de paramètres techniques et de seuils par une interface dédiée peut être envisagée si elle répond à un besoin validé. Elle devrait conserver des droits restreints, des validations et des traces. Les évolutions proposées constituent des perspectives ; elles ne sont pas comptées comme des fonctions déjà livrées.
+
+# Conclusion générale
+
+Ce projet organise la gestion et le suivi des stagiaires autour d’un dossier relié à des participations, des rapports, des documents et des décisions. La séparation entre identité, parcours académique et participation fournit la structure nécessaire à ce suivi. L’architecture React, Spring Boot et PostgreSQL répartit l’interface, les règles métier et la persistance, tandis que la politique d’accès combine rôles, propriété et affectation.
+
+L’étude du code met en évidence des mécanismes concrets : sessions opaques, rapports soumis par leur propriétaire et examinés par l’encadreur affecté, calendrier hebdomadaire calculé, contrôle des pièces, notes par critère, alertes et synthèses. La clôture est décrite selon ses branches réelles, y compris la décision administrative forcée qui conserve la trace des éléments manquants. Cette précision est nécessaire pour expliquer le fonctionnement actuel sans reproduire des règles dépassées.
+
+Les vérifications réalisées pour ce mémoire ont abouti à 36 tests unitaires backend et 126 tests frontend réussis, ainsi qu’à un contrôle statique et une construction frontend réussis. Ces résultats apportent des preuves ciblées. Les migrations absentes, l’intégration complète non rejouée, la recette visuelle et les contrôles d’exploitation limitent la portée de la conclusion. Le projet ne peut pas être présenté ici comme une production entièrement qualifiée ni comme une source de gains chiffrés déjà mesurés.
+
+La suite du travail consiste à rétablir les prérequis de validation, confirmer les règles administratives, recueillir les observations des utilisateurs et qualifier l’environnement de déploiement. Le mémoire peut ainsi défendre les réalisations constatées tout en exposant clairement les conditions restant à satisfaire pour leur utilisation institutionnelle.
+
+
+# Bibliographie
+
+Toutes les références ci-dessous ont été consultées pour la préparation du document le 10 novembre 2026. Les mémoires de référence servent uniquement de repères académiques et visuels. Les références P01 à P36 identifient les preuves propres au projet, détaillées dans l’annexe A et dans MATRICE_PREUVES.md.
+
+[R1] RIJARILANTO Helena Candy. Application de gestion point de vente. Mémoire de Licence en Informatique, option développement, IT University, novembre 2025. Document PDF fourni, 54 pages.
+
+[R2] RANDRIAMIRADO Nasandratriniavo Tsinjoniaina Samuëlah. Génération Automatisée et Analyse Intelligente des Comptes Rendus dans Async (SmartAsyncReports). Mémoire de Licence en Informatique, IT University, octobre 2025. Document PDF fourni, 57 pages.
+
+[R3] Spring. Using @Transactional. Documentation officielle du Spring Framework. https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html
+
+[R4] PostgreSQL Global Development Group. PostgreSQL 15 Documentation — Constraints. https://www.postgresql.org/docs/15/ddl-constraints.html
+
+[R5] React. Thinking in React. Documentation officielle. https://react.dev/learn/thinking-in-react
+
+[R6] Spring. Authorize HttpServletRequests. Documentation officielle de Spring Security. https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html
+
+[R7] Projet Stagemanagement. Code source backend, frontend et conception/Conception2.sql, révision 9e1a7d8. Copie locale examinée le 10 novembre 2026. Auteur et attribution administrative [À CONFIRMER].
+
+[R8] Projet Stagemanagement. Documents techniques locaux : BACKEND_AUDIT.md, REMEDIATION_STATUS.md, RECETTE_FINALE.md et DEPLOYMENT_READINESS.md. Leurs constats sont interprétés selon les mises à jour et confrontés au code courant.
+
+[R9] Campagne documentaire du 10 novembre 2026. Journaux des tests unitaires backend, des tests frontend, d’ESLint et de la construction Vite. Répertoire memoire/tmp ; résultats synthétisés au tableau 6.
+
+# Annexes
+
+## Annexe A Repères de preuve
+
+Le tableau 8 relie les principaux groupes d’affirmations aux sources. Les chemins Java sont relatifs à backend/src/main/java/mg/mef/stagemanagement/. Les références détaillées, la fonction, la preuve, le niveau de confiance et le statut de chaque affirmation figurent dans MATRICE_PREUVES.md. Les preuves statiques décrivent le contenu du dépôt ; les preuves d’exécution sont limitées aux commandes effectivement consignées.
+
+:::table Repères de preuve pour la soutenance
+Repères | Sujet | Sources principales
+P01 à P03 | Pile technique et échanges | pom.xml ; package.json ; package-lock.json ; frontend/src/api/apiClient.js.
+P04 à P07 | Session, rôles et ressources | AuthService ; ApplicationRoles ; SecurityConfig ; DossierAccessService.
+P08 à P11 | Portail, données et affectation | PortailStagiaireService ; Conception2.sql ; StageParticipant ; ParticipationRulesService.
+P12 à P16 | Calendrier, rapports et clôture | CalculPeriodesRapportService ; RapportActiviteGestionService ; StageGestionService ; EvenementParticipationRequest.
+P17 à P19 | Pièces et évaluation | DocumentContentValidator ; FichierGestionService ; EvaluationGestionService.
+P20 à P23 | Alertes, pilotage et exports | AlerteScheduler ; AlerteOrchestrationService ; AlerteClotureService ; PilotageService ; ExportService.
+P24 à P26 | Routage, configuration et migrations | AppRoutes.jsx ; routeConfig.js ; application.properties ; test-integration.ps1 ; DEPLOYMENT_READINESS.md.
+P27 à P31 | Résultats et réserves | Journaux conservés dans memoire/tmp ; RECETTE_FINALE.md ; DEPLOYMENT_READINESS.md.
+P32 à P36 | Admission, comptes, synthèse et audit | StagiaireGestionService ; UtilisateurGestionService ; DossierSyntheseService ; SoutenanceGestionService ; JournalAuditService.
+:::
+
+## Annexe B Inventaire du modèle physique
+
+Le tableau 9 regroupe les 44 tables déclarées dans Conception2.sql. Ce regroupement facilite la lecture ; il ne crée pas de sous-systèmes de déploiement indépendants. Les six vues et les seize triggers sont recensés dans l’audit. Les noms et colonnes explicitement annotés dans les 44 entités ont été comparés au script, sans exécuter celui-ci sur une base métier.
+
+:::table Inventaire des tables par famille
+Famille | Tables
+Référentiels généraux | types_statut ; statuts ; etablissements ; filieres ; niveaux_etude ; mois_stage ; roles.
+Paramétrage du suivi | types_piece_jointe ; types_evenement_participation ; types_alerte ; parametres_suivi ; seuils_alerte.
+Comptes et traces | utilisateurs ; utilisateurs_role ; sessions_utilisateur ; historique_connexion_utilisateur ; utilisateur_statut_historique ; journal_audit.
+Organisation | departements ; departement_statut_historique ; responsable_departements ; structures_accueil.
+Stagiaires et pièces | fichiers ; stagiaires ; stagiaire_statut_historique ; stagiaire_academique ; stagiaire_fichiers.
+Encadrement et stages | encadreurs ; encadreur_statut_historique ; cadres_stage ; stages.
+Participations | stage_participant ; stage_participant_statut_historique ; stage_participant_evenements ; stage_participant_fichiers.
+Rapports et transitions | rapports_activite ; rapports_activite_statut_historique ; rapport_observations ; transitions_statut.
+Évaluation et alertes | criteres_evaluation ; evaluations_finales ; evaluation_criteres ; soutenances ; alertes.
+:::
+
+## Annexe C Recette complémentaire et captures
+
+Le tableau 10 constitue une proposition de recette à exécuter sur un environnement isolé. Ses résultats sont à relever ; aucune ligne n’est déclarée réussie par anticipation. Les comptes et données utilisés pour les captures doivent être des données de recette ou être anonymisés sans modifier la signification du parcours.
+
+:::table Scénarios de recette restant à exécuter
+Scénario | Vérification attendue | État
+Dossiers distincts | Un stagiaire ou encadreur non affecté ne lit ni ne modifie le dossier d’autrui, y compris par URL directe. | Non exécuté ici en HTTP complet.
+Rapport hebdomadaire | Brouillon, soumission, correction, nouvelle soumission et validation avec les bons comptes. | À rejouer dans le navigateur.
+Clôture ordinaire et forcée | Refus ou trace des manquants selon la modalité ; persistance de l’événement, du statut et des alertes. | À rejouer sur PostgreSQL isolé.
+Pièces | Dépôt valide, refus de format, refus de taille et téléchargement selon les droits. | Parcours navigateur à compléter.
+Impression et responsive | Lisibilité des tableaux, navigation clavier, petits écrans et pages imprimées. | Non exécuté.
+Exploitation | HTTPS, traitement à 06 h, sauvegarde et restauration coordonnée des données et des fichiers. | Non exécuté.
+:::
+
+[CAPTURE À FOURNIR : page de connexion réelle, sans identifiants ni jeton visibles.]
+
+[CAPTURE À FOURNIR : dossier d’un stagiaire de recette et ses profils académiques.]
+
+[CAPTURE À FOURNIR : participation et dialogue de clôture administrative.]
+
+[CAPTURE À FOURNIR : grille des rapports et cycle d’examen avec un jeu de recette.]
+
+[CAPTURE À FOURNIR : tableau de bord et dossiers prioritaires sur données de recette.]
+
+Ces emplacements ne sont pas comptés comme des figures. Lors de leur remplacement, chaque capture devra recevoir une légende numérotée, une référence dans le texte et une vérification de confidentialité.
+
+## Annexe D Informations à valider avant dépôt
+
+L’identité de l’auteur, le numéro étudiant, les encadreurs, le jury, les dates officielles du stage, l’année universitaire et la date de soutenance restent [À CONFIRMER]. La présentation officielle du SIIGFP et la charte universitaire doivent également être rapprochées des documents administratifs applicables.
+
+Les observations du processus antérieur et le planning devront provenir de documents ou d’entretiens confirmés. Les remerciements et le bilan personnel doivent être validés par l’auteur. Les conditions d’emploi de la clôture forcée, la recette métier, la livraison et les résultats d’usage nécessitent une validation de l’organisme d’accueil.
+
+Avant impression, actualiser la table des matières, les listes de figures et de tableaux ainsi que la pagination dans Word, puis relire les sauts de page et les tableaux. La liste complète des éléments à vérifier est conservée dans POINTS_A_CONFIRMER.md.
