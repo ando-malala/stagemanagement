@@ -4,7 +4,7 @@ DROP DATABASE IF EXISTS suivi_stagiaire;
 CREATE DATABASE suivi_stagiaire;
 
 \c suivi_stagiaire
-
+\encoding UTF8
 CREATE TABLE types_statut(
     id SERIAL PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
