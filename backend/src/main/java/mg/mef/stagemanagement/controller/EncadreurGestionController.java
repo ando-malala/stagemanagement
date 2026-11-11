@@ -15,11 +15,39 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/encadreurs")
 public class EncadreurGestionController {
+        public static class AssocierCompteRequest {
+                private Integer utilisateurId;
+
+                public Integer getUtilisateurId() {
+                        return utilisateurId;
+                }
+
+                public void setUtilisateurId(Integer utilisateurId) {
+                        this.utilisateurId = utilisateurId;
+                }
+        }
+
     @GetMapping("/comptes-eligibles")
     public java.util.List<mg.mef.stagemanagement.service.PortailStagiaireService.Compte> comptesEligibles(
             @RequestParam(required = false) Integer encadreurId) {
         return encadreurGestionService.comptesEligibles(encadreurId);
     }
+
+        @GetMapping("/{id}/compte")
+        public mg.mef.stagemanagement.service.PortailStagiaireService.Compte compte(@PathVariable Integer id) {
+                return encadreurGestionService.compte(id);
+        }
+
+        @PatchMapping("/{id}/compte")
+        public mg.mef.stagemanagement.service.PortailStagiaireService.Compte associerCompte(
+                        @PathVariable Integer id,
+                        @RequestBody AssocierCompteRequest request
+        ) {
+                return encadreurGestionService.associerCompte(
+                                id,
+                                request == null ? null : request.getUtilisateurId()
+                );
+        }
 
     private final EncadreurGestionService encadreurGestionService;
 

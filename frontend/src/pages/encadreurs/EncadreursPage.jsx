@@ -9,6 +9,7 @@ const columns = [
   { key: 'id', label: 'ID' },
   { key: 'nom', label: 'Nom' },
   { key: 'prenoms', label: 'Prénoms' },
+  { key: 'identifiantUtilisateur', label: 'Compte associé' },
   { key: 'fonction', label: 'Fonction' },
   { key: 'departement', label: 'Département' },
   { key: 'capaciteMaxStagiaires', label: 'Capacité' },

@@ -66,6 +66,44 @@ public class EncadreurGestionService {
                 .map(u -> new PortailStagiaireService.Compte(u.getId(), u.getIdentifiant())).toList();
     }
 
+    public PortailStagiaireService.Compte compte(Integer id) {
+        access.require(access.role("ADMIN"));
+        Encadreur encadreur = encadreurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Encadreur introuvable"));
+        return new PortailStagiaireService.Compte(
+                encadreur.getUtilisateur() == null ? null : encadreur.getUtilisateur().getId(),
+                encadreur.getUtilisateur() == null ? null : encadreur.getUtilisateur().getIdentifiant()
+        );
+    }
+
+    @Transactional(readOnly = false)
+    public PortailStagiaireService.Compte associerCompte(Integer id, Integer utilisateurId) {
+        access.require(access.role("ADMIN"));
+        Encadreur encadreur = encadreurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Encadreur introuvable"));
+        if (utilisateurId == null) {
+            encadreur.setUtilisateur(null);
+            encadreurRepository.saveAndFlush(encadreur);
+            return compte(id);
+        }
+        Utilisateur utilisateur = utilisateurRepository.findForUpdate(utilisateurId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Compte introuvable"));
+        boolean mentorRole = roles.findByUtilisateur_Id(utilisateurId).stream()
+                .anyMatch(r -> "ENCADREUR".equals(r.getRole().getCode()) && Boolean.TRUE.equals(r.getRole().getActif()));
+        if (!mentorRole || utilisateur.getStatut() == null || !"ACTIF".equals(utilisateur.getStatut().getCode())
+                || !Boolean.TRUE.equals(utilisateur.getStatut().getActif())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Un compte encadreur actif est requis");
+        }
+        encadreurRepository.findByUtilisateur_Id(utilisateurId)
+                .filter(other -> !other.getId().equals(id))
+                .ifPresent(other -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Ce compte est deja associe a un autre encadreur");
+                });
+        encadreur.setUtilisateur(utilisateur);
+        encadreurRepository.saveAndFlush(encadreur);
+        return compte(id);
+    }
+
     public EncadreurResponse trouverEncadreur(Integer id) {
         access.mentor(id, false);
         Encadreur encadreur = encadreurRepository.findById(id)
