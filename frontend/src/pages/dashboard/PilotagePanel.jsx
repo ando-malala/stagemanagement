@@ -1,5 +1,4 @@
-import { getPilotage, downloadExport } from '../../api/syntheseApi.js';
-import { useFetch } from '../../hooks/useFetch.js';
+import { downloadExport } from '../../api/syntheseApi.js';
 import Card from '../../components/common/Card.jsx';
 import Button from '../../components/common/Button.jsx';
 import Table from '../../components/common/Table.jsx';
@@ -14,12 +13,11 @@ const dossiers = [['stagiaire', 'Stagiaire'], ['stage', 'Stage'], ['statut', 'St
 const charges = [['encadreur', 'Encadreur'], ['capaciteMax', 'Capacité'], ['participationsActives', 'Participations actives accessibles'], ['surcharge', 'Surcharge dans ce périmètre']];
 const defenses = [['stagiaire', 'Stagiaire'], ['dateSoutenance', 'Date'], ['lieu', 'Lieu']];
 const columns = definitions => definitions.map(([key, label]) => ({ key, label }));
-export default function PilotagePanel({ navigate, alertRows, reloadAlerts }) {
-  const state = useFetch(getPilotage);
+export default function PilotagePanel({ navigate, alertRows, data, loading, error, onRefresh }) {
   return <section className="page-stack">
-    <div className="section-heading"><h3>Suivi des dossiers</h3><Button variant="secondary" disabled={state.loading} onClick={() => { void state.reload(); void reloadAlerts?.(); }}>Actualiser le suivi</Button></div>
+    <div className="section-heading"><h3>Suivi des dossiers</h3><Button variant="secondary" disabled={loading} onClick={onRefresh}>Actualiser le suivi</Button></div>
     <div className="actions">{['participations', 'statistiques', 'alertes'].map(type => <DownloadButton key={type} download={() => downloadExport(type)}>Exporter {type} (CSV)</DownloadButton>)}</div>
-    {state.loading ? <Loader /> : state.error ? <ErrorMessage error={state.error} /> : <PilotageTables data={state.data} navigate={navigate} alertRows={alertRows} />}
+    {loading ? <Loader /> : error ? <ErrorMessage error={error} /> : <PilotageTables data={data} navigate={navigate} alertRows={alertRows} />}
   </section>;
 }
 export function PilotageTables({ data, navigate, alertRows }) {

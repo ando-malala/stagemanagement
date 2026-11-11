@@ -9,8 +9,7 @@ const stageColumns = [
   { key: 'id', label: 'ID' },
   { key: 'libelle', label: 'Libellé' },
   { key: 'structureAccueil', label: 'Structure', filterable: true },
-  { key: 'departement', label: 'Département', filterable: true },
-  { key: 'dateCreation', label: 'Créé le' }
+  { key: 'departement', label: 'Département', filterable: true }
 ];
 
 const participationColumns = [

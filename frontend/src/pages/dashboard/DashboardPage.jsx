@@ -1,8 +1,7 @@
-import { loadAlertContext } from '../../api/alertContextApi.js';
-import { groupDashboardAlerts } from '../../utils/dashboardAlerts.js';
-import { getDashboardResume } from '../../api/dashboardApi.js';
+import { useRef, useState } from 'react';
+import { loadDashboard, refreshDashboard } from '../../api/dashboardApi.js';
 import { useFetch } from '../../hooks/useFetch.js';
-import { dashboardCards, requireDashboard } from '../../utils/pilotage.js';
+import { dashboardCards } from '../../utils/pilotage.js';
 import { formatNumber } from '../../utils/formatUtils.js';
 import Card from '../../components/common/Card.jsx';
 import Button from '../../components/common/Button.jsx';
@@ -22,25 +21,39 @@ const indicatorStyles = {
   totalAlertesATraiter: ['AL', 'amber'], totalAlertesTraitees: ['EV', 'teal']
 };
 
-const fetchSummary = async (options) => requireDashboard(await getDashboardResume(options));
-const fetchAlerts = async (options) => {
-  const { rows, participations } = await loadAlertContext(options, true);
-  return { rows, cards: groupDashboardAlerts(rows, participations) };
-};
 export default function DashboardPage({ navigate }) {
   const { utilisateur } = useAuth();
-  const summary = useFetch(fetchSummary);
-  const alerts = useFetch(fetchAlerts);
+  const dashboard = useFetch(loadDashboard);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState('');
+  const refreshInProgress = useRef(false);
+  const loading = dashboard.loading || refreshing;
+  async function refresh() {
+    if (refreshInProgress.current) return;
+    refreshInProgress.current = true;
+    setRefreshing(true);
+    setRefreshError('');
+    try {
+      await refreshDashboard(dashboard.reload, hasAnyRole(utilisateur, ['ADMIN']));
+    } catch (error) {
+      setRefreshError(`La vérification des alertes a échoué : ${error.message}`);
+    } finally {
+      refreshInProgress.current = false;
+      setRefreshing(false);
+    }
+  }
   return <div className="page-stack">
     <section className="dashboard-intro"><div><span className="eyebrow">Votre espace de pilotage</span><h2>Votre activité en un regard</h2>
-      <p>Vue d’ensemble des dossiers auxquels vous avez accès.</p></div><Button variant="secondary" disabled={summary.loading || alerts.loading}
-      onClick={() => { void summary.reload(); void alerts.reload(); }}><NavigationIcon name="refresh" />Actualiser</Button></section>
-    {summary.loading ? <Loader label="Chargement des compteurs…" /> : summary.error ? <ErrorMessage error={summary.error} /> : <DashboardSummary resume={summary.data} navigate={navigate} />}
+      <p>Vue d’ensemble des dossiers auxquels vous avez accès.</p></div><Button variant="secondary" disabled={loading}
+      onClick={refresh}><NavigationIcon name="refresh" />{refreshing ? 'Actualisation…' : 'Actualiser'}</Button></section>
+    <ErrorMessage error={refreshError} />
+    {loading ? <Loader label={refreshing ? 'Vérification des alertes et actualisation du tableau de bord…' : 'Chargement des compteurs…'} /> : dashboard.error ? <ErrorMessage error={dashboard.error} /> : <DashboardSummary resume={dashboard.data.resume} navigate={navigate} />}
     <section className="page-stack dashboard-shortcuts"><div className="section-heading"><h3>Accès rapides</h3><span className="small">Les actions du quotidien</span></div><DashboardShortcuts utilisateur={utilisateur} navigate={navigate} /></section>
     <Card><div className="section-heading"><h3>Alertes à traiter</h3><AppLink to="/alertes?statut=A_TRAITER" navigate={navigate}>Voir toutes les alertes à traiter</AppLink></div>
-      {alerts.loading ? <Loader /> : alerts.error ? <ErrorMessage error={alerts.error} /> : <DashboardAlerts cards={alerts.data.cards} navigate={navigate} />}
+      {loading ? <Loader /> : dashboard.error ? <ErrorMessage error={dashboard.error} /> : <DashboardAlerts cards={dashboard.data.cards} navigate={navigate} />}
     </Card>
-    <PilotagePanel navigate={navigate} alertRows={alerts.data?.rows} reloadAlerts={alerts.reload} />
+    <PilotagePanel navigate={navigate} alertRows={dashboard.data?.rows} data={dashboard.data?.pilotage}
+      loading={loading} error={dashboard.error} onRefresh={refresh} />
   </div>;
 }
 

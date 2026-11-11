@@ -1,5 +1,12 @@
 import { apiRequest } from './apiClient.js';
 
+export function detecterToutesAlertes(options = {}) {
+  return apiRequest('/api/alertes/detection/test-orchestration', {
+    ...options,
+    method: 'POST'
+  });
+}
+
 export function listAlertesNonLues(options = {}) {
   return apiRequest('/api/alertes/non-lues', options);
 }

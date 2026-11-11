@@ -3,7 +3,7 @@ import { getStage, updateStage } from '../../api/stageApi.js';
 import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import StageParticipantsPanel from './StageParticipantsPanel.jsx';
 
-const fields = [["libelle", "Libellé"], ["structureAccueil", "Structure d’accueil"], ["departement", "Département"], ["dateCreation", "Création", "date"]];
+const fields = [["libelle", "Libellé"], ["structureAccueil", "Structure d’accueil"], ["departement", "Département"]];
 const links = [];
 
 export default function StageDetailPage({ params, navigate }) {
