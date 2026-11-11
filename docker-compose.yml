@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: stagemanagement-postgres
+    environment:
+      POSTGRES_USER: siigfp
+      POSTGRES_PASSWORD: siigfp
+      POSTGRES_DB: suivi_stagiaire
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./conception/Conception2.sql:/docker-entrypoint-initdb.d/01-Conception2.sql:ro
+      - ./conception/reparer_initialisation_suivi_stagiaire.sql:/docker-entrypoint-initdb.d/02-reparer_initialisation_suivi_stagiaire.sql:ro
+      - ./conception/data_clean_reel_2026.sql:/docker-entrypoint-initdb.d/03-data_clean_reel_2026.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siigfp -d suivi_stagiaire"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stagemanagement-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MEF_DB_URL: jdbc:postgresql://postgres:5432/suivi_stagiaire
+      MEF_DB_USER: siigfp
+      MEF_DB_PASSWORD: siigfp
+      MEF_UPLOAD_DIR: /app/uploads
+    volumes:
+      - ./backend/uploads:/app/uploads
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stagemanagement-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
