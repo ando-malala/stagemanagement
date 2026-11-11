@@ -32,6 +32,7 @@ public class EncadreurGestionService {
     private final UtilisateurRepository utilisateurRepository;
     private final DepartementRepository departementRepository;
     private final StatutRepository statutRepository;
+    private final mg.mef.stagemanagement.repository.UtilisateurRoleRepository roles;
 
     public EncadreurGestionService(
             EncadreurRepository encadreurRepository,
@@ -39,7 +40,8 @@ public class EncadreurGestionService {
             UtilisateurRepository utilisateurRepository,
             DepartementRepository departementRepository,
             StatutRepository statutRepository
-    , DossierAccessService access) {
+    , DossierAccessService access, mg.mef.stagemanagement.repository.UtilisateurRoleRepository roles) {
+        this.roles = roles;
         this.access = access;
         this.encadreurRepository = encadreurRepository;
         this.encadreurStatutHistoriqueRepository = encadreurStatutHistoriqueRepository;
@@ -55,6 +57,13 @@ public class EncadreurGestionService {
                         .thenComparing(Encadreur::getPrenoms))
                 .map(this::toResponse)
                 .toList();
+    }
+
+    public List<PortailStagiaireService.Compte> comptesEligibles(Integer encadreurId) {
+        access.require(access.role("ADMIN"));
+        if (encadreurId != null) access.mentor(encadreurId, false);
+        return utilisateurRepository.findEligibleMentorAccounts(encadreurId == null ? -1 : encadreurId).stream()
+                .map(u -> new PortailStagiaireService.Compte(u.getId(), u.getIdentifiant())).toList();
     }
 
     public EncadreurResponse trouverEncadreur(Integer id) {
@@ -159,6 +168,7 @@ public class EncadreurGestionService {
                 );
 
         Statut ancienStatut = encadreur.getStatut();
+        AssociationRules.active(nouveauStatut.getActif(), "Statut");
 
         if (ancienStatut != null
                 && ancienStatut.getId().equals(nouveauStatut.getId())) {
@@ -223,7 +233,7 @@ public class EncadreurGestionService {
         );
 
         encadreur.setCourriel(
-                nettoyerTexteOptionnel(request.getCourriel(), 150)
+                AssociationRules.email(nettoyerTexteOptionnel(request.getCourriel(), 150))
         );
 
         if (request.getCapaciteMaxStagiaires() != null
@@ -255,21 +265,14 @@ public class EncadreurGestionService {
                         )
                 );
 
+        if (encadreur.getDepartement() == null || AssociationRules.changed(encadreur.getDepartement().getId(), departement.getId()))
+            AssociationRules.activeStatus(departement.getStatut(), "Département");
         encadreur.setDepartement(departement);
 
         if (!access.role("ADMIN")) access.require(java.util.Objects.equals(request.getUtilisateurId(), encadreur.getUtilisateur() == null ? null : encadreur.getUtilisateur().getId()));
         if (request.getUtilisateurId() != null) {
-            if (creation
-                    && encadreurRepository.existsByUtilisateur_Id(request.getUtilisateurId())) {
-
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "Cet utilisateur est déjà associé à un encadreur"
-                );
-            }
-
             Utilisateur utilisateur = utilisateurRepository
-                    .findById(request.getUtilisateurId())
+                    .findForUpdate(request.getUtilisateurId())
                     .orElseThrow(() ->
                             new ResponseStatusException(
                                     HttpStatus.NOT_FOUND,
@@ -277,6 +280,13 @@ public class EncadreurGestionService {
                             )
                     );
 
+            encadreurRepository.findByUtilisateur_Id(utilisateur.getId()).filter(other -> !java.util.Objects.equals(other.getId(), encadreur.getId()))
+                    .ifPresent(other -> { throw new ResponseStatusException(HttpStatus.CONFLICT, "Ce compte est déjà associé à un encadreur"); });
+            if (encadreur.getUtilisateur() == null || AssociationRules.changed(encadreur.getUtilisateur().getId(), utilisateur.getId())) {
+                AssociationRules.activeStatus(utilisateur.getStatut(), "Compte utilisateur");
+                if (roles.findByUtilisateur_Id(utilisateur.getId()).stream().noneMatch(r -> "ENCADREUR".equals(r.getRole().getCode()) && Boolean.TRUE.equals(r.getRole().getActif())))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Un compte possédant le rôle ENCADREUR actif est requis");
+            }
             encadreur.setUtilisateur(utilisateur);
         } else {
             encadreur.setUtilisateur(null);

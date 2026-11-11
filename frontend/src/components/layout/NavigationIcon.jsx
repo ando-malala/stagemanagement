@@ -1,4 +1,5 @@
 const paths = {
+  info: 'M12 8v.1 M12 11v6 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20',
   warning: 'M12 3 2 21h20L12 3z M12 9v5 M12 17v.1',
   arrow: 'M5 12h14 M14 7l5 5-5 5',
   refresh: 'M20 7v5h-5 M4 17v-5h5 M6 7a7 7 0 0 1 12-1l2 3 M4 15l2 3a7 7 0 0 0 12-1',

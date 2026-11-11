@@ -24,7 +24,7 @@ export const businessFields = {
       options: ['INFORMATION', 'AVERTISSEMENT', 'URGENT'].map((value) => ({ value, label: value })) },
     { ...participant(), required: false }, choice('rapportId', 'Rapport', '/api/rapports-activite', ['stagiaire', 'debutSemaine', 'finSemaine'], false),
     choice('encadreurId', 'Encadreur', '/api/encadreurs', ['nom', 'prenoms'], false),
-    choice('soutenanceId', 'Soutenance', '/api/soutenances', ['stagiaire', 'dateSoutenance'], false), text('cleDeduplication', 'Clé de déduplication facultative')],
+    choice('soutenanceId', 'Soutenance', '/api/soutenances', ['stagiaire', 'dateSoutenance'], false), text('cleDeduplication', 'Clé de déduplication facultative', 255)],
   rapport: [participant(), { name: 'debutSemaine', label: 'Début de période', type: 'date', required: true },
     { name: 'finSemaine', label: 'Fin de période', type: 'date', required: true }, paragraph('activite', 'Activités'),
     paragraph('difficultes', 'Difficultés'), paragraph('solutions', 'Solutions'), choice('moisStageId', 'Mois de stage', ref('academiques', 'mois-stage'))],
@@ -38,7 +38,7 @@ export const businessFields = {
       options: [{ value: 'true', label: 'Visible' }, { value: 'false', label: 'Non visible' }] }],
   stagiaire: [text('nom', 'Nom', 150, true), text('prenoms', 'Prénoms', 250, true),
     text('adresse', 'Adresse', 250, true), text('contact', 'Contact', 100), { ...text('email', 'Courriel', 150), type: 'email' }],
-  encadreur: [choice('utilisateurId', 'Compte associé', '/api/utilisateurs', ['identifiant'], false),
+  encadreur: [choice('utilisateurId', 'Compte associé', '/api/encadreurs/comptes-eligibles', ['identifiant'], false),
     text('nom', 'Nom', 250, true), text('prenoms', 'Prénoms', 250, true), text('fonction', 'Fonction', 150),
     text('localite', 'Localité', 150), text('porte', 'Porte', 30), text('contact', 'Contact', 150),
     { ...text('courriel', 'Courriel', 150), type: 'email' },
@@ -63,12 +63,16 @@ export function updateBusinessField(kind, values, name, value) {
     next.debutSemaine = '';
     next.finSemaine = '';
   }
+  if (kind === 'evaluation' && name === 'stageParticipantId' && String(value) !== String(values.stageParticipantId)) next.encadreurId = '';
+  if (kind === 'alerte' && name === 'stageParticipantId' && String(value) !== String(values.stageParticipantId)) {
+    next.rapportId = ''; next.soutenanceId = ''; next.encadreurId = '';
+  }
   return next;
 }
 
-export function businessPayload(kind, values) {
+export function businessPayload(kind, values, fields = businessFields[kind]) {
   const fieldErrors = {};
-  const payload = Object.fromEntries(businessFields[kind].map((field) => {
+  const payload = Object.fromEntries(fields.map((field) => {
     const raw = values[field.name];
     const value = typeof raw === 'string' ? raw.trim() : raw;
     if (value == null || value === '') {
@@ -86,6 +90,7 @@ export function businessPayload(kind, values) {
     }
     if (field.options && !field.options.some((option) => option.value === value)) fieldErrors[field.name] = 'Choisissez une valeur valide.';
     if (field.maxLength && value.length > field.maxLength) fieldErrors[field.name] = `Maximum : ${field.maxLength} caractères.`;
+    if (field.type === 'email' && !/^[^\s@]+@[^\s@]+$/.test(value)) fieldErrors[field.name] = 'Saisissez une adresse courriel valide.';
     if (field.type === 'date' && !isLocalDate(value)) fieldErrors[field.name] = 'Saisissez une date valide.';
     if (field.type === 'datetime-local' && !isLocalDateTime(value)) fieldErrors[field.name] = 'Saisissez une date et une heure valides.';
     if (field.pattern && !new RegExp(`^${field.pattern}$`).test(value)) fieldErrors[field.name] = 'Format attendu : 2026-2027.';
@@ -93,6 +98,8 @@ export function businessPayload(kind, values) {
   }));
   if (kind === 'participation' && payload.dateFinStage < payload.dateDebutStage) fieldErrors.dateFinStage = 'La fin ne peut pas précéder le début du stage.';
   if (kind === 'rapport' && payload.finSemaine < payload.debutSemaine) fieldErrors.finSemaine = 'La fin ne peut pas précéder le début de période.';
+  if (kind === 'alerte' && !['stageParticipantId', 'rapportId', 'encadreurId', 'soutenanceId'].some(key => payload[key]))
+    fieldErrors.stageParticipantId = 'Associez au moins une participation, un rapport, un encadreur ou une soutenance.';
   if (Object.keys(fieldErrors).length) throw Object.assign(new Error('Vérifiez les champs du formulaire.'), { fieldErrors });
   return payload;
 }

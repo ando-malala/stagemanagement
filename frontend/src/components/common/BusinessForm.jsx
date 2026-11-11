@@ -11,18 +11,19 @@ import Button from './Button.jsx';
 import ErrorMessage from './ErrorMessage.jsx';
 import { listPeriodesRapports } from '../../api/suiviApi.js';
 import EncadreurCharge from '../../pages/encadreurs/EncadreurCharge.jsx';
+import { eligibleChoices } from '../../utils/businessEligibility.js';
 
-export default function BusinessForm({ kind, initial = {}, reportContext, onSave, onSaved, onCancel }) {
+export default function BusinessForm({ kind, initial = {}, reportContext, referenceMaxLength = 150, onSave, onSaved, onCancel }) {
   const { utilisateur } = useAuth();
   const isAdmin = hasAnyRole(utilisateur, ['ADMIN']);
   const fixedReport = kind === 'rapport' && Boolean(reportContext);
-  const fields = businessFields[kind];
+  const fields = businessFields[kind].map(field => kind === 'reference' && field.name === 'libelle' ? { ...field, maxLength: referenceMaxLength } : field);
   const [values, setValues] = useState(() => Object.fromEntries(fields.map(({ name }) => [name, initial[name] ?? ''])));
   const [stagiaireId, setStagiaireId] = useState(initial.stagiaireId ?? '');
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const pending = useRef(false);
-  const loadChoices = useCallback((options) => loadBusinessChoices(kind, isAdmin, options, fixedReport), [kind, isAdmin, fixedReport]);
+  const loadChoices = useCallback((options) => loadBusinessChoices(kind, isAdmin, options, fixedReport, initial.id), [kind, isAdmin, fixedReport, initial.id]);
   const choices = useFetch(loadChoices);
   const loadProfiles = useCallback(async (options) => kind === 'participation' && stagiaireId
     ? requireList(await listAcademiques(stagiaireId, options)) : [], [kind, stagiaireId]);
@@ -31,14 +32,26 @@ export default function BusinessForm({ kind, initial = {}, reportContext, onSave
     ? listPeriodesRapports(values.stageParticipantId, options) : Promise.resolve([]), [kind, values.stageParticipantId]);
   const periods = useFetch(loadPeriods);
   const availablePeriods = (periods.data ?? []).filter(p => !p.rapportId || p.rapportId === initial.id);
-  const blocked = (kind === 'rapport' && (periods.loading || Boolean(periods.error))) || saving || choices.loading || Boolean(choices.error) || (kind === 'participation' && (profiles.loading || Boolean(profiles.error)));
+  function fieldChoices(definition) {
+    let rows = definition.name === 'stagiaireAcademiqueId' ? profiles.data ?? [] : choices.data?.[definition.name] ?? [];
+    if (kind === 'encadreur' && definition.name === 'utilisateurId' && initial.utilisateurId && !rows.some(row => row.id === initial.utilisateurId))
+      rows = [...rows, { id: initial.utilisateurId, identifiant: `${initial.identifiantUtilisateur || 'Compte actuel'} — association conservée` }];
+    return eligibleChoices(kind, definition.name, rows, initial, values, choices.data ?? {});
+  }
+  const missingRequiredChoices = fields.some(field => field.required && field.type === 'select' && !field.options
+    && !(fixedReport && field.name === 'stageParticipantId') && fieldChoices(field).length === 0);
+  const blocked = missingRequiredChoices || (kind === 'rapport' && (periods.loading || Boolean(periods.error))) || saving || choices.loading || Boolean(choices.error) || (kind === 'participation' && (profiles.loading || Boolean(profiles.error)));
 
   async function submit(event) {
     event.preventDefault();
     if (pending.current || blocked) return;
     setError(null);
     try {
-      const payload = businessPayload(kind, values);
+      const payload = businessPayload(kind, values, fields);
+      for (const field of fields.filter(field => field.type === 'select' && !field.options && !(fixedReport && field.name === 'stageParticipantId'))) {
+        if (payload[field.name] != null && !fieldChoices(field).some(row => String(row[field.valueKey ?? 'id']) === String(payload[field.name])))
+          throw Object.assign(new Error('Un choix n’est plus disponible. Actualisez les choix ou sélectionnez une autre valeur.'), { fieldErrors: { [field.name]: 'Choisissez une option éligible.' } });
+      }
       if (kind === 'rapport' && !availablePeriods.some(p => p.debut === payload.debutSemaine && p.fin === payload.finSemaine)) throw new Error('Choisissez une période disponible pour ce stage.');
       // A dependent profile must belong to the currently selected trainee.
       if (kind === 'participation' && !profiles.data?.some((row) => row.id === payload.stagiaireAcademiqueId)) throw new Error('Sélectionnez un profil académique de ce stagiaire.');
@@ -60,7 +73,7 @@ export default function BusinessForm({ kind, initial = {}, reportContext, onSave
     {kind === 'encadreur' && !isAdmin && <p className="notice">L’association à un compte est réservée ici à l’administrateur. Le compte déjà associé est conservé.</p>}
     {kind === 'participation' && <>
       <Input type="select" name="stagiaireId" label="Stagiaire" required value={stagiaireId} disabled={saving || choices.loading || Boolean(choices.error)}
-        options={toOptions(choices.data?.stagiaireId ?? [], ['nom', 'prenoms'])} onChange={(event) => {
+        options={toOptions(eligibleChoices(kind, 'stagiaireId', choices.data?.stagiaireId ?? [], initial), ['nom', 'prenoms'])} onChange={(event) => {
           setStagiaireId(event.target.value);
           setValues((current) => ({ ...current, stagiaireAcademiqueId: '' }));
         }} />
@@ -71,11 +84,12 @@ export default function BusinessForm({ kind, initial = {}, reportContext, onSave
     <div className="entity-form">
       {fields.filter((field) => field.type !== 'hidden' && !(fixedReport && field.name === 'stageParticipantId') && !(kind === 'rapport' && ['debutSemaine', 'finSemaine'].includes(field.name)) && (field.name !== 'utilisateurId' || isAdmin)).map((definition) => {
         const field = Object.fromEntries(Object.entries(definition).filter(([key]) => !['path', 'labelKeys', 'valueType', 'valueKey'].includes(key)));
-        const rows = field.name === 'stagiaireAcademiqueId' ? profiles.data : choices.data?.[field.name];
+        const rows = fieldChoices(definition);
         const options = definition.options ?? (definition.valueKey ? (rows ?? []).map((r) => ({ value: r[definition.valueKey], label: r.libelle })) : field.type === 'select' ? toOptions(rows ?? [], definition.labelKeys) : undefined);
         return <Fragment key={field.name}><Input {...field} options={options} value={values[field.name]}
           disabled={saving || choices.loading || Boolean(choices.error) || (kind === 'rapport' && Boolean(initial.id) && field.name === 'stageParticipantId') || (field.name === 'stagiaireAcademiqueId' && (!stagiaireId || profiles.loading || Boolean(profiles.error)))}
           min={field.name === 'dateFinStage' ? values.dateDebutStage : field.name === 'finSemaine' ? values.debutSemaine : field.min}
+          hint={field.type === 'select' && !choices.loading && !choices.error && options?.length === 0 ? 'Aucun choix éligible disponible pour ce contexte.' : undefined}
           error={error?.fieldErrors?.[field.name]} onChange={(event) => setValues((current) => updateBusinessField(kind, current, field.name, event.target.value))} />
           {kind === 'rapport' && field.name === 'stageParticipantId' && <div className="page-stack">
             <Input label="Semaine du rapport" type="select" name="periodeAttendue" required value={values.debutSemaine}
@@ -99,6 +113,7 @@ export default function BusinessForm({ kind, initial = {}, reportContext, onSave
     <ErrorMessage error={error} />
     {kind === 'participation' && values.encadreurId && <EncadreurCharge key={values.encadreurId} id={values.encadreurId} />}
     <div className="row-actions"><Button type="submit" disabled={blocked || (kind === 'rapport' && !availablePeriods.length) || (fixedReport && !availablePeriods.some(period => period.debut === values.debutSemaine && period.fin === values.finSemaine))}>{saving ? 'Enregistrement…' : kind === 'rapport' ? 'Enregistrer le brouillon' : 'Enregistrer'}</Button>
-      {onCancel && <Button onClick={onCancel} disabled={saving} variant="secondary">Annuler</Button>}</div>
+      {onCancel && <Button onClick={onCancel} disabled={saving} variant="secondary">Annuler</Button>}
+      <Button variant="secondary" disabled={saving || choices.loading} onClick={() => { void choices.reload(); void profiles.reload(); }}>Actualiser les choix</Button></div>
   </form>;
 }

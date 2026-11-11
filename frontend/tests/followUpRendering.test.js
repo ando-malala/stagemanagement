@@ -27,6 +27,7 @@ test('rendu du suivi : droits, verrouillage et sélecteurs métier', async () =>
     assert.match(report, /<select[^>]*required=""[^>]*name="moisStageId"/);
     assert.match(render(Form, { kind: 'evaluation' }), /<select[^>]*name="encadreurId"/);
     assert.match(render(Form, { kind: 'soutenance' }, ['ADMIN']), /type="datetime-local"/);
+    assert.match(render(Form, { kind: 'reference', referenceMaxLength: 50 }, ['ADMIN']), /maxLength="50"/i);
     assert.match(render(Actions, { rapport: { id: 1, statut: 'BROUILLON', peutRediger: true } }, ['STAGIAIRE']), /Soumission du rapport/);
     assert.match(render(Actions, { rapport: { id: 1, statut: 'SOUMIS', peutExaminer: true } }), /Examen du rapport/);
     assert.equal(render(Actions, { rapport: { id: 1, statut: 'SOUMIS', peutExaminer: false, peutRediger: false } }, ['ADMIN']), '');

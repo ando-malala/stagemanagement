@@ -13,9 +13,9 @@ import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 const critereColumns = [{ key: 'libelle', label: 'Critère' }, { key: 'description', label: 'Description' },
-  { key: 'coefficient', label: 'Coefficient' }, { key: 'obligatoire', label: 'Obligatoire' }, { key: 'note', label: 'Note / 20' }];
+  { key: 'coefficient', label: 'Coefficient' }, { key: 'obligatoire', label: 'Obligatoire' }, { key: 'note', label: 'Note / 5' }];
 const noteColumns = [{ key: 'critereLibelle', label: 'Critère' }, { key: 'coefficient', label: 'Coefficient' },
-  { key: 'note', label: 'Note / 20' }, { key: 'commentaire', label: 'Commentaire' }];
+  { key: 'note', label: 'Note / 5' }, { key: 'commentaire', label: 'Commentaire' }];
 
 export default function EvaluationNotes({ evaluation, onSaved }) {
   const { utilisateur } = useAuth();

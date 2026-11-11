@@ -170,13 +170,14 @@ public class ReferentielOrganisationService {
             );
         }
 
+        AssociationRules.activeStatus(departement.getStatut(), "Département");
         StructureAccueil structureAccueil = new StructureAccueil();
         structureAccueil.setDepartement(departement);
         structureAccueil.setLibelle(libelle);
         structureAccueil.setLocalite(nettoyerTexteOptionnel(request.getLocalite(), 150));
         structureAccueil.setPorte(nettoyerTexteOptionnel(request.getPorte(), 30));
         structureAccueil.setContact(nettoyerTexteOptionnel(request.getContact(), 150));
-        structureAccueil.setCourriel(nettoyerTexteOptionnel(request.getCourriel(), 150));
+        structureAccueil.setCourriel(AssociationRules.email(nettoyerTexteOptionnel(request.getCourriel(), 150)));
         structureAccueil.setActif(request.getActif() == null || request.getActif());
 
         StructureAccueil enregistree =
@@ -227,12 +228,14 @@ public class ReferentielOrganisationService {
                     }
                 });
 
+        if (AssociationRules.changed(structureAccueil.getDepartement().getId(), departement.getId()))
+            AssociationRules.activeStatus(departement.getStatut(), "Département");
         structureAccueil.setDepartement(departement);
         structureAccueil.setLibelle(libelle);
         structureAccueil.setLocalite(nettoyerTexteOptionnel(request.getLocalite(), 150));
         structureAccueil.setPorte(nettoyerTexteOptionnel(request.getPorte(), 30));
         structureAccueil.setContact(nettoyerTexteOptionnel(request.getContact(), 150));
-        structureAccueil.setCourriel(nettoyerTexteOptionnel(request.getCourriel(), 150));
+        structureAccueil.setCourriel(AssociationRules.email(nettoyerTexteOptionnel(request.getCourriel(), 150)));
 
         if (request.getActif() != null) {
             structureAccueil.setActif(request.getActif());
@@ -362,7 +365,7 @@ public class ReferentielOrganisationService {
     private Statut trouverStatutDepartement(String code) {
         String codeNettoye = code.trim().toUpperCase();
 
-        return statutRepository
+        Statut statut = statutRepository
                 .findStatutByTypeCodeAndStatutCode(
                         "DEPARTEMENT",
                         codeNettoye
@@ -373,6 +376,8 @@ public class ReferentielOrganisationService {
                                 "Statut de département invalide"
                         )
                 );
+        AssociationRules.active(statut.getActif(), "Statut de département");
+        return statut;
     }
 
     private String nettoyerTexte(

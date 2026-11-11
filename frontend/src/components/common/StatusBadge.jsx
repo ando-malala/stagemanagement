@@ -12,7 +12,7 @@ const variants = {
   'Validé': 'success', 'Rapport manquant': 'danger', 'À rédiger': 'warning'
 };
 
-export default function StatusBadge({ value }) {
+export default function StatusBadge({ value, label }) {
   if (value == null || value === '') return '—';
-  return <Badge variant={Object.hasOwn(variants, value) ? variants[value] : 'neutral'}>{String(value)}</Badge>;
+  return <Badge variant={Object.hasOwn(variants, value) ? variants[value] : 'neutral'}>{label ?? String(value)}</Badge>;
 }

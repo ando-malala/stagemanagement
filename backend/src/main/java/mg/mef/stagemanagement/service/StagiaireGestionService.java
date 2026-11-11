@@ -214,6 +214,9 @@ public class StagiaireGestionService {
                         )
                 );
 
+        AssociationRules.active(niveauEtude.getActif(), "Niveau d'étude");
+        AssociationRules.active(filiere.getActif(), "Filière");
+        AssociationRules.active(etablissement.getActif(), "Établissement");
         StagiaireAcademique academique = new StagiaireAcademique();
 
         academique.setStagiaire(stagiaire);
@@ -298,7 +301,7 @@ public class StagiaireGestionService {
         );
 
         stagiaire.setEmail(
-                nettoyerTexteOptionnel(request.getEmail(), 150)
+                AssociationRules.email(nettoyerTexteOptionnel(request.getEmail(), 150))
         );
     }
 

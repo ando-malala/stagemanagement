@@ -13,6 +13,13 @@ public class ParticipationRulesService {
     @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
     public void lock(StageParticipant p) { entityManager.refresh(p, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE); mutable(p); }
     public void lockEvaluation(EvaluationFinale e) { entityManager.refresh(e, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE); lock(e.getStageParticipant()); }
+    public void refreshReport(RapportActivite report) { entityManager.refresh(report); }
+    public void mentorChange(StageParticipant current, Integer mentorId) {
+        if (!Objects.equals(current.getEncadreur().getId(), mentorId)
+                && !entityManager.createQuery("select e.id from EvaluationFinale e where e.stageParticipant.id = :id and e.encadreur.id <> :mentor", Integer.class)
+                    .setParameter("id", current.getId()).setParameter("mentor", mentorId).setMaxResults(1).getResultList().isEmpty())
+            conflict("Une évaluation existe avec l'encadreur actuel : cette réaffectation rendrait le dossier incohérent");
+    }
     private final StageParticipantRepository participations;
     private final StagiaireRepository trainees;
     private final RapportActiviteRepository reports;

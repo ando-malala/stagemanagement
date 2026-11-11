@@ -1,5 +1,6 @@
 const simple = [{ key: 'libelle', label: 'Libellé' }, { key: 'actif', label: 'Actif' }];
-const entry = (id, title, group, segment, kind, columns = simple) => ({ id, title, group, kind, columns, endpoint: `/api/referentiels/${group}/${segment}` });
+const entry = (id, title, group, segment, kind, columns = simple) => ({ id, title, group, kind, columns,
+  maxLabelLength: id === 'mois' ? 50 : id === 'niveaux' ? 100 : 150, endpoint: `/api/referentiels/${group}/${segment}` });
 export const referentiels = [
   entry('departements', 'Départements', 'organisation', 'departements', 'departement', [{ key: 'libelle', label: 'Libellé' }, { key: 'statut', label: 'Statut' }]),
   entry('structures', 'Structures d’accueil', 'organisation', 'structures-accueil', 'structure', [{ key: 'libelle', label: 'Libellé' }, { key: 'departement', label: 'Département' }, { key: 'localite', label: 'Localité' }, { key: 'actif', label: 'Actif' }]),

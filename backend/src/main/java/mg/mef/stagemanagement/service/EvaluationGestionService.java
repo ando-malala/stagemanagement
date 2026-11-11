@@ -95,8 +95,8 @@ public class EvaluationGestionService {
     public EvaluationFinaleResponse creerEvaluation(
             EvaluationFinaleRequest request
     ) {
-        if (request != null) access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
         verifierEvaluationRequest(request);
+        access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
 
         if (evaluationFinaleRepository.existsByStageParticipant_Id(
                 request.getStageParticipantId()
@@ -117,6 +117,7 @@ public class EvaluationGestionService {
                 );
 
         rules.lock(participant);
+        access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
         Encadreur encadreur = encadreurRepository
                 .findById(request.getEncadreurId())
                 .orElseThrow(() ->
@@ -149,8 +150,9 @@ public class EvaluationGestionService {
             Integer id,
             EvaluationFinaleRequest request
     ) {
-        access.evaluation(id, true); if (request != null) access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
         verifierEvaluationRequest(request);
+        access.evaluation(id, true);
+        access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
 
         EvaluationFinale evaluation = evaluationFinaleRepository.findById(id)
                 .orElseThrow(() ->
@@ -172,6 +174,7 @@ public class EvaluationGestionService {
                 );
 
         rules.lock(participant);
+        access.evaluator(request.getStageParticipantId(), request.getEncadreurId());
         Encadreur encadreur = encadreurRepository
                 .findById(request.getEncadreurId())
                 .orElseThrow(() ->
@@ -426,6 +429,9 @@ public class EvaluationGestionService {
             );
         }
 
+        if (note.stripTrailingZeros().scale() > 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La note accepte au maximum deux décimales");
+        }
         if (note.compareTo(BigDecimal.ZERO) < 0
                 || note.compareTo(new BigDecimal("5")) > 0) {
             throw new ResponseStatusException(

@@ -653,9 +653,123 @@ class CompleteIntegrationTests {
         detection.detecterEncadreursSurcharges();
         assertEquals("TRAITEE", jdbc.queryForObject("select statut from alertes where encadreur_id=?", String.class, f.mentor()));
     }
+    @Test void accountEligibilityIsEnforcedByHttpAndDatabase() throws Exception {
+        String prefix = "eligible-" + UUID.randomUUID().toString().substring(0, 8);
+        var f = fixture(prefix);
+        int admin = jdbc.queryForObject("select id from utilisateurs where identifiant=?", Integer.class, prefix + "-admin");
+        int current = get("/stagiaires/" + f.trainee() + "/compte").get("utilisateurId").asInt();
+        int free = seedUser(prefix + "-free", "STAGIAIRE");
+        int inactive = seedUser(prefix + "-inactive", "STAGIAIRE");
+        request("PATCH", "/utilisateurs/" + inactive + "/statut", Map.of("statutCode", "INACTIF"), 200);
+        request("POST", "/utilisateurs/" + free + "/roles", Map.of("roleCode", "ADMIN"), 200);
+        var candidates = get("/stagiaires/" + f.trainee() + "/comptes-eligibles");
+        var ids = new HashSet<Integer>(); candidates.forEach(c -> ids.add(c.get("utilisateurId").asInt()));
+        assertTrue(ids.contains(current)); assertTrue(ids.contains(free)); assertFalse(ids.contains(admin)); assertFalse(ids.contains(inactive));
+        String path = "/stagiaires/" + f.trainee() + "/compte";
+        request("PATCH", path, Map.of("utilisateurId", admin), 409);
+        request("PATCH", path, Map.of("utilisateurId", inactive), 409);
+        request("PATCH", path, Map.of("utilisateurId", Integer.MAX_VALUE), 404);
+        request("PATCH", path, Map.of("utilisateurId", current), 200);
+        request("PATCH", path, Map.of("utilisateurId", free), 200);
+        int other = create("/stagiaires", Map.of("nom", prefix, "prenoms", "Other", "adresse", "test"));
+        assertTrue(java.util.stream.StreamSupport.stream(get("/stagiaires/" + other + "/comptes-eligibles").spliterator(), false).noneMatch(c -> c.get("utilisateurId").asInt() == free));
+        request("PATCH", "/stagiaires/" + other + "/compte", Map.of("utilisateurId", free), 409);
+        request("DELETE", "/utilisateurs/" + free + "/roles/STAGIAIRE", null, 409);
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update stagiaires set utilisateur_id=? where id=?", admin, other));
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("delete from utilisateurs_role where utilisateur_id=? and role_id=(select id from roles where code='STAGIAIRE')", free));
+        int department = get("/encadreurs/" + f.mentor()).get("departementId").asInt();
+        request("POST", "/encadreurs", Map.of("nom", "Invalid", "prenoms", "Account", "departementId", department, "utilisateurId", admin), 409);
+        var mentorCurrent = get("/encadreurs/" + f.mentor()).get("utilisateurId").asInt();
+        var mentorChoices = get("/encadreurs/comptes-eligibles?encadreurId=" + f.mentor());
+        assertTrue(java.util.stream.StreamSupport.stream(mentorChoices.spliterator(), false).anyMatch(c -> c.get("utilisateurId").asInt() == mentorCurrent));
+        request("POST", "/encadreurs", Map.of("nom", "Invalid", "prenoms", "Duplicate", "departementId", department, "utilisateurId", mentorCurrent), 409);
+        token = f.mentorToken();
+        request("GET", "/stagiaires/" + f.trainee() + "/comptes-eligibles", null, 403);
+        request("GET", "/encadreurs/comptes-eligibles", null, 403);
+        request("PATCH", path, Map.of("utilisateurId", current), 403);
+        token = f.adminToken();
+        request("PATCH", path, Collections.singletonMap("utilisateurId", null), 200);
+        request("DELETE", "/utilisateurs/" + free + "/roles/STAGIAIRE", null, 200);
+    }
+
+    @Test void concurrentAccountClaimsAndRoleRemovalPreserveEligibility() throws Exception {
+        String prefix = "account-race-" + UUID.randomUUID().toString().substring(0, 8);
+        var f = fixture(prefix);
+        int other = create("/stagiaires", Map.of("nom", prefix, "prenoms", "Other", "adresse", "test"));
+        int free = seedUser(prefix + "-free", "STAGIAIRE");
+        var calls = new ArrayList<java.util.concurrent.CompletableFuture<HttpResponse<String>>>();
+        for (int trainee : List.of(f.trainee(), other)) calls.add(http.sendAsync(builder("/stagiaires/" + trainee + "/compte")
+                .header("Content-Type", "application/json").method("PATCH", HttpRequest.BodyPublishers.ofString(json.writeValueAsString(Map.of("utilisateurId", free))))
+                .build(), HttpResponse.BodyHandlers.ofString()));
+        assertEquals(List.of(200, 409), calls.stream().map(java.util.concurrent.CompletableFuture::join).map(HttpResponse::statusCode).sorted().toList());
+        assertEquals(1, jdbc.queryForObject("select count(*) from stagiaires where utilisateur_id=?", Integer.class, free));
+        int candidate = seedUser(prefix + "-candidate", "STAGIAIRE");
+        request("POST", "/utilisateurs/" + candidate + "/roles", Map.of("roleCode", "ADMIN"), 200);
+        calls.clear();
+        calls.add(http.sendAsync(builder("/stagiaires/" + f.trainee() + "/compte").header("Content-Type", "application/json")
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(json.writeValueAsString(Map.of("utilisateurId", candidate)))).build(), HttpResponse.BodyHandlers.ofString()));
+        calls.add(http.sendAsync(builder("/utilisateurs/" + candidate + "/roles/STAGIAIRE").DELETE().build(), HttpResponse.BodyHandlers.ofString()));
+        assertEquals(List.of(200, 409), calls.stream().map(java.util.concurrent.CompletableFuture::join).map(HttpResponse::statusCode).sorted().toList());
+        assertEquals(0, jdbc.queryForObject("select count(*) from stagiaires t where utilisateur_id=? and not exists(select 1 from utilisateurs_role ur join roles r on r.id=ur.role_id where ur.utilisateur_id=t.utilisateur_id and r.code='STAGIAIRE' and r.actif)", Integer.class, candidate));
+    }
+
+    @Test void newReferencesMustBeActiveWhileHistoricalLinksRemainEditable() throws Exception {
+        var f = fixture("refs-" + UUID.randomUUID().toString().substring(0, 8));
+        int structure = get("/stages/" + f.stage()).get("structureAccueilId").asInt();
+        jdbc.update("update structures_accueil set actif=false where id=?", structure);
+        assertFalse(get("/stages/" + f.stage()).get("eligibleNouvelleParticipation").asBoolean());
+        request("POST", "/stages", Map.of("libelle", "Invalid", "structureAccueilId", structure), 409);
+        request("POST", "/stages", Map.of("libelle", "Missing", "structureAccueilId", Integer.MAX_VALUE), 404);
+        request("PATCH", "/stages/" + f.stage(), Map.of("libelle", "Historical-" + f.stage(), "structureAccueilId", structure), 200);
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("insert into stages(libelle,structure_accueil_id) values (?,?)", "Forged", structure));
+        var body = participationBody(f, f.academic(), LocalDate.now(), LocalDate.now().plusDays(10));
+        request("POST", "/stage-participants", body, 409);
+        jdbc.update("update structures_accueil set actif=true where id=?", structure);
+        jdbc.update("update cadres_stage set actif=false where id=?", f.cadre());
+        request("POST", "/stage-participants", body, 409);
+        jdbc.update("update cadres_stage set actif=true where id=?", f.cadre());
+        int p = create("/stage-participants", body);
+        jdbc.update("update cadres_stage set actif=false where id=?", f.cadre());
+        request("PATCH", "/stage-participants/" + p, body, 200);
+        jdbc.update("update niveaux_etude set actif=false where id=?", f.level());
+        request("POST", "/stagiaires/" + f.trainee() + "/academiques", Map.of("niveauEtudeId", f.level(), "filiereId", f.stream(), "etablissementId", f.school(), "anneeEtudes", "2027-2028"), 409);
+        assertFalse(get("/stagiaires/" + f.trainee() + "/academiques").isEmpty());
+        request("POST", "/stagiaires", Map.of("nom", "Invalid", "prenoms", "Email", "adresse", "test", "email", "not-an-email"), 400);
+        request("POST", "/evaluations", Map.of("encadreurId", f.mentor()), 400);
+        int evaluation = create("/evaluations", Map.of("stageParticipantId", p, "encadreurId", f.mentor()));
+        int criterion = get("/evaluations/criteres").get(0).get("id").asInt();
+        request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", criterion, "note", 4.123), 400);
+        request("POST", "/evaluations/" + evaluation + "/notes", Map.of("critereId", criterion, "note", 4.25), 201);
+        int department = get("/encadreurs/" + f.mentor()).get("departementId").asInt();
+        int replacement = create("/encadreurs", Map.of("nom", "Replacement", "prenoms", "Mentor", "departementId", department));
+        var changed = new HashMap<String, Object>(body); changed.put("encadreurId", replacement);
+        request("PATCH", "/stage-participants/" + p, changed, 409);
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update("update stage_participant set encadreur_id=? where id=?", replacement, p));
+    }
+
+    @Test void alertReferencesCannotMixDossiers() throws Exception {
+        var f = fixture("alert-links-" + UUID.randomUUID().toString().substring(0, 8));
+        int p1 = create("/stage-participants", participationBody(f, f.academic(), LocalDate.now(), LocalDate.now().plusDays(6)));
+        int p2 = create("/stage-participants", participationBody(f, f.academic(), LocalDate.now().plusDays(10), LocalDate.now().plusDays(16)));
+        int defense = create("/soutenances", Map.of("stageParticipantId", p1, "dateSoutenance", LocalDateTime.now().toString()));
+        var body = new HashMap<String, Object>(Map.of("typeAlerteCode", "DOSSIER_INCOMPLET", "message", "Test", "priorite", "URGENT"));
+        request("POST", "/alertes", body, 400);
+        body.put("soutenanceId", defense); body.put("stageParticipantId", p2);
+        request("POST", "/alertes", body, 409);
+        body.put("stageParticipantId", p1); body.put("cleDeduplication", "x".repeat(256));
+        request("POST", "/alertes", body, 400);
+        body.remove("cleDeduplication"); create("/alertes", body);
+        body.put("soutenanceId", Integer.MAX_VALUE); request("POST", "/alertes", body, 404);
+        token = f.traineeToken(); request("POST", "/alertes", body, 403);
+    }
+
     int seedUser(String name, String role) {
+        // The clean schema contains only the three current roles. Legacy compatibility
+        // tests must explicitly create their historical fixture, never alter production seeds.
+        if ("RESPONSABLE_STAGE".equals(role))
+            jdbc.update("insert into roles(code,libelle) values ('RESPONSABLE_STAGE','Administration historique de test') on conflict (code) do nothing");
         jdbc.update("insert into utilisateurs(identifiant,mot_de_passe_hash,statut_id) select ?,?,s.id from statuts s join types_statut t on t.id=s.type_statut_id where t.code='UTILISATEUR' and s.code='ACTIF'", name, encoder.encode(PASSWORD));
-        jdbc.update("insert into utilisateurs_role(utilisateur_id,role_id) select u.id,r.id from utilisateurs u cross join roles r where u.identifiant=? and r.code=?", name, role);
+        assertEquals(1, jdbc.update("insert into utilisateurs_role(utilisateur_id,role_id) select u.id,r.id from utilisateurs u cross join roles r where u.identifiant=? and r.code=?", name, role));
         return jdbc.queryForObject("select id from utilisateurs where identifiant=?", Integer.class, name);
     }
     String login(String name) throws Exception {

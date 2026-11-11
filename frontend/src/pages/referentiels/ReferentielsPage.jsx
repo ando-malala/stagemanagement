@@ -32,11 +32,11 @@ function ReferencePanel({ config }) {
   const [message, setMessage] = useState('');
   return <Card>
     <div className="section-heading"><h2>{config.title}</h2><Button variant="secondary" disabled={loading || Boolean(editing)} onClick={reload}>Actualiser</Button></div>
-    {config.kind === 'departement' && <p className="notice">Le statut existant est conservé lors d’une modification. Les nouveaux départements utilisent le statut par défaut du serveur.</p>}
+    {config.kind === 'departement' && <p className="notice">Sans nouveau statut sélectionné, le statut existant est conservé. À la création, le statut par défaut est « Actif ».</p>}
     {message && <p className="alert alert-success" role="status">{message}</p>}
     {writable && !editing && <Button onClick={() => { setMessage(''); setEditing({ actif: 'true' }); }}>Créer</Button>}
     {writable && editing && <section className="page-stack"><h3>{editing.id ? `Modifier : ${editing.libelle ?? editing.themeStage}` : 'Nouvelle référence'}</h3>
-      <BusinessForm key={editing.id ?? 'new'} kind={config.kind} initial={editing} onCancel={() => setEditing(null)}
+      <BusinessForm key={editing.id ?? 'new'} kind={config.kind} initial={editing} referenceMaxLength={config.maxLabelLength} onCancel={() => setEditing(null)}
         onSave={(payload) => editing.id ? updateReferentiel(config.endpoint, editing.id, payload) : createReferentiel(config.endpoint, payload)}
         onSaved={async () => { setEditing(null); setMessage('Référence enregistrée.'); await reload(); }} />
     </section>}

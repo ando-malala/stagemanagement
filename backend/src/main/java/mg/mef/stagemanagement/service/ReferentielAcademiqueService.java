@@ -57,7 +57,7 @@ public class ReferentielAcademiqueService {
 
     @Transactional(readOnly = false)
     public ReferentielResponse creerEtablissement(ReferentielRequest request) {
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 150);
 
         if (etablissementRepository.existsByLibelleIgnoreCase(libelle)) {
             throw new ResponseStatusException(
@@ -95,7 +95,7 @@ public class ReferentielAcademiqueService {
                         )
                 );
 
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 150);
 
         etablissementRepository.findByLibelleIgnoreCase(libelle)
                 .ifPresent(existant -> {
@@ -141,7 +141,7 @@ public class ReferentielAcademiqueService {
 
     @Transactional(readOnly = false)
     public ReferentielResponse creerFiliere(ReferentielRequest request) {
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 150);
 
         if (filiereRepository.existsByLibelleIgnoreCase(libelle)) {
             throw new ResponseStatusException(
@@ -178,7 +178,7 @@ public class ReferentielAcademiqueService {
                         )
                 );
 
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 150);
 
         filiereRepository.findByLibelleIgnoreCase(libelle)
                 .ifPresent(existante -> {
@@ -223,7 +223,7 @@ public class ReferentielAcademiqueService {
 
     @Transactional(readOnly = false)
     public ReferentielResponse creerNiveauEtude(ReferentielRequest request) {
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 100);
 
         if (niveauEtudeRepository.existsByLibelleIgnoreCase(libelle)) {
             throw new ResponseStatusException(
@@ -261,7 +261,7 @@ public class ReferentielAcademiqueService {
                         )
                 );
 
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 100);
 
         niveauEtudeRepository.findByLibelleIgnoreCase(libelle)
                 .ifPresent(existant -> {
@@ -307,7 +307,7 @@ public class ReferentielAcademiqueService {
 
     @Transactional(readOnly = false)
     public ReferentielResponse creerMoisStage(ReferentielRequest request) {
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 50);
 
         if (moisStageRepository.existsByLibelleIgnoreCase(libelle)) {
             throw new ResponseStatusException(
@@ -345,7 +345,7 @@ public class ReferentielAcademiqueService {
                         )
                 );
 
-        String libelle = nettoyerLibelle(request);
+        String libelle = nettoyerLibelle(request, 50);
 
         moisStageRepository.findByLibelleIgnoreCase(libelle)
                 .ifPresent(existant -> {
@@ -377,7 +377,7 @@ public class ReferentielAcademiqueService {
     // UTILITAIRE
     // =========================
 
-    private String nettoyerLibelle(ReferentielRequest request) {
+    private String nettoyerLibelle(ReferentielRequest request, int maxLength) {
 
         if (request == null
                 || request.getLibelle() == null
@@ -391,7 +391,7 @@ public class ReferentielAcademiqueService {
 
         String libelle = request.getLibelle().trim();
 
-        if (libelle.length() > 150) {
+        if (libelle.length() > maxLength) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Le libellé est trop long"

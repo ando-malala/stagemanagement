@@ -33,7 +33,10 @@ import mg.mef.stagemanagement.repository.UtilisateurRoleRepository;
 import mg.mef.stagemanagement.repository.UtilisateurStatutHistoriqueRepository;
 
 @Service
+@org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
 public class UtilisateurGestionService {
+        private final mg.mef.stagemanagement.repository.StagiaireRepository trainees;
+        private final mg.mef.stagemanagement.repository.EncadreurRepository mentors;
         private final mg.mef.stagemanagement.repository.SessionUtilisateurRepository sessions;
 
         private final UtilisateurRepository utilisateurRepository;
@@ -53,9 +56,10 @@ public class UtilisateurGestionService {
                 PasswordEncoder passwordEncoder,
                 UtilisateurStatutHistoriqueRepository utilisateurStatutHistoriqueRepository,
                 DepartementRepository departementRepository,
-                ResponsableDepartementRepository responsableDepartementRepository, mg.mef.stagemanagement.repository.SessionUtilisateurRepository sessions
+                ResponsableDepartementRepository responsableDepartementRepository, mg.mef.stagemanagement.repository.SessionUtilisateurRepository sessions,
+                mg.mef.stagemanagement.repository.StagiaireRepository trainees, mg.mef.stagemanagement.repository.EncadreurRepository mentors
         ) {
-                this.utilisateurRepository = utilisateurRepository; this.sessions = sessions;
+                this.utilisateurRepository = utilisateurRepository; this.sessions = sessions; this.trainees = trainees; this.mentors = mentors;
                 this.roleRepository = roleRepository;
                 this.statutRepository = statutRepository;
                 this.utilisateurRoleRepository = utilisateurRoleRepository;
@@ -200,7 +204,7 @@ public class UtilisateurGestionService {
                                 );
                 }
 
-                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                Utilisateur utilisateur = utilisateurRepository.findForUpdate(utilisateurId)
                         .orElseThrow(() -> 
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -239,6 +243,7 @@ public class UtilisateurGestionService {
                         );
                 }
 
+                AssociationRules.active(nouveauStatut.getActif(), "Statut");
                 utilisateur.setStatut(nouveauStatut);
 
                 Utilisateur utilisateurEnregistre =
@@ -276,7 +281,7 @@ public class UtilisateurGestionService {
                         );
                 }
 
-                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                Utilisateur utilisateur = utilisateurRepository.findForUpdate(utilisateurId)
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -328,7 +333,7 @@ public class UtilisateurGestionService {
                         );
                 }
 
-                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                Utilisateur utilisateur = utilisateurRepository.findForUpdate(utilisateurId)
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -384,7 +389,7 @@ public class UtilisateurGestionService {
                         );
                 }
 
-                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                Utilisateur utilisateur = utilisateurRepository.findForUpdate(utilisateurId)
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -394,6 +399,9 @@ public class UtilisateurGestionService {
 
                 String roleCodeNettoye = roleCode.trim().toUpperCase(java.util.Locale.ROOT);
                 verifierRoleSupporte(roleCodeNettoye);
+                if (("STAGIAIRE".equals(roleCodeNettoye) && trainees.findByUtilisateur_Id(utilisateurId).isPresent())
+                        || ("ENCADREUR".equals(roleCodeNettoye) && mentors.findByUtilisateur_Id(utilisateurId).isPresent()))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Dissociez d'abord le compte de sa fiche métier avant de retirer ce rôle");
                 var attributions = utilisateurRoleRepository.findByUtilisateur_Id(utilisateur.getId());
                 var aRetirer = attributions.stream()
                         .filter(attribution -> roleCodeNettoye.equals(ApplicationRoles.effective(attribution.getRole().getCode())))
@@ -487,6 +495,8 @@ public class UtilisateurGestionService {
 
                 ResponsableDepartement responsableDepartement =
                         new ResponsableDepartement();
+
+                AssociationRules.activeStatus(departement.getStatut(), "Département");
 
                 responsableDepartement.setUtilisateur(utilisateur);
                 responsableDepartement.setDepartement(departement);

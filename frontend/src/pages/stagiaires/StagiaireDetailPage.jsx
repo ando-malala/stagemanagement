@@ -18,7 +18,7 @@ export default function StagiaireDetailPage({ params, navigate }) {
     {(data, reload) => <div className="page-stack">
       <BusinessEditor kind="stagiaire" initial={data} save={(payload) => updateStagiaire(params.id, payload)} onSaved={reload} />
       <AcademiquesPanel stagiaireId={params.id} />
-      {can(utilisateur, 'gererUtilisateurs') && <CompteStagiaire id={params.id} />}
+      {can(utilisateur, 'gererUtilisateurs') && <CompteStagiaire key={params.id} id={params.id} />}
       <StagiaireParticipations id={params.id} navigate={navigate} />
       <DossierSynthese id={params.id} navigate={navigate} />
       <DocumentsPanel key={`stagiaire/${data.id}`} scope="stagiaire" ownerId={data.id} ownerLabel={`${data.nom} ${data.prenoms}`} />

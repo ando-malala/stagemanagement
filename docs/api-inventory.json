@@ -488,6 +488,22 @@
   },
   {
     "method": "GET",
+    "path": "/api/encadreurs/comptes-eligibles",
+    "controller": "EncadreurGestionController",
+    "handler": "comptesEligibles",
+    "response": "java.util.List<mg.mef.stagemanagement.service.PortailStagiaireService.Compte>",
+    "parameters": "@RequestParam(required = false) Integer encadreurId",
+    "body": null,
+    "success": "200",
+    "access": "hasRole",
+    "roles": [
+      "ADMIN"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
+    "line": 18
+  },
+  {
+    "method": "GET",
     "path": "/api/encadreurs",
     "controller": "EncadreurGestionController",
     "handler": "listerEncadreurs",
@@ -502,7 +518,7 @@
       "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
-    "line": 27
+    "line": 32
   },
   {
     "method": "GET",
@@ -520,7 +536,7 @@
       "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
-    "line": 34
+    "line": 39
   },
   {
     "method": "POST",
@@ -536,7 +552,7 @@
       "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
-    "line": 43
+    "line": 48
   },
   {
     "method": "PATCH",
@@ -552,7 +568,7 @@
       "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
-    "line": 52
+    "line": 57
   },
   {
     "method": "PATCH",
@@ -568,7 +584,7 @@
       "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/EncadreurGestionController.java",
-    "line": 62
+    "line": 67
   },
   {
     "method": "GET",
@@ -1574,6 +1590,22 @@
     "line": 12
   },
   {
+    "method": "GET",
+    "path": "/api/stagiaires/{id}/comptes-eligibles",
+    "controller": "PortailStagiaireController",
+    "handler": "comptesEligibles",
+    "response": "java.util.List<PortailStagiaireService.Compte>",
+    "parameters": "@PathVariable Integer id",
+    "body": null,
+    "success": "200",
+    "access": "hasRole",
+    "roles": [
+      "ADMIN"
+    ],
+    "source": "backend/src/main/java/mg/mef/stagemanagement/controller/PortailStagiaireController.java",
+    "line": 14
+  },
+  {
     "method": "PATCH",
     "path": "/api/stagiaires/{id}/compte",
     "controller": "PortailStagiaireController",
@@ -1587,7 +1619,7 @@
       "ADMIN"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/PortailStagiaireController.java",
-    "line": 14
+    "line": 16
   },
   {
     "method": "GET",
@@ -1603,7 +1635,7 @@
       "STAGIAIRE"
     ],
     "source": "backend/src/main/java/mg/mef/stagemanagement/controller/PortailStagiaireController.java",
-    "line": 18
+    "line": 20
   },
   {
     "method": "GET",

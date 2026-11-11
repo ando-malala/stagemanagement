@@ -11,7 +11,7 @@ export default function Input({ label, name, type = 'text', options, error, hint
         <select {...controlProps}>
           <option value="">{emptyOptionLabel}</option>
           {options?.map((option) => (
-            <option key={option.value ?? option} value={option.value ?? option}>{option.label ?? option}</option>
+            <option key={option.value ?? option} value={option.value ?? option} disabled={option.disabled}>{option.label ?? option}</option>
           ))}
         </select>
       ) : <input {...controlProps} type={type} />}

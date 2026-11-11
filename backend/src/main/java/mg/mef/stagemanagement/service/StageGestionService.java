@@ -153,6 +153,7 @@ public class StageGestionService {
             );
         }
 
+        AssociationRules.active(structureAccueil.getActif(), "Structure d'accueil");
         Stage stage = new Stage();
         stage.setLibelle(libelle);
         stage.setStructureAccueil(structureAccueil);
@@ -213,6 +214,8 @@ public class StageGestionService {
                     }
                 });
 
+        if (AssociationRules.changed(stage.getStructureAccueil().getId(), structureAccueil.getId()))
+            AssociationRules.active(structureAccueil.getActif(), "Structure d'accueil");
         stage.setLibelle(libelle);
         stage.setStructureAccueil(structureAccueil);
 
@@ -329,6 +332,7 @@ public class StageGestionService {
             );
         }
 
+        verifierReferencesParticipation(null, stage, stagiaireAcademique, cadreStage, encadreur);
         rules.dates(null, stagiaireAcademique, request.getDateDebutStage(), request.getDateFinStage());
         Statut statutPlanifie = statutRepository
                 .findStatutByTypeCodeAndStatutCode("PARTICIPATION", "PLANIFIEE")
@@ -420,6 +424,8 @@ public class StageGestionService {
                 (!participant.getDateDebutStage().equals(request.getDateDebutStage()) || !participant.getDateFinStage().equals(request.getDateFinStage())
                 || !participant.getStage().getId().equals(request.getStageId()) || !participant.getStagiaireAcademique().getId().equals(request.getStagiaireAcademiqueId())))
             ParticipationRulesService.conflict("Utilisez les evenements dedies pour modifier une participation demarree");
+        verifierReferencesParticipation(participant, stage, stagiaireAcademique, cadreStage, encadreur);
+        rules.mentorChange(participant, encadreur.getId());
         rules.dates(id, stagiaireAcademique, request.getDateDebutStage(), request.getDateFinStage());
         participant.setStage(stage);
         participant.setStagiaireAcademique(stagiaireAcademique);
@@ -439,6 +445,17 @@ public class StageGestionService {
     // MAPPERS
     // =========================
 
+    private void verifierReferencesParticipation(StageParticipant current, Stage stage, StagiaireAcademique academic, CadreStage cadre, Encadreur mentor) {
+        if (current == null || AssociationRules.changed(current.getStage().getId(), stage.getId()))
+            AssociationRules.active(stage.getStructureAccueil().getActif(), "Structure du stage");
+        if (current == null || AssociationRules.changed(current.getStagiaireAcademique().getId(), academic.getId()))
+            AssociationRules.activeStatus(academic.getStagiaire().getStatut(), "Stagiaire");
+        if (current == null || AssociationRules.changed(current.getCadreStage().getId(), cadre.getId()))
+            AssociationRules.active(cadre.getActif(), "Cadre de stage");
+        if (current == null || AssociationRules.changed(current.getEncadreur().getId(), mentor.getId()))
+            AssociationRules.activeStatus(mentor.getStatut(), "Encadreur");
+    }
+
     private StageResponse toStageResponse(Stage stage) {
         StructureAccueil structureAccueil = stage.getStructureAccueil();
 
@@ -450,7 +467,7 @@ public class StageGestionService {
             departement = structureAccueil.getDepartement().getLibelle();
         }
 
-        return new StageResponse(
+        StageResponse response = new StageResponse(
                 stage.getId(),
                 stage.getLibelle(),
                 structureAccueil != null ? structureAccueil.getId() : null,
@@ -459,6 +476,8 @@ public class StageGestionService {
                 departement,
                 stage.getDateCreation()
         );
+        response.setEligibleNouvelleParticipation(structureAccueil != null && Boolean.TRUE.equals(structureAccueil.getActif()));
+        return response;
     }
 
     private StageParticipantResponse toParticipantResponse(

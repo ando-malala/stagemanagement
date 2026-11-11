@@ -142,6 +142,8 @@ public class RapportActiviteGestionService {
                                 )
                         );
 
+        rules.lock(participant);
+        access.reportAuthor(participant.getId());
         rules.reportPeriod(participant, request.getDebutSemaine(), request.getFinSemaine());
         MoisStage moisStage = moisStageRepository.findById(request.getMoisStageId())
                 .orElseThrow(() ->
@@ -151,6 +153,7 @@ public class RapportActiviteGestionService {
                         )
                 );
 
+        AssociationRules.active(moisStage.getActif(), "Mois de stage");
         Statut statutBrouillon = statutRepository
                 .findStatutByTypeCodeAndStatutCode("RAPPORT", "BROUILLON")
                 .orElseThrow(() ->
@@ -203,6 +206,8 @@ public class RapportActiviteGestionService {
                         )
                 );
 
+        rules.refreshReport(rapport);
+        access.reportContent(id, request.getStageParticipantId());
         String statutActuel = rapport.getStatut() != null
                 ? rapport.getStatut().getCode()
                 : null;
@@ -238,6 +243,8 @@ public class RapportActiviteGestionService {
         rapport.setActivite(nettoyerTexteOptionnel(request.getActivite()));
         rapport.setDifficultes(nettoyerTexteOptionnel(request.getDifficultes()));
         rapport.setSolutions(nettoyerTexteOptionnel(request.getSolutions()));
+        if (AssociationRules.changed(rapport.getMoisStage().getId(), moisStage.getId()))
+            AssociationRules.active(moisStage.getActif(), "Mois de stage");
         rapport.setMoisStage(moisStage);
         rapport.setDateModification(LocalDateTime.now());
 
@@ -367,6 +374,9 @@ public class RapportActiviteGestionService {
                         )
                 );
 
+        rules.refreshReport(rapport);
+        access.reportTransition(rapportId, request.getStatutCode());
+        AssociationRules.active(nouveauStatut.getActif(), "Statut de rapport");
         Statut ancienStatut = rapport.getStatut();
 
         if (ancienStatut != null

@@ -59,7 +59,8 @@ test('choix : droits ADMIN pour les comptes, références réelles et annulation
   assert.deepEqual(calls, ['/api/referentiels/organisation/departements']);
   calls.length = 0;
   await loadBusinessChoices('encadreur', true, options);
-  assert.ok(calls.includes('/api/utilisateurs'));
+  assert.ok(calls.includes('/api/encadreurs/comptes-eligibles'));
+  assert.ok(!calls.includes('/api/utilisateurs'));
   calls.length = 0;
   for (const kind of ['stagiaire', 'stage', 'academique', 'participation', 'rapport', 'evaluation', 'soutenance', 'observation']) await loadBusinessChoices(kind, false, options);
   assert.ok(calls.includes('/api/stagiaires'));

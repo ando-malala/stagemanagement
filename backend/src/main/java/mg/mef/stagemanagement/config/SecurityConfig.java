@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "ENCADREUR")
 
                         .requestMatchers(HttpMethod.GET, "/api/portail/me").hasRole("STAGIAIRE")
+                        .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/comptes-eligibles", "/api/encadreurs/comptes-eligibles").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/stagiaires/{id}/compte").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/stagiaires/{id}/compte").hasRole("ADMIN")
                         // Personal reads reuse the existing APIs and resource policy.

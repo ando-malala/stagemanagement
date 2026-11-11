@@ -11,6 +11,8 @@ public class PortailStagiaireController {
     public PortailStagiaireController(PortailStagiaireService portail) { this.portail = portail; }
     @GetMapping("/stagiaires/{id}/compte")
     public PortailStagiaireService.Compte compte(@PathVariable Integer id) { return portail.compte(id); }
+    @GetMapping("/stagiaires/{id}/comptes-eligibles")
+    public java.util.List<PortailStagiaireService.Compte> comptesEligibles(@PathVariable Integer id) { return portail.comptesEligibles(id); }
     @PatchMapping("/stagiaires/{id}/compte")
     public PortailStagiaireService.Compte associer(@PathVariable Integer id, @RequestBody CompteRequest request) {
         return portail.associer(id, request.utilisateurId());

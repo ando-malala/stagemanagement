@@ -14,6 +14,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { hasAnyRole } from '../../utils/roleUtils.js';
 import NavigationIcon from '../../components/layout/NavigationIcon.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
+import NotificationBadge from '../../components/common/NotificationBadge.jsx';
 
 const indicatorStyles = {
   totalStagiaires: ['ST', 'blue'], totalStages: ['SP', 'teal'],
@@ -49,7 +50,9 @@ export default function DashboardPage({ navigate }) {
     <ErrorMessage error={refreshError} />
     {loading ? <Loader label={refreshing ? 'Vérification des alertes et actualisation du tableau de bord…' : 'Chargement des compteurs…'} /> : dashboard.error ? <ErrorMessage error={dashboard.error} /> : <DashboardSummary resume={dashboard.data.resume} navigate={navigate} />}
     <section className="page-stack dashboard-shortcuts"><div className="section-heading"><h3>Accès rapides</h3><span className="small">Les actions du quotidien</span></div><DashboardShortcuts utilisateur={utilisateur} navigate={navigate} /></section>
-    <Card><div className="section-heading"><h3>Alertes à traiter</h3><AppLink to="/alertes?statut=A_TRAITER" navigate={navigate}>Voir toutes les alertes à traiter</AppLink></div>
+    <Card><div className="section-heading"><h3>Alertes à traiter</h3><AppLink className="alerts-notification-link" to="/alertes?statut=A_TRAITER" navigate={navigate}>
+      <NavigationIcon name="AL" />Voir toutes les alertes à traiter{!loading && !dashboard.error && <NotificationBadge count={dashboard.data.resume.totalAlertesATraiter} />}
+    </AppLink></div>
       {loading ? <Loader /> : dashboard.error ? <ErrorMessage error={dashboard.error} /> : <DashboardAlerts cards={dashboard.data.cards} navigate={navigate} />}
     </Card>
     <PilotagePanel navigate={navigate} alertRows={dashboard.data?.rows} data={dashboard.data?.pilotage}

@@ -15,11 +15,19 @@ import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import BusinessEditor from '../../components/common/BusinessEditor.jsx';
 import AlerteDetail from './AlerteDetail.jsx';
+import AlertOverview from './AlertOverview.jsx';
+import StatusBadge from '../../components/common/StatusBadge.jsx';
+import EmptyState from '../../components/common/EmptyState.jsx';
+import NavigationIcon from '../../components/layout/NavigationIcon.jsx';
+import { alertLabel, sortAlerts } from '../../utils/alertOverview.js';
 
 const fetcher = async (options) => (await loadAlertContext(options)).rows;
-const columns = [{ key: 'stagiaireNomComplet', label: 'Stagiaire' }, { key: 'typeAlerteLibelle', label: 'Type' }, { key: 'message', label: 'Message' },
-  { key: 'natureAlerte', label: 'Nature' }, { key: 'priorite', label: 'Priorité' },
-  { key: 'dateEcheance', label: 'Échéance', render: (row) => formatDate(row.dateEcheance) }, { key: 'statut', label: 'Statut' }];
+const alertColumn = (key, label) => ({ key, label, render: row => <StatusBadge value={row[key]} label={alertLabel(key, row[key])} /> });
+const columns = [alertColumn('priorite', 'Priorité'),
+  { key: 'typeAlerteLibelle', label: 'Type', render: row => row.typeAlerteLibelle || row.typeAlerteCode || 'Non renseigné' },
+  { key: 'stagiaireNomComplet', label: 'Stagiaire' }, { key: 'message', label: 'Message' },
+  { key: 'dateEcheance', label: 'Échéance', render: (row) => formatDate(row.dateEcheance) },
+  alertColumn('natureAlerte', 'Nature'), alertColumn('statut', 'Statut')];
 
 export default function AlertesPage({ navigate }) {
   const { utilisateur } = useAuth();
@@ -28,23 +36,30 @@ export default function AlertesPage({ navigate }) {
   const [selectedId, setSelectedId] = useState(() => new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('alerte'));
   const [confirmation, setConfirmation] = useState(null);
   const [message, setMessage] = useState('');
+  const [filterRevision, setFilterRevision] = useState(0);
   const rows = data ?? [];
+  const visibleRows = sortAlerts(filterAlertes(rows, filters));
   const selected = rows.find((row) => String(row.id) === String(selectedId));
+  function selectFilters(next) { setFilters(next); setFilterRevision(value => value + 1); }
   async function refresh() { setSelectedId(null); await reload(); }
   return <Card>
-    <div className="section-heading"><div><h2>Alertes</h2><p className="small">Filtres appliqués aux alertes reçues du serveur. Les alertes informatives ne se traitent pas manuellement.</p></div>
-      <Button variant="secondary" disabled={loading} onClick={refresh}>Actualiser</Button></div>
-    <BusinessEditor kind="alerte" label="Créer une alerte" initial={{ priorite: 'INFORMATION' }} save={createAlerte} onSaved={refresh} />
-    <p className="notice">Les types d’alertes proposés à la création sont chargés depuis le serveur.</p>
+    <div className="section-heading"><div><h2>Alertes</h2><p className="small">Repérez les priorités et retrouvez les dossiers à suivre.</p></div>
+      <Button variant="secondary" disabled={loading} onClick={refresh}><NavigationIcon name="refresh" />Actualiser</Button></div>
+    {!loading && !error && <AlertOverview rows={rows} filters={filters} onSelect={selectFilters} />}
+    <section id="alert-results" aria-label="Liste des alertes">
+    <div className="section-heading"><div><h3>Liste des alertes</h3><p className="small">Par défaut : priorité la plus urgente, puis échéance la plus proche.</p></div></div>
+    <div className="alert-create"><BusinessEditor kind="alerte" label="Créer une alerte" initial={{ priorite: 'INFORMATION' }} save={createAlerte} onSaved={refresh} /></div>
     <div className="entity-form">{[['statut', 'Statut'], ['priorite', 'Priorité'], ['natureAlerte', 'Nature'], ['typeAlerteCode', 'Type']].map(([key, label]) => <Input key={key} name={key} label={label} type="select"
-      value={filters[key] ?? ''} options={filterOptions(rows, key, filters[key])} onChange={(event) => setFilters((current) => ({ ...current, [key]: event.target.value }))} />)}
-      <Button variant="secondary" onClick={() => setFilters({})}>Réinitialiser les filtres</Button></div>
+      emptyOptionLabel="Toutes" value={filters[key] ?? ''} options={filterOptions(rows, key, filters[key])} onChange={(event) => selectFilters({ ...filters, [key]: event.target.value })} />)}
+      <Button variant="secondary" onClick={() => selectFilters({})}>Réinitialiser les filtres</Button></div>
     {message && <p className="alert alert-success" role="status">{message}</p>}
     {!loading && !error && selectedId && !selected && <p className="notice">L’alerte demandée n’est pas présente dans la liste reçue.</p>}
     <ErrorMessage error={error} />
-    <Table caption="Alertes" columns={columns} data={filterAlertes(rows, filters)} loading={loading} error={error}
+    {!loading && !error && !visibleRows.length ? <EmptyState message={rows.length ? 'Aucune alerte pour ces filtres. Sélectionnez « Toutes » pour retrouver la liste complète.' : 'Aucune alerte à afficher.'} /> :
+    <Table key={filterRevision} caption="Alertes" columns={columns} data={visibleRows} loading={loading} error={error}
       renderActions={(row) => <div className="row-actions"><Button variant="secondary" onClick={() => setSelectedId(row.id)}>Consulter</Button>
-        {canTreatAlert(utilisateur, row) && <Button onClick={() => setConfirmation(row)}>Traiter</Button>}</div>} />
+        {canTreatAlert(utilisateur, row) && <Button onClick={() => setConfirmation(row)}>Traiter</Button>}</div>} />}
+    </section>
     <Modal open={Boolean(selected)} title={`Alerte n° ${selected?.id ?? ''}`} onClose={() => setSelectedId(null)}>{selected && <AlerteDetail alerte={selected} navigate={navigate} />}</Modal>
     <ConfirmDialog open={Boolean(confirmation)} title="Traiter cette alerte" onClose={() => setConfirmation(null)} onConfirm={async () => {
       await marquerAlerteLue(confirmation.id); setConfirmation(null); setMessage('Alerte traitée.'); await refresh();
@@ -53,7 +68,7 @@ export default function AlertesPage({ navigate }) {
 }
 
 function filterOptions(rows, key, selected) {
-  const options = alertFilterOptions(rows, key);
+  const options = alertFilterOptions(rows, key).map(option => ({ ...option, label: key === 'typeAlerteCode' ? option.label : alertLabel(key, option.value) }));
   if (selected && !options.some((option) => option.value === selected)) options.push({ value: selected, label: `${selected} (aucune alerte reçue)` });
   return options;
 }

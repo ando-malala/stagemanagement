@@ -30,16 +30,22 @@ public class PortailStagiaireService {
         return new Compte(t.getUtilisateur() == null ? null : t.getUtilisateur().getId(),
                 t.getUtilisateur() == null ? null : t.getUtilisateur().getIdentifiant());
     }
+    public java.util.List<Compte> comptesEligibles(Integer id) {
+        access.require(access.role("ADMIN"));
+        access.trainee(id, false);
+        return users.findEligibleTraineeAccounts(id).stream()
+                .map(u -> new Compte(u.getId(), u.getIdentifiant())).toList();
+    }
     @Transactional
     public Compte associer(Integer id, Integer userId) {
         access.require(access.role("ADMIN"));
         var t = access.trainee(id, true);
         if (userId == null) t.setUtilisateur(null);
         else {
-            var u = users.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Compte introuvable"));
+            var u = users.findForUpdate(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Compte introuvable"));
             boolean traineeRole = roles.findByUtilisateur_Id(userId).stream()
                     .anyMatch(r -> "STAGIAIRE".equals(r.getRole().getCode()) && Boolean.TRUE.equals(r.getRole().getActif()));
-            if (!traineeRole || !"ACTIF".equals(u.getStatut().getCode()))
+            if (!traineeRole || u.getStatut() == null || !"ACTIF".equals(u.getStatut().getCode()) || !Boolean.TRUE.equals(u.getStatut().getActif()))
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Un compte stagiaire actif est requis");
             trainees.findByUtilisateur_Id(userId).filter(other -> !other.getId().equals(id)).ifPresent(other -> {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Ce compte est deja associe a un autre stagiaire");

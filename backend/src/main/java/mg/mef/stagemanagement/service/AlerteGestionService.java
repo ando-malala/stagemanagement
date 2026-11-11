@@ -95,6 +95,8 @@ public class AlerteGestionService {
         );
 
         AlertePriorite priorite = convertirPriorite(request.getPriorite());
+        if (request.getCleDeduplication() != null && request.getCleDeduplication().trim().length() > 255)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La clé de déduplication est limitée à 255 caractères");
 
         if (request.getCleDeduplication() != null
                 && !request.getCleDeduplication().trim().isEmpty()
@@ -169,6 +171,7 @@ public class AlerteGestionService {
             alerte.setSoutenance(soutenance);
         }
 
+        verifierReferences(alerte);
         access.require(access.readAlert(alerte));
         Alerte enregistree = alerteRepository.save(alerte);
 
@@ -246,6 +249,26 @@ public class AlerteGestionService {
                         + "Chaque anomalie doit être vérifiée individuellement."
                 );
         }
+
+    static void verifierReferences(Alerte alerte) {
+        StageParticipant participant = alerte.getStageParticipant();
+        if (alerte.getRapport() != null) {
+            StageParticipant reportOwner = alerte.getRapport().getStageParticipant();
+            if (participant != null && !participant.getId().equals(reportOwner.getId()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Le rapport ne correspond pas à la participation sélectionnée");
+            participant = reportOwner;
+        }
+        if (alerte.getSoutenance() != null) {
+            StageParticipant defenseOwner = alerte.getSoutenance().getStageParticipant();
+            if (participant != null && !participant.getId().equals(defenseOwner.getId()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "La soutenance ne correspond pas au dossier sélectionné");
+            participant = defenseOwner;
+        }
+        if (participant == null && alerte.getEncadreur() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Associez l'alerte à une participation, un rapport, un encadreur ou une soutenance");
+        if (participant != null && alerte.getEncadreur() != null && !participant.getEncadreur().getId().equals(alerte.getEncadreur().getId()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "L'encadreur ne correspond pas au dossier sélectionné");
+    }
 
     private TypeAlerte trouverTypeAlerte(String code) {
         if (code == null || code.trim().isEmpty()) {

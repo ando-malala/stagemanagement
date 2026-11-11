@@ -11,6 +11,10 @@ public class StageResponse {
     private Integer departementId;
     private String departement;
     private LocalDateTime dateCreation;
+    private boolean eligibleNouvelleParticipation;
+
+    public boolean isEligibleNouvelleParticipation() { return eligibleNouvelleParticipation; }
+    public void setEligibleNouvelleParticipation(boolean value) { eligibleNouvelleParticipation = value; }
 
     public StageResponse() {
     }

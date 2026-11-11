@@ -15,6 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/encadreurs")
 public class EncadreurGestionController {
+    @GetMapping("/comptes-eligibles")
+    public java.util.List<mg.mef.stagemanagement.service.PortailStagiaireService.Compte> comptesEligibles(
+            @RequestParam(required = false) Integer encadreurId) {
+        return encadreurGestionService.comptesEligibles(encadreurId);
+    }
 
     private final EncadreurGestionService encadreurGestionService;
 

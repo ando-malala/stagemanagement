@@ -2,7 +2,7 @@
 
 Généré par `python scripts/audit_backend.py`. Complément métier : [audit](BACKEND_AUDIT.md).
 
-53 contrôleurs, 298 opérations HTTP, 125 opérations admises par SecurityConfig (certaines techniques).
+53 contrôleurs, 300 opérations HTTP, 127 opérations admises par SecurityConfig (certaines techniques).
 
 Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessible même à ADMIN. Les signatures décrivent les paramètres de chemin, de requête, multipart et le corps exact. Les paramètres AuthenticationPrincipal sont injectés par le serveur. Les réponses List sont des tableaux JSON, sans enveloppe data ni pagination Spring. Les statuts indiqués sont ceux du chemin de succès; voir les erreurs des services ci-dessous, ainsi que 401/403 pour les accès protégés. Les CRUD bruts peuvent aussi renvoyer 404 via Optional. Cet inventaire statique ne prouve ni la disponibilité du serveur ni les données PostgreSQL.
 
@@ -124,12 +124,14 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
+| GET | `/api/encadreurs/comptes-eligibles` | ADMIN | 200 | `java.util.List<mg.mef.stagemanagement.service.PortailStagiaireService.Compte>` |
 | GET | `/api/encadreurs` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<List<EncadreurResponse>>` |
 | GET | `/api/encadreurs/{id}` | ADMIN, ENCADREUR, STAGIAIRE | 200 | `ResponseEntity<EncadreurResponse>` |
 | POST | `/api/encadreurs` | ADMIN | 201 | `ResponseEntity<EncadreurResponse>` |
 | PATCH | `/api/encadreurs/{id}` | ADMIN | 200 | `ResponseEntity<EncadreurResponse>` |
 | PATCH | `/api/encadreurs/{id}/statut` | ADMIN | 200 | `ResponseEntity<EncadreurResponse>` |
 
+- `comptesEligibles` : `@RequestParam(required = false) Integer encadreurId`.
 - `listerEncadreurs` : `aucun paramètre`.
 - `trouverEncadreur` : `@PathVariable Integer id`.
 - `creerEncadreur` : `@RequestBody EncadreurRequest request`.
@@ -353,10 +355,12 @@ Les règles sont évaluées dans leur ordre Spring. `denyAll` signifie inaccessi
 | Méthode | URL | Autorisation | Succès | Réponse |
 |---|---|---|---|---|
 | GET | `/api/stagiaires/{id}/compte` | ADMIN | 200 | `PortailStagiaireService.Compte` |
+| GET | `/api/stagiaires/{id}/comptes-eligibles` | ADMIN | 200 | `java.util.List<PortailStagiaireService.Compte>` |
 | PATCH | `/api/stagiaires/{id}/compte` | ADMIN | 200 | `PortailStagiaireService.Compte` |
 | GET | `/api/portail/me` | STAGIAIRE | 200 | `PortailStagiaireService.Profil` |
 
 - `compte` : `@PathVariable Integer id`.
+- `comptesEligibles` : `@PathVariable Integer id`.
 - `associer` : `@PathVariable Integer id, @RequestBody CompteRequest request`.
 - `me` : `aucun paramètre`.
 
@@ -1058,7 +1062,7 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 ### [EvenementParticipationRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/stage/EvenementParticipationRequest.java)
 
-`motif: String`, `dateEffet: LocalDate`
+`motif: String`, `dateEffet: LocalDate`, `ignorerDocumentsManquants: Boolean`, `forcerCloture: Boolean`
 
 ### [ProlongerParticipationRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/stage/ProlongerParticipationRequest.java)
 
@@ -1078,7 +1082,7 @@ Les contraintes métier se trouvent principalement dans les services, sans @Vali
 
 ### [StageResponse](../backend/src/main/java/mg/mef/stagemanagement/dto/stage/StageResponse.java)
 
-`id: Integer`, `libelle: String`, `structureAccueilId: Integer`, `structureAccueil: String`, `departementId: Integer`, `departement: String`, `dateCreation: LocalDateTime`
+`id: Integer`, `libelle: String`, `structureAccueilId: Integer`, `structureAccueil: String`, `departementId: Integer`, `departement: String`, `dateCreation: LocalDateTime`, `eligibleNouvelleParticipation: boolean`
 
 ### [StagiaireAcademiqueRequest](../backend/src/main/java/mg/mef/stagemanagement/dto/stagiaire/StagiaireAcademiqueRequest.java)
 
@@ -1211,6 +1215,7 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 ### [AlerteGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/AlerteGestionService.java)
 
 - `BAD_REQUEST` : Les informations de l'alerte sont obligatoires
+- `BAD_REQUEST` : La clé de déduplication est limitée à 255 caractères
 - `CONFLICT` : Cette alerte existe déjà
 - `NOT_FOUND` : Participation introuvable
 - `NOT_FOUND` : Rapport introuvable
@@ -1221,6 +1226,10 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `CONFLICT` : Cette alerte n'est plus à traiter
 - `UNAUTHORIZED` : Utilisateur connecté introuvable
 - `CONFLICT` : Le traitement global des alertes est désactivé. 
+- `CONFLICT` : Le rapport ne correspond pas à la participation sélectionnée
+- `CONFLICT` : La soutenance ne correspond pas au dossier sélectionné
+- `BAD_REQUEST` : Associez l'alerte à une participation, un rapport, un encadreur ou une soutenance
+- `CONFLICT` : L'encadreur ne correspond pas au dossier sélectionné
 - `BAD_REQUEST` : Le type d'alerte est obligatoire
 - `NOT_FOUND` : Type d'alerte introuvable
 - `BAD_REQUEST` : Priorité d'alerte invalide
@@ -1262,8 +1271,9 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : La capacité maximale doit être positive
 - `BAD_REQUEST` : Le département est obligatoire
 - `NOT_FOUND` : Département introuvable
-- `CONFLICT` : Cet utilisateur est déjà associé à un encadreur
 - `NOT_FOUND` : Utilisateur introuvable
+- `CONFLICT` : Ce compte est déjà associé à un encadreur
+- `CONFLICT` : Un compte possédant le rôle ENCADREUR actif est requis
 - `BAD_REQUEST` : Le texte est trop long
 
 ### [EvaluationGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/EvaluationGestionService.java)
@@ -1280,6 +1290,7 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : Les informations de l'évaluation sont incomplètes
 - `CONFLICT` : Une évaluation finalisée ne peut plus être modifiée
 - `BAD_REQUEST` : La note est obligatoire
+- `BAD_REQUEST` : La note accepte au maximum deux décimales
 - `BAD_REQUEST` : La note doit être comprise entre 0 et 5
 
 ### [FichierGestionService](../backend/src/main/java/mg/mef/stagemanagement/service/FichierGestionService.java)
@@ -1432,6 +1443,7 @@ Catalogue par service, à rapprocher des méthodes appelées par chaque contrôl
 - `BAD_REQUEST` : Statut utilisateur invalide
 - `BAD_REQUEST` : Le nouveau mot de passe doit contenir au moins 12 caractères
 - `BAD_REQUEST` : Le rôle est obligatoire
+- `CONFLICT` : Dissociez d'abord le compte de sa fiche métier avant de retirer ce rôle
 - `NOT_FOUND` : Ce rôle n'est pas attribué à cet utilisateur
 - `BAD_REQUEST` : Un utilisateur doit conserver au moins un rôle actif
 - `BAD_REQUEST` : Le département est obligatoire
