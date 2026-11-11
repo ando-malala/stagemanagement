@@ -1,0 +1,131 @@
+--- version initiale
++++ concept1
+@@ -1,77 +1,16 @@
+ 	
+ Gestion et suivi des stagiaires
+au Ministère de l’Économie
+et des Finances
+ Conception et réalisation d’une application web
+Projet MEF SIIGFP
+-Par
+[À CONFIRMER : nom et prénoms]
+Numéro étudiant : [À CONFIRMER]
+-Mémoire présenté en vue de l’obtention du grade de
+Licence en Informatique
+Option Développement d’applications
+IT University
+-Année universitaire et date de soutenance : [À CONFIRMER]
+-Encadreur pédagogique : [À CONFIRMER]
+Encadreur professionnel : [À CONFIRMER]
+Président et membres du jury : [À CONFIRMER]
+-
++Par
+RAKOTONIAINA Andomalala Erica
++Mémoire présenté en vue de l’obtention du grade de
+Licence en Informatique
+Option Web
++IT University
++Novembre, 2026
++Encadreur pédagogique : [À CONFIRMER]
+Encadreur professionnel : RAJOELISOLO Mitanjo
+Président et membres du jury : [À CONFIRMER]
+ Table des matières
+-
+-Glossaire
+-Avant-propos
+-Remerciements
+-Introduction générale
+-1 Présentation du projet
+-1.1 Contexte et objectifs
+-1.2 Analyse de l’existant et périmètre documenté
+-1.3 Acteurs et besoins
+-1.4 Démarche de travail et planning
+-1.5 Technologies et justification de la solution
+-1.6 Architecture générale
+-2 Conception et réalisation
+-2.1 Organisation des données
+-2.2 Architecture backend et transactions
+-2.3 Authentification et contrôle d’accès
+-2.4 Admission et affectation
+-2.5 Événements et clôture des participations
+-2.6 Rapports hebdomadaires et observations
+-2.7 Gestion documentaire
+-2.8 Évaluations et soutenances
+-2.9 Alertes et pilotage
+-2.10 Interface utilisateur et parcours
+-2.11 Contraintes SQL et cohérence avec JPA
+-2.12 Tests et validation
+-2.13 État du déploiement
+-2.14 Difficultés attestées et solutions
+-3 Évaluation du projet et connaissances acquises
+-3.1 Bilan fonctionnel
+-3.2 Bilan technique
+-3.3 Apport potentiel à l’organisme d’accueil
+-3.4 Bilan personnel à valider
+-3.5 Perspectives d’évolution
+-Conclusion générale
+-Bibliographie
+-Annexes
+-Annexe A Repères de preuve
+-Annexe B Inventaire du modèle physique
+-Annexe C Recette complémentaire et captures
+-Annexe D Informations à valider avant dépôt
+-
+ Champ automatique — actualiser dans Word pour afficher les numéros de page.
+ Liste des tableaux
+-
+-Tableau 1 — Acteurs et responsabilités observées
+-Tableau 2 — Technologies et responsabilités
+-Tableau 3 — Ensembles du modèle relationnel
+-Tableau 4 — Modalités de clôture présentes dans le code
+-Tableau 5 — Parcours et pages existantes
+-Tableau 6 — Résultats des vérifications réalisées
+-Tableau 7 — Bilan des réalisations et niveau de validation
+-Tableau 8 — Repères de preuve pour la soutenance
+-Tableau 9 — Inventaire des tables par famille
+-Tableau 10 — Scénarios de recette restant à exécuter
+-
+ Champ automatique — actualiser dans Word pour afficher les numéros de page.
+ Liste des figures
+-
+-Figure 1 — Acteurs et principaux parcours observés
+-Figure 2 — Architecture générale de l’application
+-Figure 3 — Relations principales du modèle physique PostgreSQL
+-Figure 4 — Composants de traitement d’une requête métier
+-Figure 5 — Décision de clôture et contrôles conservés
+-Figure 6 — Séquence simplifiée de soumission et d’examen d’un rapport
+-
+ Champ automatique — actualiser dans Word pour afficher les numéros de page.
+ Glossaire
+ API — Interface de programmation exposant les opérations du serveur à l’interface web.
+@@ -90,25 +29,25 @@
+ Transaction — Ensemble d’opérations sur la base dont la validation ou l’annulation forme une unité.
+ Trigger — Fonction déclenchée par la base lors d’une opération sur les données afin d’appliquer une règle complémentaire.
+ Avant-propos
+-Ce mémoire porte sur la conception et la réalisation d’une application web de gestion et de suivi des stagiaires dans le cadre d’un stage au Ministère de l’Économie et des Finances de Madagascar, au sein du contexte SIIGFP indiqué pour le projet. Il est préparé en vue de l’obtention d’une Licence en Informatique à IT University, option Développement d’applications. L’intitulé administratif exact de la formation, la promotion et les dates officielles du stage restent [À CONFIRMER].
++Le present memoire presente les resultats du travail effectue lors de mon stage de fin d’etudes de Licence en Informatique a l’IT University. Ce stage, d’une duree de trois mois, a ete realise au sein de le Cellule Informatique SIIGFP du Ministere de l’Economie et du Finance de Madagascar. 
++Afin de poser clairement le contexte de ce memoire, je vais presenter succinctement d’une part l’IT University, et d’autre part mon entreprise d’accueil.
+ IT University constitue le cadre universitaire de ce travail. Le mémoire met en relation les compétences de développement d’applications, de conception relationnelle et de validation logicielle avec un système métier concret. Une présentation institutionnelle détaillée de l’établissement pourra être ajoutée à partir de la notice officielle applicable à la promotion. Les mémoires fournis en référence servent de repères de structure et de présentation ; leurs descriptions institutionnelles ne sont pas reprises comme des informations administratives actuelles.
+ Le MEF est l’organisme d’accueil désigné dans le sujet. Le nom complet de l’unité SIIGFP, sa place dans l’organigramme, les fonctions de ses responsables et le périmètre précis de son intervention dans l’accueil des stagiaires restent [À CONFIRMER]. Le présent travail décrit le logiciel du dépôt Stagemanagement ; il ne prétend pas documenter l’ensemble du système d’information du ministère ni démontrer une intégration avec un système financier existant.
+ La version du projet examinée est identifiée par la révision Git 9e1a7d8. Les constats techniques et les nouvelles vérifications consignées dans ce document sont arrêtés au 10 novembre 2026. Cette date correspond à la préparation du mémoire, et non à une date de soutenance ou à une borne de stage. Les affirmations importantes renvoient à des preuves repérées P01 à P36, présentées en annexe et détaillées dans la matrice documentaire associée.
+ Remerciements
+ [À CONFIRMER — texte personnel à valider avant dépôt]
+ Je remercie IT University pour le cadre de formation dans lequel s’inscrit ce mémoire, ainsi que le Ministère de l’Économie et des Finances pour l’accueil associé à ce stage.
+-Je souhaite également remercier mon encadreur pédagogique, [À CONFIRMER : nom et fonction], et mon encadreur professionnel, [À CONFIRMER : nom et fonction]. Leur contribution précise à ce travail sera décrite après validation personnelle.
++Je souhaite également remercier mon encadreur pédagogique, RAJOELISOLO Mitanjo, et mon encadreur professionnel, RAKOTOARIMALALA Tsinjo Tony. Leur contribution précise à ce travail sera décrite après validation personnelle.
+ [À CONFIRMER : ajouter les personnes effectivement concernées et personnaliser les remerciements selon l’expérience vécue.]
+-
+ Introduction générale
+-Le suivi d’un stage ne se limite pas à enregistrer l’identité d’une personne. Il associe un parcours académique, une structure d’accueil, un encadreur, une période de présence, des travaux à rendre et des décisions administratives. Dans l’application étudiée, ces informations sont reliées à des documents, à des observations et à des événements qui doivent rester compréhensibles au fil du dossier. Le projet présenté dans ce mémoire organise ces relations au sein d’une application web destinée à la gestion et au suivi des stagiaires du MEF dans le contexte SIIGFP.
++Le suivi d’un stage ne se limite pas à enregistrer l’identité d’une personne. Il associe un parcours académique, une structure d’accueil, un encadreur, une période de présence, des travaux à rendre et des décisions administratives. Dans l’application étudiée, ces informations sont reliées à des documents, à des observations et à des événements qui doivent rester compréhensibles au fil du dossier. Le projet présenté dans ce mémoire organise ces relations au sein d’une application web destinée à la gestion et au suivi des stagiaires au sein de la Cellule Informatique SIIGFP du MEF.
+ La question centrale est la suivante : comment construire un dossier de stage cohérent et traçable, accessible à chaque acteur selon ses responsabilités, tout en conservant les règles et les décisions qui déterminent son évolution ? Cette problématique est formulée à partir du périmètre effectivement développé. Elle ne suppose ni un nombre d’utilisateurs, ni une perte de documents, ni un délai de traitement ancien qui n’auraient pas été mesurés.
+ L’objectif général consiste à mettre en relation les informations administratives et pédagogiques nécessaires au suivi. Les objectifs techniques sont de séparer l’interface des traitements métier, de préserver l’intégrité relationnelle, de contrôler les accès au niveau des ressources et d’exposer les échéances utiles à l’action. Le code comporte des parcours d’admission, d’affectation, de rédaction et d’examen des rapports, de gestion documentaire, d’évaluation, de soutenance, de clôture et de pilotage. L’authentification et les rôles traversent l’ensemble de ces parcours.
+ La démarche de présentation s’appuie sur une lecture du schéma PostgreSQL, des entités et services Java, des contrôleurs REST, des composants React et des tests disponibles. Les résultats de campagnes antérieures sont distingués des vérifications effectuées pour cette rédaction. Ces dernières ont permis d’exécuter 36 tests unitaires backend et 126 tests frontend avec succès, ainsi que le contrôle ESLint et la construction Vite. Elles ne constituent pas une recette complète de l’installation cible : les interactions navigateur, l’intégration PostgreSQL complète et l’exploitation restent à documenter dans le périmètre de cette version.
+ Le mémoire comporte trois chapitres. Le premier présente le projet, les besoins déduits de ses fonctions et l’architecture existante. Le deuxième développe la conception et les principaux mécanismes de réalisation, avec une attention particulière à la sécurité, aux rapports et à la clôture administrative. Le troisième évalue les résultats démontrés, les limites et les évolutions envisageables. Les annexes rassemblent les repères de preuve, l’inventaire relationnel et les vérifications à compléter.
+ 1 Présentation du projet
+ 1.1 Contexte et objectifs
+-Le sujet fourni situe le stage au Ministère de l’Économie et des Finances de Madagascar et rattache le projet au SIIGFP. Le produit développé est une application de suivi des stagiaires. Son périmètre observable concerne des dossiers de personnes, leurs participations à des stages, les encadreurs, les productions périodiques et les éléments nécessaires à la clôture. Le rattachement à l’organisme d’accueil fournit le contexte du travail ; aucune connexion à une application financière du ministère n’est démontrée dans le dépôt.
++Le sujet fourni situe le stage au Ministère de l’Économie et des Finances de Madagascar et rattache le projet a la Cellule SIIGFP. Le produit développé est une application de suivi des stagiaires. Son périmètre observable concerne des dossiers de personnes, leurs participations à des stages, les encadreurs, les productions périodiques et les éléments nécessaires à la clôture. Le rattachement à l’organisme d’accueil fournit le contexte du travail ; aucune connexion à une application financière du ministère n’est démontrée dans le dépôt.
+ L’application distingue l’existence administrative d’un stagiaire de ses participations successives. Cette distinction permet de conserver une identité générale tout en associant chaque participation à un profil académique, un stage, un cadre de travail et un encadreur. L’objectif n’est donc pas seulement de disposer d’un annuaire : il s’agit de rendre possible un suivi contextualisé, depuis l’affectation jusqu’à la clôture, sans confondre les événements de plusieurs périodes. [P10, P32]
+ Les services de synthèse et de pilotage poursuivent un objectif complémentaire. Ils regroupent les informations réparties dans les tables pour rendre visibles les échéances, les pièces manquantes, l’avancement des rapports et les alertes. La présence de ces calculs démontre une capacité de consolidation dans le code. L’utilité effectivement constatée auprès du service d’accueil et les critères d’acceptation institutionnels restent [À CONFIRMER]. [P22, P34]
+ 1.2 Analyse de l’existant et périmètre documenté
