@@ -1,0 +1,452 @@
+{
+  "section_1": {
+    "title": "Glossaire",
+    "physical": 6,
+    "label": "v"
+  },
+  "section_2": {
+    "title": "Avant-propos",
+    "physical": 7,
+    "label": "vi"
+  },
+  "section_3": {
+    "title": "L'IT University",
+    "physical": 7,
+    "label": "vi"
+  },
+  "section_4": {
+    "title": "Le Ministère de l’Économie et des Finances (MEF)",
+    "physical": 7,
+    "label": "vi"
+  },
+  "section_5": {
+    "title": "Remerciements",
+    "physical": 8,
+    "label": "vii"
+  },
+  "section_6": {
+    "title": "Introduction générale",
+    "physical": 9,
+    "label": "1"
+  },
+  "section_7": {
+    "title": "1 Présentation du projet",
+    "physical": 11,
+    "label": "3"
+  },
+  "section_8": {
+    "title": "1.1 Contexte et objectifs",
+    "physical": 11,
+    "label": "3"
+  },
+  "section_9": {
+    "title": "1.1.1 Contexte du projet",
+    "physical": 11,
+    "label": "3"
+  },
+  "section_10": {
+    "title": "1.1.2 Objectif général",
+    "physical": 12,
+    "label": "4"
+  },
+  "section_11": {
+    "title": "1.1.3 Objectifs spécifiques",
+    "physical": 12,
+    "label": "4"
+  },
+  "section_12": {
+    "title": "1.2 Analyse de l’existant",
+    "physical": 12,
+    "label": "4"
+  },
+  "section_13": {
+    "title": "1.2.1 Organisation actuelle du suivi des stagiaires",
+    "physical": 13,
+    "label": "5"
+  },
+  "section_14": {
+    "title": "1.2.2 Limites et difficultés identifiées",
+    "physical": 13,
+    "label": "5"
+  },
+  "section_15": {
+    "title": "1.2.3 Synthèse de l’analyse",
+    "physical": 14,
+    "label": "6"
+  },
+  "section_16": {
+    "title": "1.3 Acteurs et besoins",
+    "physical": 14,
+    "label": "6"
+  },
+  "section_17": {
+    "title": "1.3.1 Besoins fonctionnels",
+    "physical": 15,
+    "label": "7"
+  },
+  "section_18": {
+    "title": "1.3.2 Besoins non fonctionnels",
+    "physical": 15,
+    "label": "7"
+  },
+  "section_19": {
+    "title": "1.4 Démarche de travail et planning",
+    "physical": 16,
+    "label": "8"
+  },
+  "section_20": {
+    "title": "1.4.1 Démarche de travail",
+    "physical": 16,
+    "label": "8"
+  },
+  "section_21": {
+    "title": "1.4.2 Planning de réalisation",
+    "physical": 17,
+    "label": "9"
+  },
+  "section_22": {
+    "title": "1.5 Technologies utilisées et justification des choix",
+    "physical": 17,
+    "label": "9"
+  },
+  "section_23": {
+    "title": "1.5.1 Technologies utilisées",
+    "physical": 17,
+    "label": "9"
+  },
+  "section_24": {
+    "title": "1.5.2 Justification des choix technologiques",
+    "physical": 18,
+    "label": "10"
+  },
+  "section_25": {
+    "title": "1.5.3 Architecture générale de la solution",
+    "physical": 19,
+    "label": "11"
+  },
+  "section_26": {
+    "title": "2 Conception et réalisation",
+    "physical": 21,
+    "label": "13"
+  },
+  "section_27": {
+    "title": "2.1 Organisation des données",
+    "physical": 21,
+    "label": "13"
+  },
+  "section_28": {
+    "title": "2.2 Architecture backend et transactions",
+    "physical": 23,
+    "label": "15"
+  },
+  "section_29": {
+    "title": "2.3 Authentification et contrôle d’accès",
+    "physical": 25,
+    "label": "17"
+  },
+  "section_30": {
+    "title": "2.4 Admission et affectation des stagiaires",
+    "physical": 26,
+    "label": "18"
+  },
+  "section_31": {
+    "title": "2.5 Événements et clôture des participations",
+    "physical": 28,
+    "label": "20"
+  },
+  "section_32": {
+    "title": "2.6 Rapports hebdomadaires et observations",
+    "physical": 31,
+    "label": "23"
+  },
+  "section_33": {
+    "title": "2.7 Gestion documentaire",
+    "physical": 34,
+    "label": "26"
+  },
+  "section_34": {
+    "title": "2.8 Évaluations et soutenances",
+    "physical": 35,
+    "label": "27"
+  },
+  "section_35": {
+    "title": "2.9 Alertes et pilotage",
+    "physical": 37,
+    "label": "29"
+  },
+  "section_36": {
+    "title": "2.9.1 Gestion des alertes",
+    "physical": 37,
+    "label": "29"
+  },
+  "section_37": {
+    "title": "2.9.2 Indicateurs de suivi et tableaux de bord",
+    "physical": 38,
+    "label": "30"
+  },
+  "section_38": {
+    "title": "2.9.3 Synthèses et exportation des données",
+    "physical": 38,
+    "label": "30"
+  },
+  "section_39": {
+    "title": "2.10 Interface utilisateur et parcours",
+    "physical": 40,
+    "label": "32"
+  },
+  "section_40": {
+    "title": "2.10.1 Parcours de l’administrateur (ADMIN)",
+    "physical": 40,
+    "label": "32"
+  },
+  "section_41": {
+    "title": "2.10.2 Parcours de l’encadreur (ENCADREUR)",
+    "physical": 40,
+    "label": "32"
+  },
+  "section_42": {
+    "title": "2.10.3 Parcours du stagiaire (STAGIAIRE)",
+    "physical": 41,
+    "label": "33"
+  },
+  "section_43": {
+    "title": "2.10.4 Contrôle des accès et gestion des interactions",
+    "physical": 41,
+    "label": "33"
+  },
+  "section_44": {
+    "title": "2.11 Contraintes SQL et cohérence avec JPA",
+    "physical": 42,
+    "label": "34"
+  },
+  "section_45": {
+    "title": "2.12 Tests et validation",
+    "physical": 43,
+    "label": "35"
+  },
+  "section_46": {
+    "title": "2.13 État du déploiement",
+    "physical": 44,
+    "label": "36"
+  },
+  "section_47": {
+    "title": "2.14 Difficultés rencontrées et solutions apportées",
+    "physical": 44,
+    "label": "36"
+  },
+  "section_48": {
+    "title": "3 Évaluation du projet et connaissances acquises",
+    "physical": 46,
+    "label": "38"
+  },
+  "section_49": {
+    "title": "3.1 Bilan fonctionnel",
+    "physical": 46,
+    "label": "38"
+  },
+  "section_50": {
+    "title": "3.2 Bilan technique",
+    "physical": 46,
+    "label": "38"
+  },
+  "section_51": {
+    "title": "3.3 Apports à l’organisme d’accueil",
+    "physical": 47,
+    "label": "39"
+  },
+  "section_52": {
+    "title": "3.4 Bilan personnel et compétences acquises",
+    "physical": 48,
+    "label": "40"
+  },
+  "section_53": {
+    "title": "3.5 Limites et perspectives d’évolution",
+    "physical": 50,
+    "label": "42"
+  },
+  "section_54": {
+    "title": "Conclusion générale",
+    "physical": 51,
+    "label": "43"
+  },
+  "section_55": {
+    "title": "Bibliographie",
+    "physical": 52,
+    "label": "44"
+  },
+  "section_56": {
+    "title": "Annexes",
+    "physical": 53,
+    "label": "45"
+  },
+  "section_57": {
+    "title": "Annexe A Règles de gestion essentielles",
+    "physical": 53,
+    "label": "45"
+  },
+  "section_58": {
+    "title": "Annexe B Inventaire du modèle relationnel",
+    "physical": 54,
+    "label": "46"
+  },
+  "section_59": {
+    "title": "Annexe C Scénarios de recette complémentaire",
+    "physical": 55,
+    "label": "47"
+  },
+  "section_60": {
+    "title": "Annexe D Repères de déploiement et de conservation",
+    "physical": 56,
+    "label": "48"
+  },
+  "tab_1": {
+    "title": "Tableau 1 — Acteurs et responsabilités",
+    "physical": 14,
+    "label": "6"
+  },
+  "tab_2": {
+    "title": "Tableau 2 — Principales phases de réalisation du projet",
+    "physical": 17,
+    "label": "9"
+  },
+  "tab_3": {
+    "title": "Tableau 3 — Technologies utilisées dans le projet",
+    "physical": 18,
+    "label": "10"
+  },
+  "tab_4": {
+    "title": "Tableau 4 — Ensembles du modèle relationnel",
+    "physical": 23,
+    "label": "15"
+  },
+  "tab_5": {
+    "title": "Tableau 5 — Modalités de clôture",
+    "physical": 29,
+    "label": "21"
+  },
+  "tab_6": {
+    "title": "Tableau 6 — Parcours et pages de l’application",
+    "physical": 41,
+    "label": "33"
+  },
+  "tab_7": {
+    "title": "Tableau 7 — Vérifications documentées et portée des résultats",
+    "physical": 43,
+    "label": "35"
+  },
+  "tab_8": {
+    "title": "Tableau 8 — Synthèse des principales règles de gestion",
+    "physical": 53,
+    "label": "45"
+  },
+  "tab_9": {
+    "title": "Tableau 9 — Inventaire des 44 tables par famille",
+    "physical": 54,
+    "label": "46"
+  },
+  "tab_10": {
+    "title": "Tableau 10 — Vues du schéma de référence",
+    "physical": 54,
+    "label": "46"
+  },
+  "tab_11": {
+    "title": "Tableau 11 — Scénarios de recette de bout en bout",
+    "physical": 55,
+    "label": "47"
+  },
+  "tab_12": {
+    "title": "Tableau 12 — Services et stockage dans Docker Compose",
+    "physical": 56,
+    "label": "48"
+  },
+  "fig_1": {
+    "title": "Figure 1 — Acteurs et principaux parcours",
+    "physical": 15,
+    "label": "7"
+  },
+  "fig_2": {
+    "title": "Figure 2 — Architecture générale de l’application",
+    "physical": 20,
+    "label": "12"
+  },
+  "fig_3": {
+    "title": "Figure 3 — Relations principales du modèle relationnel PostgreSQL",
+    "physical": 22,
+    "label": "14"
+  },
+  "fig_4": {
+    "title": "Figure 4 — Composants de traitement d’une requête métier",
+    "physical": 24,
+    "label": "16"
+  },
+  "fig_5": {
+    "title": "Figure 5 — Interface de connexion à l’application",
+    "physical": 25,
+    "label": "17"
+  },
+  "fig_6": {
+    "title": "Figure 6 — Dossier du stagiaire et informations académiques",
+    "physical": 27,
+    "label": "19"
+  },
+  "fig_7": {
+    "title": "Figure 7 — Formulaire d’affectation à une participation",
+    "physical": 28,
+    "label": "20"
+  },
+  "fig_8": {
+    "title": "Figure 8 — Décision de clôture et contrôles conservés",
+    "physical": 30,
+    "label": "22"
+  },
+  "fig_9": {
+    "title": "Figure 9 — Confirmation de la clôture administrative",
+    "physical": 31,
+    "label": "23"
+  },
+  "fig_10": {
+    "title": "Figure 10 — Grille de suivi des rapports hebdomadaires",
+    "physical": 32,
+    "label": "24"
+  },
+  "fig_11": {
+    "title": "Figure 11 — Séquence de soumission et d’examen d’un rapport",
+    "physical": 33,
+    "label": "25"
+  },
+  "fig_12": {
+    "title": "Figure 12 — Actions d’examen d’un rapport soumis",
+    "physical": 33,
+    "label": "25"
+  },
+  "fig_13": {
+    "title": "Figure 13 — Gestion des pièces jointes du dossier",
+    "physical": 34,
+    "label": "26"
+  },
+  "fig_14": {
+    "title": "Figure 14 — Grille d’évaluation finale d’une participation",
+    "physical": 36,
+    "label": "28"
+  },
+  "fig_15": {
+    "title": "Figure 15 — Planification d’une soutenance",
+    "physical": 36,
+    "label": "28"
+  },
+  "fig_16": {
+    "title": "Figure 16 — Classement des dossiers et actions recommandées",
+    "physical": 37,
+    "label": "29"
+  },
+  "fig_17": {
+    "title": "Figure 17 — Tableau de bord du suivi des stages",
+    "physical": 38,
+    "label": "30"
+  },
+  "fig_18": {
+    "title": "Figure 18 — Extrait du bilan de fin de stage exporté en PDF",
+    "physical": 39,
+    "label": "31"
+  }
+}

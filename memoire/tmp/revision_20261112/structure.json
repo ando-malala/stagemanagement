@@ -1,0 +1,487 @@
+{
+  "headings": [
+    [
+      "Glossaire",
+      1,
+      "section_1"
+    ],
+    [
+      "Avant-propos",
+      1,
+      "section_2"
+    ],
+    [
+      "L'IT University",
+      2,
+      "section_3"
+    ],
+    [
+      "Le Ministère de l’Économie et des Finances (MEF)",
+      2,
+      "section_4"
+    ],
+    [
+      "Remerciements",
+      1,
+      "section_5"
+    ],
+    [
+      "Introduction générale",
+      1,
+      "section_6"
+    ],
+    [
+      "1 Présentation du projet",
+      1,
+      "section_7"
+    ],
+    [
+      "1.1 Contexte et objectifs",
+      2,
+      "section_8"
+    ],
+    [
+      "1.1.1 Contexte du projet",
+      3,
+      "section_9"
+    ],
+    [
+      "1.1.2 Objectif général",
+      3,
+      "section_10"
+    ],
+    [
+      "1.1.3 Objectifs spécifiques",
+      3,
+      "section_11"
+    ],
+    [
+      "1.2 Analyse de l’existant",
+      2,
+      "section_12"
+    ],
+    [
+      "1.2.1 Organisation actuelle du suivi des stagiaires",
+      3,
+      "section_13"
+    ],
+    [
+      "1.2.2 Limites et difficultés identifiées",
+      3,
+      "section_14"
+    ],
+    [
+      "1.2.3 Synthèse de l’analyse",
+      3,
+      "section_15"
+    ],
+    [
+      "1.3 Acteurs et besoins",
+      2,
+      "section_16"
+    ],
+    [
+      "1.3.1 Besoins fonctionnels",
+      3,
+      "section_17"
+    ],
+    [
+      "1.3.2 Besoins non fonctionnels",
+      3,
+      "section_18"
+    ],
+    [
+      "1.4 Démarche de travail et planning",
+      2,
+      "section_19"
+    ],
+    [
+      "1.4.1 Démarche de travail",
+      3,
+      "section_20"
+    ],
+    [
+      "1.4.2 Planning de réalisation",
+      3,
+      "section_21"
+    ],
+    [
+      "1.5 Technologies utilisées et justification des choix",
+      2,
+      "section_22"
+    ],
+    [
+      "1.5.1 Technologies utilisées",
+      3,
+      "section_23"
+    ],
+    [
+      "1.5.2 Justification des choix technologiques",
+      3,
+      "section_24"
+    ],
+    [
+      "1.5.3 Architecture générale de la solution",
+      3,
+      "section_25"
+    ],
+    [
+      "2 Conception et réalisation",
+      1,
+      "section_26"
+    ],
+    [
+      "2.1 Organisation des données",
+      2,
+      "section_27"
+    ],
+    [
+      "2.2 Architecture backend et transactions",
+      2,
+      "section_28"
+    ],
+    [
+      "2.3 Authentification et contrôle d’accès",
+      2,
+      "section_29"
+    ],
+    [
+      "2.4 Admission et affectation des stagiaires",
+      2,
+      "section_30"
+    ],
+    [
+      "2.5 Événements et clôture des participations",
+      2,
+      "section_31"
+    ],
+    [
+      "2.6 Rapports hebdomadaires et observations",
+      2,
+      "section_32"
+    ],
+    [
+      "2.7 Gestion documentaire",
+      2,
+      "section_33"
+    ],
+    [
+      "2.8 Évaluations et soutenances",
+      2,
+      "section_34"
+    ],
+    [
+      "2.9 Alertes et pilotage",
+      2,
+      "section_35"
+    ],
+    [
+      "2.9.1 Gestion des alertes",
+      3,
+      "section_36"
+    ],
+    [
+      "2.9.2 Indicateurs de suivi et tableaux de bord",
+      3,
+      "section_37"
+    ],
+    [
+      "2.9.3 Synthèses et exportation des données",
+      3,
+      "section_38"
+    ],
+    [
+      "2.10 Interface utilisateur et parcours",
+      2,
+      "section_39"
+    ],
+    [
+      "2.10.1 Parcours de l’administrateur (ADMIN)",
+      3,
+      "section_40"
+    ],
+    [
+      "2.10.2 Parcours de l’encadreur (ENCADREUR)",
+      3,
+      "section_41"
+    ],
+    [
+      "2.10.3 Parcours du stagiaire (STAGIAIRE)",
+      3,
+      "section_42"
+    ],
+    [
+      "2.10.4 Contrôle des accès et gestion des interactions",
+      3,
+      "section_43"
+    ],
+    [
+      "2.11 Contraintes SQL et cohérence avec JPA",
+      2,
+      "section_44"
+    ],
+    [
+      "2.12 Tests et validation",
+      2,
+      "section_45"
+    ],
+    [
+      "2.13 État du déploiement",
+      2,
+      "section_46"
+    ],
+    [
+      "2.14 Difficultés rencontrées et solutions apportées",
+      2,
+      "section_47"
+    ],
+    [
+      "3 Évaluation du projet et connaissances acquises",
+      1,
+      "section_48"
+    ],
+    [
+      "3.1 Bilan fonctionnel",
+      2,
+      "section_49"
+    ],
+    [
+      "3.2 Bilan technique",
+      2,
+      "section_50"
+    ],
+    [
+      "3.3 Apports à l’organisme d’accueil",
+      2,
+      "section_51"
+    ],
+    [
+      "3.4 Bilan personnel et compétences acquises",
+      2,
+      "section_52"
+    ],
+    [
+      "3.5 Limites et perspectives d’évolution",
+      2,
+      "section_53"
+    ],
+    [
+      "Conclusion générale",
+      1,
+      "section_54"
+    ],
+    [
+      "Bibliographie",
+      1,
+      "section_55"
+    ],
+    [
+      "Annexes",
+      1,
+      "section_56"
+    ],
+    [
+      "Annexe A Règles de gestion essentielles",
+      2,
+      "section_57"
+    ],
+    [
+      "Annexe B Inventaire du modèle relationnel",
+      2,
+      "section_58"
+    ],
+    [
+      "Annexe C Scénarios de recette complémentaire",
+      2,
+      "section_59"
+    ],
+    [
+      "Annexe D Repères de déploiement et de conservation",
+      2,
+      "section_60"
+    ]
+  ],
+  "captions": [
+    [
+      "Figure",
+      1,
+      "Acteurs et principaux parcours",
+      "fig_1"
+    ],
+    [
+      "Figure",
+      2,
+      "Architecture générale de l’application",
+      "fig_2"
+    ],
+    [
+      "Figure",
+      3,
+      "Relations principales du modèle relationnel PostgreSQL",
+      "fig_3"
+    ],
+    [
+      "Figure",
+      4,
+      "Composants de traitement d’une requête métier",
+      "fig_4"
+    ],
+    [
+      "Figure",
+      5,
+      "Interface de connexion à l’application",
+      "fig_5"
+    ],
+    [
+      "Figure",
+      6,
+      "Dossier du stagiaire et informations académiques",
+      "fig_6"
+    ],
+    [
+      "Figure",
+      7,
+      "Formulaire d’affectation à une participation",
+      "fig_7"
+    ],
+    [
+      "Figure",
+      8,
+      "Décision de clôture et contrôles conservés",
+      "fig_8"
+    ],
+    [
+      "Figure",
+      9,
+      "Confirmation de la clôture administrative",
+      "fig_9"
+    ],
+    [
+      "Figure",
+      10,
+      "Grille de suivi des rapports hebdomadaires",
+      "fig_10"
+    ],
+    [
+      "Figure",
+      11,
+      "Séquence de soumission et d’examen d’un rapport",
+      "fig_11"
+    ],
+    [
+      "Figure",
+      12,
+      "Actions d’examen d’un rapport soumis",
+      "fig_12"
+    ],
+    [
+      "Figure",
+      13,
+      "Gestion des pièces jointes du dossier",
+      "fig_13"
+    ],
+    [
+      "Figure",
+      14,
+      "Grille d’évaluation finale d’une participation",
+      "fig_14"
+    ],
+    [
+      "Figure",
+      15,
+      "Planification d’une soutenance",
+      "fig_15"
+    ],
+    [
+      "Figure",
+      16,
+      "Classement des dossiers et actions recommandées",
+      "fig_16"
+    ],
+    [
+      "Figure",
+      17,
+      "Tableau de bord du suivi des stages",
+      "fig_17"
+    ],
+    [
+      "Figure",
+      18,
+      "Extrait du bilan de fin de stage exporté en PDF",
+      "fig_18"
+    ],
+    [
+      "Tableau",
+      1,
+      "Acteurs et responsabilités",
+      "tab_1"
+    ],
+    [
+      "Tableau",
+      2,
+      "Principales phases de réalisation du projet",
+      "tab_2"
+    ],
+    [
+      "Tableau",
+      3,
+      "Technologies utilisées dans le projet",
+      "tab_3"
+    ],
+    [
+      "Tableau",
+      4,
+      "Ensembles du modèle relationnel",
+      "tab_4"
+    ],
+    [
+      "Tableau",
+      5,
+      "Modalités de clôture",
+      "tab_5"
+    ],
+    [
+      "Tableau",
+      6,
+      "Parcours et pages de l’application",
+      "tab_6"
+    ],
+    [
+      "Tableau",
+      7,
+      "Vérifications documentées et portée des résultats",
+      "tab_7"
+    ],
+    [
+      "Tableau",
+      8,
+      "Synthèse des principales règles de gestion",
+      "tab_8"
+    ],
+    [
+      "Tableau",
+      9,
+      "Inventaire des 44 tables par famille",
+      "tab_9"
+    ],
+    [
+      "Tableau",
+      10,
+      "Vues du schéma de référence",
+      "tab_10"
+    ],
+    [
+      "Tableau",
+      11,
+      "Scénarios de recette de bout en bout",
+      "tab_11"
+    ],
+    [
+      "Tableau",
+      12,
+      "Services et stockage dans Docker Compose",
+      "tab_12"
+    ]
+  ],
+  "source_sha256": "0dfa9cdf2f1a1e0574431d5a8f38a972b3e3044a1fd680b3c56386bb19c5d242"
+}

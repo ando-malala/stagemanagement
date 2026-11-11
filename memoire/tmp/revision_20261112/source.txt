@@ -1,0 +1,549 @@
+P0 [normal] 	
+P1 [Title] Gestion et suivi des stagiaires
+au Ministère de l’Économie
+et des Finances
+P2 [normal] Conception et réalisation d’une application web
+Projet MEF SIIGFP
+P3 [normal] Par
+RAKOTONIAINA Andomalala Erica
+P4 [normal] Mémoire présenté en vue de l’obtention du grade de
+Licence en Informatique
+Option Web
+P5 [normal] IT University
+P6 [normal] Novembre, 2026
+P7 [normal] Encadreur professionnel : RAJOELISOLO Mitanjo
+Encadreur pédagogique : RAKOTOARIMALALA Tsinjo Tony
+Président et membres du jury : [À CONFIRMER]
+P8 [Heading 1] Table des matières
+P9 [Heading 1] Liste des tableaux
+P10 [normal] 
+P11 [Heading 1] Liste des figures
+P12 [Heading 1] Glossaire
+P13 [normal] API (Application Programming Interface) : Interface qui permet à des applications de communiquer entre elles, en exposant des fonctionnalités pour permettre des échanges de données. 
+P14 [normal] BCrypt (Blowfish Crypt) : Algorithme de hachage utilisé pour protéger les mots de passe des utilisateurs en les transformant en une valeur sécurisée, difficile à retrouver. 
+P15 [normal] CRUD (Create, Read, Update, Delete) : Ensemble des opérations de base pour manipuler des données dans une base de données ou un système. Cela inclut la création, la lecture, la mise à jour et la suppression de données. 
+P16 [normal] DTO (Data Transfer Object) : Objet de transfert de données utilisé pour échanger des informations entre les différentes couches d’une application, notamment entre le frontend et le backend. Il permet de structurer les données transmises et de limiter l’exposition des informations internes du système. 
+P17 [normal] HTTP (HyperText Transfer Protocol) : Protocole de communication pour le transfert de données sur le web, permettant d’échanger des informations entre un client (comme un navigateur) et un serveur. 
+P18 [normal] JPA (Java Persistence API) : Spécification Java permettant de gérer et de manipuler les données d’une base de données à partir d’objets Java. 
+P19 [normal] JSON (JavaScript Object Notation) : Format léger utilisé pour organiser et échanger des données entre différentes applications. 
+P20 [normal] MEF (Ministère de l’Économie et des Finances) : Institution publique malgache chargée de la gestion des finances publiques et de la politique économique de l’État. 
+P21 [normal] MCD (Modèle Conceptuel de Données) : Représentation des données d’un système et de leurs relations, indépendamment de leur stockage informatique. 
+P22 [normal] Mio (Mébioctet) : Unité de mesure informatique correspondant à 1 048 576 octets, utilisée notamment pour mesurer la taille des fichiers et de la mémoire. 
+P23 [normal] SIIGFP (Système Intégré Informatisé de Gestion des Finances Publiques) : Système informatique utilisé pour faciliter la gestion et le suivi des opérations relatives aux finances publiques. 
+P24 [normal] SQL (Structured Query Language) : Langage utilisé pour créer, consulter, modifier et gérer les données dans une base de données relationnelle. 
+P25 [normal] SSR (Server-Side Rendering) : Technique de développement web consistant à générer le contenu HTML d’une page sur le serveur avant de l’envoyer au navigateur. 
+P26 [normal] Transaction : Ensemble d’opérations sur la base dont la validation ou l’annulation forme une unité.
+P27 [normal] Trigger (Déclencheur) : Mécanisme d’une base de données qui exécute automatiquement une action lorsqu’un événement se produit, comme l’ajout, la modification ou la suppression de données. 
+P28 [Heading 1] Avant-propos
+P29 [normal] Le present memoire presente les resultats du travail effectue lors de mon stage de fin d’etudes de Licence en Informatique a l’IT University. Ce stage, d’une duree de trois mois, a ete realise au sein de le Cellule Informatique SIIGFP du Ministere de l’Economie et du Finance de Madagascar. 
+P30 [normal] Afin de poser clairement le contexte de ce memoire, je vais presenter succinctement d’une part l’IT University, et d’autre part mon entreprise d’accueil.
+P31 [normal] 	 	
+P32 [normal] 	 	
+P33 [Heading 2] L'IT University
+P34 [normal] Fondée en 2011, l'IT University (ITU) est une université privée d'excellence spécialisée dans les technologies de l'information et de la communication, située à Andoharanofotsy, Antananarivo. Elle a pour mission de former de jeunes bacheliers, principalement issus de filières scientifiques, aux métiers porteurs de l'informatique moderne et de la transition numérique.
+P35 [normal] L'université propose des parcours complets et rigoureusement structurés :
+P36 [normal] Cycle 	Licence (Bac + 3) : Offrant 	des spécialisations pointues en Développement d'applications, 	Réseaux et Systèmes, Bases de Données, ainsi qu'en Web et Graphic 	Design et Digital Leadership and 	Administration.
+P37 [normal] Cycle 	Master (Bac + 5) : Proposant 	notamment le Master MBDS (Mobiquité, Big Data et Intégration de 	Systèmes) en partenariat avec l'Université Côte d'Azur (France), 	et le Master BIHAR en coopération avec l'ESTIA du Pays Basque.
+P38 [normal] Résolument axée sur la professionnalisation de ses étudiants, l'IT University a développé un vaste réseau de partenariats industriels avec les acteurs majeurs du secteur numérique malgache et international, incluant les opérateurs télécoms et des entreprises de services du numérique réputées telles que BICI. Ces partenaires contribuent activement à l'enrichissement des cursus pédagogiques par l'octroi d'infrastructures à haut débit, l'animation de séminaires techniques et l'accueil régulier d'étudiants en stage de pré-embauche. Par ailleurs, le corps professoral de l'ITU est composé exclusivement de professionnels et d'experts en activité, garantissant une adéquation immédiate entre les compétences enseignées et les réalités du marché technologique.
+P39 [normal] 
+P40 [Heading 2] 
+P41 [Heading 2] Le Ministère de l’Économie et des Finances (MEF)
+P42 [normal] Le Ministère de l’Économie et des Finances (MEF) est une institution publique malgache chargée de la gestion des politiques économiques, budgétaires et financières de l’État. Il intervient notamment dans l’élaboration et l’exécution du budget national, la gestion des ressources publiques et le suivi des dépenses de l’État.
+P43 [normal] Pour assurer ses missions, le ministère s’appuie sur plusieurs directions et services spécialisés, notamment la Direction Générale du Budget et des Finances (DGBF), qui participe à la gestion et au suivi des opérations budgétaires.
+P44 [normal] Dans le cadre de la modernisation de l’administration publique, le MEF utilise différents systèmes informatiques, dont le Système Intégré Informatisé de la Gestion des Finances Publiques (SIIGFP), destiné à faciliter le traitement et le suivi des opérations financières et budgétaires.
+P45 [normal] Mon stage s’est déroulé au sein de la cellule SIIGFP, rattachée à la Direction du Budget. Les travaux réalisés ont porté sur la conception et le développement d’une application web de gestion et de suivi des stagiaires, visant à centraliser leurs informations et à faciliter leur suivi administratif.
+P46 [normal] 
+P47 [Heading 1] Remerciements
+P48 [normal] J'exprime ma plus sincère gratitude à l'ensemble de l'équipe de l'IT University, ainsi qu'au corps professoral et administratif, pour la qualité de l'enseignement dispensé, les connaissances transmises et l'accompagnement tout au long de mon parcours universitaire.
+P49 [normal] Mes remerciements les plus chaleureux s'adressent également au Ministère de l'Économie et des Finances (MEF), particulièrement à l'ensemble de l'équipe du SIIGFP, pour leur accueil, leur disponibilité et l'opportunité qui m'a été offerte de réaliser mon stage de fin d'études dans un environnement professionnel enrichissant.
+P50 [normal] Je tiens à exprimer ma reconnaissance toute particulière :
+P51 [normal] À mon encadreur professionnel, RAJOELISOLO Mitanjo, pour son accompagnement, ses conseils et son soutien dans la réalisation de ce mémoire ;
+P52 [normal] À mon encadreur pédagogique, RAKOTOARIMALALA Tsinjo Tony, pour sa disponibilité, sa confiance, ses précieux conseils et le partage de ses connaissances tout au long de mon stage ;
+P53 [normal] À l'ensemble du personnel du SIIGFP, pour leur bienveillance, leur esprit d'entraide et les échanges enrichissants qui ont contribué au bon déroulement de cette expérience professionnelle.
+P54 [normal] Enfin, j'adresse ma profonde reconnaissance à ma famille, à mes parents et à mes proches, pour leurs sacrifices, leurs encouragements et leur soutien moral indéfectible tout au long de mes études. Leur présence et leur confiance ont été une source constante de motivation et de persévérance.
+P55 [normal] 
+P56 [Heading 1] Introduction générale
+P57 [normal] L'essentiel du travail que j'ai réalisé lors de mon stage de fin d'études a porté sur le thème : « Conception et réalisation d'une application web de gestion et de suivi des stagiaires au sein du Ministère de l'Économie et des Finances (MEF) ».
+P58 [normal] Au sein d'une administration publique, la gestion des stagiaires nécessite le suivi de nombreuses informations, allant de leur identification et de leur parcours académique jusqu'à leur affectation, leur encadrement et la clôture de leur stage. Ces activités impliquent plusieurs intervenants et nécessitent une organisation rigoureuse afin d'assurer la cohérence des informations et de faciliter les opérations administratives.
+P59 [normal] Dans le cadre de mon stage au sein de la cellule du Système Intégré Informatisé de la Gestion des Finances Publiques (SIIGFP), rattachée à la Direction du Budget du Ministère de l'Économie et des Finances, le projet qui m'a été confié consistait à développer une application web destinée à centraliser et à organiser les différentes étapes du suivi des stagiaires.
+P60 [normal] La gestion de ces informations représente un enjeu important, car chaque stagiaire peut être associé à un établissement de formation, à un parcours académique, à une période de stage, à un encadreur et à plusieurs documents administratifs. À cela s'ajoutent les rapports d'activité, les évaluations, les soutenances ainsi que les différentes échéances nécessitant un suivi régulier. L'utilisation d'un système centralisé permet de regrouper ces éléments et de faciliter leur consultation par les personnes autorisées.
+P61 [normal] C'est dans cette perspective que s'inscrit la problématique de ce projet : comment concevoir une application web permettant de centraliser les informations des stagiaires, d'assurer le suivi de leur parcours et de faciliter les opérations administratives, tout en garantissant la cohérence des données et la sécurité des accès ?
+P62 [normal] Pour répondre à cette problématique, l'objectif principal de mon travail a été de concevoir et de développer une application web organisée autour de plusieurs modules fonctionnels :
+P63 [normal] Gestion des utilisateurs et des rôles : permettre l'authentification des utilisateurs et la gestion des autorisations selon les responsabilités de chacun.
+P64 [normal] Gestion des stagiaires : enregistrer, consulter et modifier les informations personnelles et académiques des stagiaires.
+P65 [normal] Gestion des stages et des affectations : organiser les périodes de stage, les structures d'accueil et l'affectation des stagiaires à leurs encadreurs.
+P66 [normal] Suivi des rapports d'activité : faciliter l'enregistrement, la consultation et le traitement des rapports produits au cours du stage.
+P67 [normal] Gestion documentaire : centraliser les documents associés aux stagiaires et à leurs participations.
+P68 [normal] Gestion des évaluations et des soutenances : assurer le suivi des étapes de fin de stage et des informations relatives à l'évaluation des stagiaires.
+P69 [normal] Gestion des alertes et des échéances : signaler les événements importants, notamment les périodes de fin de stage et les situations nécessitant une attention particulière.
+P70 [normal] Pour réaliser cette application, j'ai adopté une architecture séparant l'interface utilisateur, les traitements métier et la gestion des données. Le frontend a été développé avec React, tandis que le backend repose sur Java et Spring Boot, avec des API REST assurant la communication entre les différentes parties du système. La base de données relationnelle a été conçue avec PostgreSQL, afin d'organiser les informations et de préserver leurs relations.
+P71 [normal] Le présent mémoire est structuré en trois grands chapitres. Le premier présente le cadre général du projet, le contexte du stage, les besoins identifiés et les objectifs de l'application. Le deuxième expose la conception et la réalisation technique du système, notamment l'architecture logicielle, la modélisation de la base de données et le développement des principales fonctionnalités. Enfin, le troisième chapitre présente les résultats obtenus, les vérifications effectuées, les difficultés rencontrées ainsi que les compétences acquises au cours du stage, avant d'aborder les limites du projet et ses perspectives d'amélioration.
+P72 [normal] 
+P73 [Heading 1] 1 Présentation du projet
+P74 [Heading 2] 1.1 Contexte et objectifs
+P75 [Heading 3] 1.1.1 Contexte du projet
+P76 [normal] Le Ministère de l'Économie et des Finances (MEF), à travers la Cellule d'exploitation du Système Intégré Informatisé de la Gestion des Finances Publiques (SIIGFP), accueille régulièrement des stagiaires issus de différents établissements d'enseignement supérieur et de diverses filières de formation.
+P77 [normal] L'accueil de ces stagiaires nécessite plusieurs opérations administratives, notamment l'enregistrement de leurs informations personnelles et académiques, la définition de leur période de stage, leur affectation à un encadreur professionnel ainsi que le suivi des activités réalisées durant leur séjour.
+P78 [normal] Cependant, la gestion de ces différentes informations peut devenir complexe lorsqu'elles sont réparties entre plusieurs supports, tels que des documents papier, des classeurs ou des fichiers indépendants. Cette organisation présente plusieurs difficultés :
+P79 [normal] La dispersion des informations : les données personnelles, académiques et administratives d'un stagiaire peuvent être conservées dans différents documents, ce qui complique leur consultation.
+P80 [normal] Le suivi des activités : l'absence d'un espace centralisé pour les rapports hebdomadaires rend difficile la consultation des travaux réalisés et des observations des encadreurs.
+P81 [normal] Le suivi des échéances : les dates de fin de stage, les rapports en retard et les dossiers incomplets nécessitent une surveillance régulière.
+P82 [normal] La gestion documentaire : les documents liés aux stagiaires et à leurs stages doivent être organisés afin de faciliter leur consultation et leur conservation.
+P83 [normal] La traçabilité : les changements de statut, les validations et les opérations administratives doivent pouvoir être suivis.
+P84 [normal] La production de synthèses : l'établissement de listes, de statistiques et de bilans nécessite de regrouper des informations provenant de plusieurs dossiers.
+P85 [normal] Face à ces besoins, le projet qui m'a été confié consiste à concevoir et développer une application web de gestion et de suivi des stagiaires, destinée à centraliser les informations et à faciliter les différentes opérations administratives réalisées au sein de la Cellule SIIGFP.
+P86 [normal] L'application doit permettre de suivre le parcours d'un stagiaire depuis son enregistrement jusqu'à la clôture de son stage, en intégrant les affectations, les rapports d'activité, les documents, les évaluations et les échéances importantes.
+P87 [Heading 3] 1.1.2 Objectif général
+P88 [normal] L'objectif principal du projet est de concevoir et réaliser une application web centralisée, sécurisée et simple d'utilisation permettant d'assurer la gestion administrative et le suivi des stagiaires au sein de la Cellule SIIGFP du Ministère de l'Économie et des Finances.
+P89 [normal] Cette application vise à faciliter l'enregistrement, la consultation, le suivi et la conservation des informations relatives aux stagiaires, tout en améliorant la visibilité sur le déroulement de leurs stages.
+P90 [Heading 3] 1.1.3 Objectifs spécifiques
+P91 [normal] Pour atteindre cet objectif général, plusieurs objectifs spécifiques ont été définis :
+P92 [normal] Centraliser les informations des stagiaires : enregistrer leurs données personnelles, leurs établissements d'origine, leurs filières et leurs niveaux d'études.
+P93 [normal] Faciliter la gestion des stages et des affectations : organiser les périodes de stage, les structures d'accueil et l'attribution des encadreurs professionnels.
+P94 [normal] Assurer le suivi des activités : permettre l'enregistrement des rapports hebdomadaires, leur consultation et leur validation par les encadreurs.
+P95 [normal] Centraliser les documents administratifs : organiser les pièces jointes associées aux stagiaires et à leurs participations aux stages.
+P96 [normal] Gérer les évaluations et les soutenances : enregistrer les résultats des évaluations finales et assurer le suivi des soutenances lorsqu'elles sont prévues.
+P97 [normal] Automatiser la détection des échéances : signaler les stages proches de leur fin, les rapports manquants ou en retard et les dossiers nécessitant une intervention.
+P98 [normal] Faciliter le pilotage administratif : proposer des tableaux de bord et des indicateurs permettant de consulter les stages en cours, les dossiers incomplets et les alertes actives.
+P99 [normal] Sécuriser l'accès aux informations : mettre en place un système d'authentification et de gestion des rôles afin de limiter les opérations accessibles à chaque utilisateur.
+P100 [normal] Assurer la traçabilité des opérations : conserver l'historique des changements de statut et des principales actions réalisées dans l'application.
+P101 [normal] Faciliter la clôture des stages : vérifier les éléments nécessaires à la finalisation d'un dossier et conserver les informations relatives au parcours du stagiaire.
+P102 [normal] La réalisation de ces objectifs doit permettre à la Cellule SIIGFP de disposer d'un outil unique pour organiser les dossiers des stagiaires, suivre leurs activités et identifier les situations nécessitant une intervention administrative.
+P103 [Heading 2] 1.2 Analyse de l’existant
+P104 [normal] Au sein de la Cellule SIIGFP du Ministère de l’Économie et des Finances, l’accueil des stagiaires nécessite la réalisation de plusieurs tâches administratives. Celles-ci comprennent notamment la collecte des informations personnelles et académiques, l’enregistrement des périodes de stage, l’affectation aux encadreurs professionnels ainsi que le suivi des activités réalisées.
+P105 [normal] D’après les besoins constates au cours de l’analyse du processus reel en jeu, la gestion de ces différentes informations présente plusieurs difficultés, principalement liées à leur organisation, à leur accessibilité et à leur suivi.
+P106 [Heading 3] 1.2.1 Organisation actuelle du suivi des stagiaires
+P107 [normal] Le suivi administratif d’un stagiaire repose sur plusieurs catégories d’informations : son identité, son établissement d’origine, sa filière, la durée de son stage, son encadreur et les activités qui lui sont confiées.
+P108 [normal] Au cours de son stage, d’autres éléments viennent compléter son dossier, notamment les rapports d’activité, les observations de l’encadreur et les documents nécessaires à la validation ou à la clôture de sa période de stage.
+P109 [normal] Lorsque ces informations sont conservées sur différents supports ou dans des fichiers indépendants, leur consultation et leur mise à jour nécessitent plusieurs manipulations. Le suivi global du parcours d’un stagiaire devient alors plus difficile, particulièrement lorsqu’il faut retrouver son historique ou vérifier l’état de son dossier.
+P110 [Heading 3] 1.2.2 Limites et difficultés identifiées
+P111 [normal] L’analyse des besoins fait ressortir plusieurs limites dans l’organisation du suivi des stagiaires.
+P112 [normal] La dispersion des informations constitue une première difficulté. Les données personnelles, académiques et administratives ne sont pas nécessairement regroupées dans un dossier unique, ce qui peut compliquer leur recherche et entraîner des incohérences.
+P113 [normal] Le suivi des activités hebdomadaires représente également une contrainte. En l’absence d’un dispositif centralisé, la consultation des rapports, leur validation et la conservation des observations des encadreurs deviennent plus difficiles à organiser.
+P114 [normal] La surveillance des échéances nécessite une attention particulière. Les dates de fin de stage, les rapports non déposés et les dossiers incomplets doivent être suivis régulièrement afin d’identifier les situations nécessitant une intervention.
+P115 [normal] La gestion documentaire présente aussi des limites lorsque les pièces justificatives et les documents liés au stage sont conservés séparément des informations administratives du stagiaire.
+P116 [normal] Enfin, le manque de visibilité globale sur les stages en cours, terminés ou en attente de clôture complique l'établissement de bilans et la consultation d'indicateurs utiles au suivi administratif.
+P117 [Heading 3] 1.2.3 Synthèse de l’analyse
+P118 [normal] Cette analyse met en évidence la nécessité d’améliorer la centralisation, l’organisation et le suivi des informations relatives aux stagiaires.
+P119 [normal] Le principal enjeu consiste à disposer d’informations cohérentes et facilement accessibles aux personnes autorisées, tout en facilitant le contrôle des activités, des documents et des échéances.
+P120 [normal] Ces constats ont servi de base à la définition des besoins fonctionnels du projet et ont orienté la conception de l’application web de gestion et de suivi des stagiaires, présentée dans les sections suivantes.
+P121 [normal] 
+P122 [Heading 2] 1.3 Acteurs et besoins
+P123 [normal] L'application de gestion et de suivi des stagiaires est destinée à plusieurs catégories d'utilisateurs, dont les responsabilités varient selon leur rôle dans le processus de suivi.
+P124 [normal] Trois principaux acteurs ont été retenus : l'administrateur, l'encadreur professionnel et le stagiaire. Chacun dispose de fonctionnalités et de droits d'accès adaptés à ses responsabilités.
+P125 [normal] Le tableau suivant présente les principales opérations associées à chaque acteur.
+P126 [normal] Tableau 1 — Acteurs et responsabilités observées
+P127 [normal] 
+P128 [normal] 
+P129 [normal] Figure 1 — Acteurs et principaux parcours observés
+P130 [normal] Sources : SecurityConfig et DossierAccessService ; vue fonctionnelle simplifiée, hors matrice exhaustive des permissions.
+P131 [Heading 3] 1.3.1 Besoins fonctionnels
+P132 [normal] Les besoins fonctionnels correspondent aux différentes opérations que l'application doit permettre de réaliser pour assurer la gestion et le suivi des stagiaires.
+P133 [normal] Ils se répartissent en quatre grandes catégories :
+P134 [normal] Gestion administrative : enregistrer et gérer les informations personnelles et académiques des stagiaires, les établissements, les filières, les encadreurs ainsi que les comptes utilisateurs.
+P135 [normal] Gestion et suivi des stages : organiser les affectations, définir les périodes de stage, suivre leur déroulement et conserver l'historique des changements de statut.
+P136 [normal] Suivi des activités et des documents : permettre la rédaction et la validation des rapports hebdomadaires, la gestion des documents administratifs, les évaluations et les soutenances.
+P137 [normal] Pilotage et supervision : proposer des tableaux de bord, des statistiques et des alertes pour faciliter le suivi des échéances, identifier les dossiers incomplets et conserver la trace des opérations effectuées.
+P138 [Heading 3] 1.3.2 Besoins non fonctionnels
+P139 [normal] Les besoins non fonctionnels définissent les exigences que l'application doit respecter pour garantir son bon fonctionnement et sa fiabilité.
+P140 [normal] Les principales exigences sont les suivantes :
+P141 [normal] Sécurité : protéger les informations personnelles des stagiaires et limiter l'accès aux données selon les rôles et les autorisations des utilisateurs.
+P142 [normal] Intégrité des données : garantir la cohérence des informations enregistrées dans la base de données et éviter les associations incorrectes entre les stagiaires, les stages et les encadreurs.
+P143 [normal] Traçabilité : conserver un historique des opérations importantes, notamment les connexions, les modifications de statut et les validations.
+P144 [normal] Ergonomie : proposer une interface claire, intuitive et facile à utiliser pour les différents utilisateurs.
+P145 [normal] Performance : assurer des temps de réponse adaptés aux opérations courantes, telles que la consultation des dossiers et l'enregistrement des rapports.
+P146 [normal] Fiabilité : garantir un fonctionnement stable de l'application et prévoir des mécanismes de sauvegarde et de restauration des données.
+P147 [Heading 2] 1.4 Démarche de travail et planning
+P148 [normal] Pour mener à bien le développement de l'application web de gestion et de suivi des stagiaires, le travail a été organisé en plusieurs étapes, allant de l'analyse des besoins jusqu'à la réalisation des tests.
+P149 [normal] Cette organisation avait pour objectif de structurer le développement, de faciliter le suivi de l'avancement du projet et de garantir la cohérence entre les fonctionnalités attendues et leur réalisation.
+P150 [Heading 3] 1.4.1 Démarche de travail
+P151 [normal] Le développement de l'application s'est articulé autour de cinq principales phases :
+P152 [normal] Analyse des besoins : étude du cahier des charges afin d'identifier les fonctionnalités attendues, les différents utilisateurs, leurs responsabilités et les règles de gestion à respecter.
+P153 [normal] Conception du système : élaboration de l'architecture générale de l'application, modélisation de la base de données relationnelle et définition des échanges entre le frontend et le backend.
+P154 [normal] Développement du backend : mise en place de la base de données PostgreSQL, développement des services métier et des API REST avec Java et Spring Boot, ainsi que des mécanismes d'authentification et de gestion des autorisations.
+P155 [normal] Développement du frontend : réalisation des interfaces utilisateur avec React, intégration des API et mise en place des formulaires, tableaux de consultation et fonctionnalités de suivi.
+P156 [normal] Tests et corrections : vérification du comportement des fonctionnalités développées, contrôle des règles de gestion et correction des anomalies identifiées.
+P157 [normal] Ces différentes étapes ont permis de construire progressivement l'application, tout en apportant des ajustements aux fonctionnalités au cours du développement.
+P158 [Heading 3] 1.4.2 Planning de réalisation
+P159 [normal] Le projet s'inscrit dans une période de stage de trois mois. Les travaux ont été répartis entre l'analyse des besoins, la conception, le développement et les vérifications techniques.
+P160 [normal] Le tableau suivant présente les principales activités du projet.
+P161 [normal] Tableau 2 — Principales phases de réalisation du projet
+P162 [normal] Ce découpage présente l'organisation générale du travail réalisé. La répartition chronologique détaillée des activités pourra être illustrée par un diagramme de Gantt afin de montrer leur déroulement au cours du stage.
+P163 [normal] 
+P164 [Heading 2] 1.5 Technologies utilisées et justification des choix
+P165 [normal] La réalisation de l'application web de gestion et de suivi des stagiaires a nécessité l'utilisation de plusieurs technologies pour assurer le développement de l'interface utilisateur, le traitement des opérations métier et la gestion des données.
+P166 [normal] Le choix de ces technologies repose principalement sur leur compatibilité, leur capacité à répondre aux besoins fonctionnels du projet et leur adaptation à une architecture web organisée en plusieurs couches.
+P167 [Heading 3] 1.5.1 Technologies utilisées
+P168 [normal] Le tableau suivant présente les principales technologies employées dans la réalisation de l'application.
+P169 [normal] Tableau 3 — Technologies utilisées dans le projet
+P170 [Heading 3] 1.5.2 Justification des choix technologiques
+P171 [normal] Java et Spring Boot
+P172 [normal] Java a été retenu pour le développement de la partie serveur de l'application. Ce langage orienté objet permet de structurer le code en différentes classes et de faciliter l'organisation des traitements métier.
+P173 [normal] Son utilisation avec Spring Boot permet de développer des API REST et de séparer les responsabilités entre les contrôleurs, les services métier et les composants chargés de l'accès aux données.
+P174 [normal] Spring Security complète cette architecture en assurant la gestion de l'authentification et des autorisations, tandis que Spring Data JPA facilite les opérations de persistance dans la base de données.
+P175 [normal] React et Vite
+P176 [normal] React a été utilisé pour développer l'interface utilisateur de l'application. Cette bibliothèque permet de construire des interfaces à partir de composants réutilisables, notamment pour les formulaires, les tableaux, les pages de consultation et les tableaux de bord.
+P177 [normal] Cette approche facilite l'organisation du frontend et la réutilisation des éléments communs entre les différentes fonctionnalités.
+P178 [normal] Vite a été associé à React pour fournir un environnement de développement adapté et permettre la compilation des ressources nécessaires à l'exécution de l'application web.
+P179 [normal] 
+P180 [normal] PostgreSQL
+P181 [normal] PostgreSQL a été choisi pour assurer le stockage et la gestion des données de l'application.
+P182 [normal] Le projet manipule plusieurs catégories d'informations liées entre elles, notamment les stagiaires, les établissements, les encadreurs, les stages, les rapports d'activité et les évaluations.
+P183 [normal] L'utilisation d'une base de données relationnelle permet de structurer ces informations sous forme de tables et de définir les relations entre elles à l'aide de clés primaires et étrangères.
+P184 [normal] PostgreSQL offre également des mécanismes tels que les contraintes d'intégrité, les transactions et les déclencheurs (triggers), qui contribuent à préserver la cohérence des données.
+P185 [normal] Apache PDFBox
+P186 [normal] La bibliothèque Apache PDFBox est utilisée dans le backend pour traiter les documents PDF, notamment dans les fonctionnalités liées aux pièces documentaires et à la production de bilans.
+P187 [normal] Maven, Node.js et ESLint
+P188 [normal] Maven assure la gestion des dépendances Java ainsi que la construction du backend. Node.js et npm fournissent les outils nécessaires au développement du frontend et à la gestion de ses bibliothèques.
+P189 [normal] Enfin, ESLint contribue à améliorer la qualité du code JavaScript en signalant certaines erreurs et les problèmes liés aux règles de programmation définies dans le projet.
+P190 [Heading 3] 1.5.3 Architecture générale de la solution
+P191 [normal] L'application repose sur une architecture web organisée autour de trois composants principaux :
+P192 [normal] Le frontend : développé avec React, il constitue l'interface utilisée pour consulter les informations, remplir les formulaires et effectuer les différentes opérations de gestion.
+P193 [normal] Le backend : développé avec Java et Spring Boot, il reçoit les requêtes HTTP, applique les règles métier, vérifie les autorisations et communique avec la base de données.
+P194 [normal] La base de données : gérée avec PostgreSQL, elle assure la conservation des informations et le maintien des relations entre les différentes entités du système.
+P195 [normal] La communication entre le frontend et le backend s'effectue au moyen d'API REST, avec des échanges de données principalement au format JSON.
+P196 [normal] Cette séparation permet d'organiser le développement de l'application en distinguant clairement l'interface utilisateur, les traitements métier et la persistance des données.
+P197 [normal] 
+P198 [normal] Figure X — Architecture générale de l’application web de gestion et de suivi des stagiaires.
+P199 [normal] Source : Élaboration personnelle à partir de l’architecture technique du projet.
+P200 [normal] 
+P201 [normal] 
+P202 [Heading 1] 2 Conception et réalisation
+P203 [Heading 2] 2.1 Organisation des données
+P204 [normal] La conception de la base de données repose sur une organisation permettant de distinguer les informations personnelles du stagiaire, son parcours académique et sa participation à un stage.
+P205 [normal] La table stagiaires contient les informations personnelles et les coordonnées de chaque stagiaire. La table stagiaire_academique permet d'enregistrer son établissement d'origine, sa filière, son niveau et son année d'études. Enfin, la table stage_participant établit le lien entre le profil académique du stagiaire et son stage, en précisant notamment l'encadreur responsable, la période de stage, le cadre de travail et le statut de la participation.
+P206 [normal] Cette organisation permet de conserver les informations générales d'un stagiaire indépendamment de ses différentes participations. Ainsi, un même stagiaire peut effectuer plusieurs stages sans qu'il soit nécessaire de créer un nouveau dossier personnel à chaque fois.
+P207 [normal] La figure 3 présente les principales relations entre les tables de la base de données. Elle permet de comprendre comment les informations sont structurées et associées entre elles afin de garantir la cohérence et l'intégrité des données.
+P208 [normal] 
+P209 [normal] Figure 2 — Relations principales du modèle conceptuel de donnees PostgreSQL
+P210 [normal] Source : conception/Conception2.sql. Chaque flèche représente une clé étrangère ; les relations représentées sont un extrait du schéma.
+P211 [normal] Un stagiaire peut être associé à plusieurs profils académiques, tandis que chaque profil académique appartient à un seul stagiaire. De même, un stage peut accueillir plusieurs participants, chacun disposant de ses propres dates de début et de fin ainsi que d'un encadreur professionnel. Les rapports d'activité, les événements et les documents sont ensuite associés à chaque participation afin d'assurer un suivi individualisé.
+P212 [normal] Concernant les évaluations finales et les soutenances, la base de données prévoit au maximum un enregistrement de chaque type par participation. Cette organisation permet d'éviter les doublons et de conserver des informations cohérentes pour chaque dossier de stage.
+P213 [normal] Sur le plan administratif, chaque stage est associé à une structure d'accueil, elle-même rattachée à un département. Le rattachement départemental est donc déterminé à partir de la structure d'accueil et non directement à partir des informations personnelles du stagiaire. Les droits d'accès aux dossiers sont gérés selon le rôle de l'utilisateur, les affectations des encadreurs et les comptes associés aux stagiaires.
+P214 [normal] Enfin, le système conserve un historique des changements de statut ainsi que les événements importants survenus au cours d'un stage, tels que les suspensions ou les prolongations. Ces deux mécanismes sont complémentaires : l'historique permet de suivre l'évolution des statuts, tandis que les événements enregistrent les changements particuliers pouvant affecter le déroulement du stage.
+P215 [normal] Le tableau 3 présente une synthèse des principales catégories de tables utilisées dans la base de données et de leurs responsabilités dans le fonctionnement de l'application.
+P216 [normal] 
+P217 [normal] Tableau 2 — Ensembles du modèle relationnel
+P218 [normal] 
+P219 [Heading 2] 2.2 Architecture backend et transactions
+P220 [normal] La figure 4 illustre l’organisation du backend de l’application, fondée sur une séparation des responsabilités entre les différents composants. Les contrôleurs reçoivent les requêtes HTTP, les services appliquent les règles métier, les DTO structurent les données échangées et les repositories assurent l’accès à la base de données à travers les entités JPA.
+P221 [normal] Cette architecture est notamment illustrée par les classes suivantes :
+P222 [normal] StageGestionController : reçoit les requêtes HTTP relatives à la gestion des stages et les transmet aux services concernés.
+P223 [normal] StageGestionService : prend en charge les traitements métier liés aux stages, notamment les opérations de gestion et les vérifications nécessaires.
+P224 [normal] StageParticipantRepository : assure l’accès aux données des participations aux stages, notamment leur recherche et leur enregistrement dans la base de données.
+P225 [normal] StageParticipant : représente une participation à un stage sous forme d’entité JPA, contenant les informations et les relations nécessaires à son suivi.
+P226 [normal] Cette répartition permet de mieux organiser le code, de faciliter sa maintenance et de séparer les traitements métier des opérations d’accès aux données.
+P227 [normal] 
+P228 [normal] 
+P229 [normal] Figure 3 — Composants de traitement d’une requête métier
+P230 [normal] Sources : contrôleurs de gestion, DTO, DossierAccessService, ParticipationRulesService et repositories. Le schéma présente des responsabilités, pas des services déployés séparément.
+P231 [normal] Les services de gestion de l’application ne se limitent pas aux opérations classiques de création, de consultation, de modification et de suppression des données (CRUD). Ils assurent également l’application des règles métier nécessaires au bon déroulement des stages.
+P232 [normal] Par exemple, lors de la création d’une participation, le système vérifie les informations d’affectation, la validité des dates, l’existence des références associées et l’absence de chevauchement avec d’autres périodes de stage. Il attribue ensuite un statut initial à la participation. De même, lors de la clôture d’un stage, le système contrôle les conditions nécessaires, vérifie les éléments du dossier et enregistre les changements de statut ainsi que leur historique.
+P233 [normal] Pour garantir la cohérence des données, certaines opérations sont exécutées dans des transactions. Celles-ci permettent de regrouper plusieurs modifications afin qu’elles soient validées ensemble ou annulées en cas d’erreur. Cette gestion est notamment assurée par les mécanismes transactionnels de Spring.
+P234 [normal] L’application utilise également des mécanismes de verrouillage pour limiter les conflits lorsque plusieurs utilisateurs effectuent simultanément des opérations sur les mêmes données. Le service ParticipationRulesService intervient notamment pour contrôler les modifications autorisées sur une participation. Ainsi, lorsqu’un stage est clôturé, annulé ou abandonné, certaines opérations de modification sont bloquées afin de préserver la cohérence du dossier.
+P235 [normal] Ces mécanismes contribuent à renforcer la fiabilité des traitements et à assurer le respect des règles de gestion définies pour le suivi des stagiaires.
+P236 [Heading 2] 2.3 Authentification et contrôle d’accès
+P237 [normal] La sécurité de l’application repose sur un système d’authentification et de gestion des autorisations permettant de protéger les informations des stagiaires et de limiter l’accès aux fonctionnalités selon les responsabilités de chaque utilisateur.
+P238 [normal] Lorsqu’un utilisateur se connecte, le service AuthService vérifie l’existence de son compte, contrôle son statut et compare le mot de passe saisi avec celui enregistré sous forme de hachage BCrypt. Si les informations sont correctes et que le compte est actif, le système génère un jeton de session valable pendant huit heures. Ce jeton permet d’identifier l’utilisateur lors de ses prochaines requêtes sans qu’il ait à saisir de nouveau ses identifiants.
+P239 [normal] Pour renforcer la sécurité, le jeton est généré de manière aléatoire et seule son empreinte SHA-256 est conservée dans la base de données. L’application utilise ainsi des sessions enregistrées côté serveur plutôt que des jetons JWT.
+P240 [normal] 
+P241 [normal] Interface de connexion à l’application  
+P242 [normal] À chaque requête nécessitant une authentification, le filtre SessionAuthenticationFilter vérifie le jeton transmis dans l’en-tête HTTP Authorization. Il permet ensuite de retrouver l’identité de l’utilisateur et ses rôles afin de déterminer les opérations auxquelles il peut accéder.
+P243 [normal] Le contrôle des autorisations repose principalement sur deux mécanismes. Le premier est assuré par Spring Security, à travers la classe SecurityConfig, qui définit les routes accessibles selon les rôles. Le second intervient au niveau des données grâce au service DossierAccessService, qui vérifie si l’utilisateur possède les droits nécessaires pour consulter ou modifier un dossier particulier.
+P244 [normal] L’application distingue trois rôles principaux : ADMIN, ENCADREUR et STAGIAIRE. L’administrateur dispose des autorisations nécessaires à la gestion générale de l’application. L’encadreur peut consulter et suivre les stagiaires qui lui sont affectés, tandis que le stagiaire accède principalement à son propre dossier et à ses rapports d’activité.
+P245 [normal] Certaines opérations font également l’objet de contrôles spécifiques. Par exemple, seul le stagiaire associé à un dossier peut rédiger et soumettre ses rapports, tandis que leur examen et leur validation sont réservés à l’encadreur affecté. Ces restrictions restent applicables même lorsqu’un utilisateur possède plusieurs rôles.
+P246 [normal] Du côté du frontend, le jeton de session est conservé dans le localStorage du navigateur et transmis automatiquement lors des requêtes authentifiées. Ce mécanisme permet de maintenir la connexion de l’utilisateur lors de la navigation dans l’application. Il nécessite toutefois une protection adaptée contre les attaques susceptibles d’exécuter des scripts malveillants dans le navigateur.
+P247 [normal] Enfin, le système prévoit l’expiration et la révocation des sessions, notamment lors de certaines opérations de gestion des comptes. L’ensemble de ces mécanismes contribue à protéger les données personnelles, à contrôler les accès et à assurer une utilisation de l’application conforme aux responsabilités de chaque utilisateur.
+P248 [Heading 2] 2.4 Admission et affectation des stagiaires
+P249 [normal] Le processus d'admission débute par l'enregistrement des informations personnelles du stagiaire, suivi de la création de son profil académique. Ce dernier comprend notamment son établissement d'origine, sa filière, son niveau d'études et son année universitaire.
+P250 [normal] L'administrateur est chargé de l'enregistrement des stagiaires et de la gestion de leurs informations administratives et académiques. Il vérifie les renseignements nécessaires à la constitution du dossier et peut associer un compte utilisateur au stagiaire afin de lui permettre d'accéder à son espace personnel.
+P251 [normal] 
+P252 [normal] 
+P253 [normal] 		Dossier du stagiaire et informations académiques 
+P254 [normal] 
+P255 [normal] L'affectation relève également de l'administrateur. Elle consiste à associer le stagiaire à un stage, à un cadre de stage et à un encadreur professionnel, tout en définissant les dates de début et de fin de sa participation. Lors de cette opération, le système vérifie la validité des dates et s'assure qu'un stagiaire ne possède pas plusieurs périodes de stage qui se chevauchent. Une nouvelle participation reçoit initialement le statut « PLANIFIEE ».
+P256 [normal] 
+P257 [normal] 		Formulaire d’affectation d’un stagiaire à une participation  
+P258 [normal] L'encadreur professionnel intervient après l'affectation. Il peut consulter les informations des stagiaires qui lui sont attribués et assurer leur suivi pendant le déroulement du stage. Ses responsabilités comprennent notamment l'examen des rapports d'activité, l'ajout d'observations et leur validation selon les autorisations accordées.
+P259 [normal] Le stagiaire, quant à lui, accède à son espace personnel lorsque son dossier est associé à un compte utilisateur. Il peut consulter les informations relatives à son affectation, rédiger et soumettre ses rapports d'activité ainsi que prendre connaissance des observations formulées par son encadreur. Il ne peut pas modifier lui-même les informations administratives de son affectation.
+P260 [normal] Des contrôles sont également appliqués lors de la modification des périodes de stage. Lorsque des rapports d'activité ont déjà été enregistrés, le système vérifie que les nouvelles dates restent compatibles avec les périodes couvertes par ces rapports. Dans le cas contraire, la modification est refusée afin de préserver la cohérence des informations.
+P261 [normal] Cette répartition des responsabilités permet de distinguer clairement la gestion administrative assurée par l'administrateur, le suivi professionnel effectué par l'encadreur et la participation active du stagiaire à travers son espace personnel.
+P262 [normal] .
+P263 [Heading 2] 2.5 Événements et clôture des participations
+P264 [normal] Au cours d'un stage, plusieurs événements peuvent modifier le déroulement initialement prévu. L'application permet notamment de gérer les prolongations, les suspensions, les reprises, les abandons, les annulations et les clôtures de participation.
+P265 [normal] Lorsqu'un stage est prolongé, le système conserve l'ancienne et la nouvelle date de fin afin de garder une trace de la modification. De même, les opérations de suspension et de reprise nécessitent une date d'effet, qui est vérifiée pour garantir sa cohérence avec la période du stage et les événements précédemment enregistrés.
+P266 [normal] Chaque opération fait l'objet de contrôles permettant de vérifier si le changement de statut est autorisé. Les événements et les historiques de statut sont ensuite conservés afin de retracer les différentes décisions prises au cours du stage.
+P267 [normal] La clôture d'une participation constitue une étape importante du suivi administratif. L'application prévoit trois modalités de clôture, présentées dans le tableau 4 et illustrées par la figure 5.
+P268 [normal] Dans le cadre d'une clôture ordinaire, le système vérifie que les documents obligatoires sont présents et que les rapports d'activité attendus pour les périodes déjà achevées ont été validés. Les rapports correspondant à des périodes futures ne sont donc pas exigés.
+P269 [normal] La soutenance, lorsqu'elle est prévue, fait l'objet d'un suivi distinct et ne constitue pas une condition obligatoire de cette procédure de clôture.
+P270 [normal] Ces mécanismes permettent d'assurer un suivi cohérent des changements survenus pendant le stage et de conserver un historique des décisions administratives jusqu'à la clôture du dossier.
+P271 [normal] Tableau 3 — Modalités de clôture présentes dans le code
+P272 [normal] 
+P273 [normal] 
+P274 [normal] Figure 4 — Décision de clôture et contrôles conservés
+P275 [normal] Sources : StageGestionService, ParticipationRulesService, EvenementParticipationRequest et ClotureParticipationTests.
+P276 [normal] La clôture forcée constitue une procédure exceptionnelle permettant à l'administrateur de terminer une participation même lorsque certains documents obligatoires sont absents ou que des rapports d'activité n'ont pas encore été validés.
+P277 [normal] Cette opération reste soumise à plusieurs conditions. L'utilisateur doit disposer des autorisations nécessaires, la participation ne doit pas être déjà terminée et le changement vers le statut « CLOTUREE » doit être autorisé par les règles de gestion. L'administrateur doit également confirmer explicitement sa décision dans l'interface, après avoir été informé des éventuelles pièces manquantes et des rapports non validés.
+P278 [normal] 
+P279 [normal] 		Confirmation de la clôture administrative d’une participation 
+P280 [normal] Avant d'effectuer la clôture, le système vérifie à nouveau l'état du dossier afin d'identifier les éléments incomplets. Ces informations sont conservées dans les traces de la décision administrative pour permettre un suivi ultérieur.
+P281 [normal] Une fois les contrôles effectués, la participation reçoit le statut « CLOTUREE » et une date de clôture est enregistrée. Le dossier devient alors soumis aux restrictions applicables aux participations terminées.
+P282 [normal] Ainsi, la clôture forcée permet uniquement de déroger aux exigences de complétude du dossier. Elle ne permet pas de contourner les contrôles d'accès, les règles de transition de statut ou l'interdiction de clôturer une participation déjà terminée.
+P283 [Heading 2] 
+P284 [Heading 2] 
+P285 [Heading 2] 2.6 Rapports hebdomadaires et observations
+P286 [normal] L'application intègre un système de suivi des activités permettant aux stagiaires de rédiger et de soumettre leurs rapports hebdomadaires. Le service CalculPeriodesRapportService se charge de déterminer automatiquement les périodes de rapport à partir des dates de début et de fin du stage.
+P287 [normal] Chaque période correspond à une semaine se terminant le dimanche, à l'exception de la première et de la dernière semaine, qui sont adaptées aux dates réelles du stage. La date limite de dépôt est fixée au lundi suivant la fin de la semaine concernée. Ce calcul repose sur la période du stage et ne tient pas automatiquement compte des éventuelles suspensions.
+P288 [normal] 
+P289 [normal] 		Grille de suivi des rapports hebdomadaires 
+P290 [normal] Depuis son espace personnel, le stagiaire peut consulter les différentes périodes de rapport attendues. Pour une période ne contenant aucun rapport, il peut accéder à un formulaire dont les informations principales sont préremplies. Lorsqu'un rapport existe déjà, l'application permet de le consulter et d'effectuer les actions autorisées selon son statut.
+P291 [normal] Le traitement des rapports suit un processus de validation impliquant le stagiaire et son encadreur professionnel. Le stagiaire commence par rédiger son rapport sous le statut « BROUILLON », puis le soumet à son encadreur, ce qui fait passer le rapport au statut « SOUMIS ».
+P292 [normal] L'encadreur affecté peut ensuite examiner le contenu du rapport, ajouter des observations et décider de le valider ou de demander des corrections. Dans ce dernier cas, le rapport prend le statut « A_CORRIGER », permettant au stagiaire de modifier son contenu avant de le soumettre à nouveau.
+P293 [normal] Afin de garantir la cohérence du suivi, le système limite la modification du contenu aux rapports ayant le statut « BROUILLON » ou « A_CORRIGER ». Il empêche également le rattachement d'un rapport existant à une autre participation.
+P294 [normal] La figure 6 illustre les différentes étapes de ce processus, depuis la rédaction du rapport par le stagiaire jusqu'à sa validation par l'encadreur.
+P295 [normal] Ce fonctionnement permet d'organiser le suivi hebdomadaire des activités, de conserver les observations des encadreurs et d'assurer une traçabilité des différentes étapes de validation.
+P296 [normal] 
+P297 [normal] 
+P298 [normal] Figure 5 — Séquence simplifiée de soumission et d’examen d’un rapport
+P299 [normal] Sources : RapportActiviteGestionService, DossierAccessService, clients API et pages de rapports. Les contrôles et écritures sont regroupés pour la lisibilité.
+P300 [normal] Le changement de statut d’un rapport s’effectue à travers une requête PATCH, permettant de gérer les différentes étapes de soumission, de correction et de validation. Lorsqu’un rapport passe au statut « SOUMIS », le système enregistre automatiquement sa date de soumission. De même, lorsqu’il est validé par l’encadreur, sa date de validation est renseignée.
+P301 [normal] 
+P302 [normal] 		Examen d’un rapport soumis par l’encadreur  
+P303 [normal] Des contrôles sont également appliqués au niveau de la base de données PostgreSQL afin de garantir la cohérence des dates, des changements de statut et des périodes de rapport. Cette organisation permet de distinguer les rapports simplement soumis de ceux ayant été examinés et validés par un encadreur, notamment dans les tableaux de bord et les statistiques.
+P304 [normal] L’application permet également aux encadreurs d’ajouter des observations aux rapports d’activité. Chaque observation contient notamment son auteur, son type, un commentaire et une indication précisant si elle peut être consultée par le stagiaire.
+P305 [normal] Les observations considérées comme privées ne sont pas affichées dans l’espace personnel du stagiaire. Seul l’encadreur affecté à la participation peut effectuer les opérations d’examen et de commentaire autorisées. Ces restrictions s’appliquent également aux informations accessibles dans les synthèses et les documents exportés, afin de préserver la confidentialité des observations.
+P306 [normal] Ces mécanismes permettent d’assurer un suivi structuré des rapports hebdomadaires, tout en garantissant la traçabilité des validations et la confidentialité des échanges entre les stagiaires et leurs encadreurs.
+P307 [normal] 
+P308 [Heading 2] 2.7 Gestion documentaire
+P309 [normal] L’application intègre un module de gestion documentaire permettant d’enregistrer et de consulter les fichiers associés aux stagiaires et à leurs participations aux stages. Les documents sont classés selon leur type, leur caractère obligatoire ou facultatif et le nombre de fichiers autorisés. Ces informations sont définies dans la base de données et utilisées pour contrôler les dépôts ainsi que la complétude des dossiers avant leur clôture.
+P310 [normal] 
+P311 [normal] 		Gestion des pièces jointes du dossier 
+P312 [normal] Afin de garantir la sécurité des fichiers téléversés, le service DocumentContentValidator effectue plusieurs vérifications, notamment sur le nom du fichier, sa taille, son extension, son type MIME et son contenu. Les formats autorisés sont PDF, JPEG et PNG, avec une taille maximale de 10 Mio par fichier.
+P313 [normal] Des contrôles supplémentaires sont appliqués selon le format. Les images doivent pouvoir être décodées correctement et respecter certaines limites de dimensions. Les documents PDF sont analysés à l’aide de la bibliothèque PDFBox afin de détecter notamment les fichiers chiffrés, les documents dépassant les limites de pages autorisées et certaines structures potentiellement dangereuses.
+P314 [normal] Lorsqu’un document est téléversé, le système lui attribue un nom unique généré à partir d’un UUID afin d’éviter les conflits de noms. Le fichier est ensuite conservé dans un espace de stockage dédié, tandis que ses informations descriptives et son emplacement sont enregistrés dans PostgreSQL.
+P315 [normal] L’accès aux documents est également soumis à des contrôles de sécurité. Avant chaque téléchargement, l’application vérifie les autorisations de l’utilisateur, la disponibilité du fichier et la validité de son emplacement de stockage. Lorsqu’un même fichier est associé à plusieurs dossiers, un utilisateur non administrateur doit disposer des droits nécessaires sur l’ensemble des dossiers concernés pour pouvoir y accéder.
+P316 [normal] Enfin, la gestion documentaire prend en compte la cohérence entre les informations enregistrées dans la base de données et les fichiers stockés sur le disque. En cas d’échec d’une opération, le système prévoit un mécanisme de nettoyage afin de limiter la conservation de fichiers sans référence valide.
+P317 [normal] Cette organisation permet de centraliser les pièces administratives, de sécuriser leur consultation et de faciliter la vérification des documents nécessaires au suivi et à la clôture des stages. Elle nécessite également une sauvegarde conjointe de la base PostgreSQL et de l’espace de stockage des fichiers afin de permettre une restauration complète des dossiers.
+P318 [Heading 2] 2.8 Évaluations et soutenances
+P319 [normal] L’application dispose d’un module permettant de gérer les évaluations finales des stagiaires ainsi que les informations relatives à leurs soutenances.
+P320 [normal] L’évaluation finale est associée à une participation et à son encadreur professionnel. Elle repose sur plusieurs critères définis dans la base de données, auxquels des notes comprises entre 0 et 5 peuvent être attribuées. Chaque critère possède des caractéristiques spécifiques, notamment son caractère obligatoire, son ordre de présentation et son coefficient.
+P321 [normal] Lors de la finalisation d’une évaluation, le système vérifie que tous les critères obligatoires et actifs ont été notés. Une fois cette condition remplie, l’évaluation est considérée comme finalisée et sa date de finalisation est automatiquement enregistrée. Aucune modification ultérieure n’est alors autorisée, afin de préserver l’intégrité des résultats.
+P322 [normal] 
+P323 [normal]  Grille d’évaluation finale d’une participation  
+P324 [normal] La gestion des évaluations est réservée aux utilisateurs disposant des autorisations nécessaires, notamment l’administrateur et l’encadreur affecté au stagiaire. Les opérations de finalisation sont également enregistrées dans l’historique afin d’assurer leur traçabilité.
+P325 [normal] La gestion des soutenances permet, quant à elle, d’enregistrer les informations relatives à une éventuelle présentation de fin de stage. Chaque soutenance est rattachée à une participation et comprend notamment une date, un lieu et des observations complémentaires.
+P326 [normal] 
+P327 [normal] 		Planification d’une soutenance liée à une participation 
+P328 [normal] Les informations relatives aux évaluations et aux soutenances sont accessibles selon les rôles et les autorisations définis dans l’application. Certaines données administratives ne sont donc pas directement consultables depuis l’espace personnel du stagiaire.
+P329 [normal] Ces fonctionnalités permettent d’organiser les étapes de fin de stage, de conserver les résultats des évaluations et de faciliter le suivi administratif des soutenances lorsqu’elles sont prévues.
+P330 [Heading 2] 2.9 Alertes et pilotage
+P331 [normal] L’application intègre un système d’alertes automatiques et des indicateurs de suivi permettant de faciliter la gestion administrative des stages. Bien que complémentaires, ces deux mécanismes remplissent des fonctions différentes : les alertes signalent les situations nécessitant une attention particulière, tandis que les indicateurs offrent une vue d’ensemble de l’activité.
+P332 [Heading 3] 2.9.1 Gestion des alertes
+P333 [normal] Le système d’alertes permet de détecter automatiquement les événements importants liés au déroulement des stages. Un planificateur exécute quotidiennement, à 10 h du matin (heure de Madagascar), plusieurs contrôles portant notamment sur les stages proches de leur date de fin, les stages dépassés, les rapports manquants, les validations en retard, les dossiers incomplets, la surcharge des encadreurs et les soutenances à venir.
+P334 [normal] 
+P335 [normal] 
+P336 [normal] 			Classement des dossiers et actions recommandées 
+P337 [normal] Chaque alerte possède un type, une priorité et un statut permettant de suivre son traitement. Les principaux statuts sont « A_TRAITER », « TRAITEE », « IGNOREE » et « EXPIREE ». Un mécanisme de déduplication permet également d’éviter la création de plusieurs alertes identiques pour une même situation.
+P338 [normal] Lorsqu’une participation est clôturée, les alertes actives qui lui sont associées peuvent être automatiquement marquées comme expirées. Elles restent toutefois conservées dans la base de données afin de préserver leur historique.
+P339 [normal] L’application propose également une fonction d’aide à la décision à travers le service PilotageService. Celui-ci analyse les alertes actives associées aux participations et calcule un niveau de priorité à partir de leurs poids et de seuils prédéfinis. Les dossiers sont ainsi classés en trois catégories : « NORMALE », « HAUTE » ou « URGENTE ».
+P340 [normal] Ce classement permet aux responsables d’identifier plus facilement les dossiers nécessitant une intervention prioritaire.
+P341 [Heading 3] 2.9.2 Indicateurs de suivi et tableaux de bord
+P342 [normal] Contrairement aux alertes, qui signalent des situations particulières, les indicateurs permettent de suivre l’évolution générale des stages à partir des informations enregistrées dans l’application.
+P343 [normal] Le tableau de bord regroupe notamment des informations concernant les stages en cours, les échéances à venir, les rapports attendus ou manquants, les documents obligatoires absents, la charge des encadreurs et les soutenances prévues dans les trente prochains jours.
+P344 [normal] 
+P345 [normal] 			Tableau de bord du suivi des stages  
+P346 [normal] Ces indicateurs facilitent la consultation des informations essentielles sans qu’il soit nécessaire d’examiner individuellement chaque dossier. Ils permettent également d’identifier les tendances générales et les éléments nécessitant un suivi administratif.
+P347 [normal] Les données présentées sont adaptées aux droits d’accès des utilisateurs afin que chacun puisse consulter uniquement les informations correspondant à ses responsabilités.
+P348 [Heading 3] 2.9.3 Synthèses et exportation des données
+P349 [normal] En complément des alertes et des indicateurs, l’application propose des fonctionnalités permettant de consulter des synthèses et d’exporter certaines informations aux formats CSV et PDF.
+P350 [normal] 
+P351 [normal] 		Extrait du bilan de fin de stage exporté en PDF 
+P352 [normal] Les exports CSV intègrent des contrôles visant à empêcher l’interprétation de certaines données comme des formules lors de leur ouverture dans un tableur. Les documents PDF sont générés à l’aide de la bibliothèque Apache PDFBox.
+P353 [normal] Ces fonctionnalités facilitent la consultation, la conservation et le partage des informations administratives par les utilisateurs autorisés.
+P354 [normal] Ainsi, les alertes permettent d’identifier les problèmes et les actions prioritaires, tandis que les indicateurs servent à observer et à évaluer l’état général du suivi des stages. Leur utilisation complémentaire contribue à améliorer le pilotage administratif au sein de la Cellule SIIGFP.
+P355 [Heading 2] 2.10 Interface utilisateur et parcours
+P356 [normal] L’interface utilisateur de l’application a été développée avec React afin de proposer un environnement de travail adapté aux différents acteurs du système. Elle repose sur des composants réutilisables permettant d’uniformiser les tableaux, les formulaires, les messages d’erreur et les fenêtres de confirmation.
+P357 [normal] La navigation est organisée selon les trois rôles définis dans le modèle métier : ADMIN, ENCADREUR et STAGIAIRE. Chaque rôle dispose de fonctionnalités spécifiques, tandis que les autorisations sont également vérifiées au niveau du backend afin de garantir la confidentialité des dossiers.
+P358 [Heading 3] 2.10.1 Parcours de l’administrateur (ADMIN)
+P359 [normal] L’administrateur assure la gestion administrative et le suivi général des stages. Son parcours comprend les étapes suivantes :
+P360 [normal] Authentification : connexion à l’application à l’aide d’un compte disposant du rôle ADMIN.
+P361 [normal] Consultation du tableau de bord : visualisation des indicateurs, des échéances et des alertes.
+P362 [normal] Gestion des dossiers : enregistrement des stagiaires, création des profils académiques et gestion des informations administratives.
+P363 [normal] Gestion des stages : création des stages, définition des périodes et affectation des stagiaires aux encadreurs professionnels.
+P364 [normal] Suivi administratif : consultation des rapports, des documents, des évaluations, des soutenances et des changements de statut.
+P365 [normal] Gestion des utilisateurs : création des comptes, attribution des rôles et gestion des autorisations.
+P366 [normal] Clôture des participations : vérification des conditions de clôture et validation de la décision administrative, avec possibilité de dérogation lorsque les règles applicatives l'autorisent.
+P367 [Heading 3] 2.10.2 Parcours de l’encadreur (ENCADREUR)
+P368 [normal] L’encadreur professionnel intervient dans le suivi des stagiaires qui lui sont affectés. Son parcours comprend les étapes suivantes :
+P369 [normal] Authentification : connexion à l’application avec un compte disposant du rôle ENCADREUR.
+P370 [normal] Consultation des affectations : accès aux participations dont il assure l’encadrement.
+P371 [normal] Consultation des rapports : examen des activités hebdomadaires soumises par les stagiaires.
+P372 [normal] Gestion des observations : ajout de commentaires et demande de corrections lorsque cela est nécessaire.
+P373 [normal] Validation des rapports : approbation des rapports conformes aux attentes.
+P374 [normal] Évaluation finale : attribution des notes selon les critères définis et finalisation de l’évaluation.
+P375 [normal] Suivi des échéances : consultation des alertes et des informations de suivi concernant les participations autorisées.
+P376 [Heading 3] 
+P377 [Heading 3] 2.10.3 Parcours du stagiaire (STAGIAIRE)
+P378 [normal] Le stagiaire dispose d’un espace personnel lui permettant de suivre sa participation et de renseigner ses activités. Son parcours comprend les étapes suivantes :
+P379 [normal] Authentification : connexion à l’aide du compte utilisateur associé à son dossier.
+P380 [normal] Consultation du dossier : visualisation de ses informations personnelles, académiques et de son affectation.
+P381 [normal] Consultation des périodes de rapport : identification des semaines pour lesquelles un rapport est attendu.
+P382 [normal] Rédaction des rapports : saisie des activités réalisées et enregistrement sous le statut « BROUILLON ».
+P383 [normal] Soumission des rapports : transmission des rapports à l’encadreur pour examen.
+P384 [normal] Consultation des observations : prise de connaissance des commentaires rendus visibles par l’encadreur.
+P385 [normal] Correction et nouvelle soumission : modification des rapports retournés pour correction, puis nouvelle soumission en vue de leur validation.
+P386 [Heading 3] 2.10.4 Contrôle des accès et gestion des interactions
+P387 [normal] Les fonctionnalités accessibles dépendent du rôle de l’utilisateur, mais également de son lien avec les données concernées. Ainsi, un encadreur ne peut pas intervenir librement sur les dossiers des autres encadreurs, tandis qu’un stagiaire ne peut consulter et modifier que les informations autorisées de son propre dossier.
+P388 [normal] L’application prend également en charge les erreurs de saisie, les sessions expirées et les accès non autorisés. Des messages d’information et des fenêtres de confirmation accompagnent les utilisateurs lors des opérations importantes.
+P389 [normal] Cette organisation permet de distinguer clairement les responsabilités de chaque acteur et de garantir que les opérations réalisées correspondent aux règles de gestion définies pour le suivi des stagiaires.
+P390 [normal] Tableau 4 — Parcours et pages existantes
+P391 [Heading 2] 2.11 Contraintes SQL et cohérence avec JPA
+P392 [normal] La base de données de l’application a été conçue avec PostgreSQL à partir du script Conception2.sql. Celui-ci comprend 44 tables, 6 vues et 16 déclencheurs (triggers), permettant d’organiser les informations et d’assurer leur cohérence.
+P393 [normal] Les responsabilités liées à la gestion des données sont réparties entre quatre éléments complémentaires : PostgreSQL, les services métier Java, JPA et Hibernate.
+P394 [normal] PostgreSQL assure l’intégrité des données. Les clés primaires identifient les enregistrements, les clés étrangères garantissent la validité des relations entre les tables et les contraintes UNIQUE empêchent certains doublons. Les contraintes CHECK et les déclencheurs permettent également de vérifier certaines règles, notamment les transitions de statut, les périodes de rapport et les associations documentaires.
+P395 [normal] Les services métier Java appliquent les règles fonctionnelles de l’application. Ils vérifient notamment les autorisations des utilisateurs, les conditions d’affectation, les changements de statut et les règles de clôture des stages. Ils prennent également en charge les calculs propres au fonctionnement de l’application.
+P396 [normal] Par exemple, PostgreSQL vérifie qu’une période de rapport ne dépasse pas sept jours calendaires, tandis que le service CalculPeriodesRapportService détermine les semaines attendues en fonction des dates du stage. Ces deux contrôles sont complémentaires, car ils répondent à des besoins différents.
+P397 [normal] JPA (Java Persistence API) définit les règles de correspondance entre les objets Java et les données relationnelles. Il s’agit d’une spécification qui fournit notamment des annotations permettant de représenter les tables, les colonnes et les relations sous forme d’entités Java. JPA définit donc une manière standard de gérer la persistance des objets, mais ne réalise pas directement les opérations sur la base de données.
+P398 [normal] Hibernate est le framework qui implémente JPA dans l’application. Il utilise les annotations des entités Java pour effectuer les opérations de persistance, générer les requêtes SQL nécessaires et assurer la correspondance entre les objets Java et les enregistrements PostgreSQL.
+P399 [normal] Spring Data JPA intervient à un niveau supplémentaire en simplifiant l'utilisation de JPA et d'Hibernate. Il permet notamment de créer des repositories pour effectuer les opérations de recherche, d'enregistrement et de modification des données, sans avoir à écrire systématiquement les requêtes SQL correspondantes.
+P400 [normal] Enfin, Hibernate est configuré en mode « validate ». Au démarrage de l'application, il vérifie la compatibilité du schéma PostgreSQL existant avec les entités Java, sans créer ni modifier automatiquement les tables.
+P401 [normal] Cette organisation permet de distinguer clairement les responsabilités : PostgreSQL garantit l'intégrité des données, les services Java appliquent les règles métier, JPA définit le modèle standard de persistance, Hibernate en assure l'implémentation et Spring Data JPA simplifie l'accès aux données à travers les repositories.
+P402 [Heading 2] 2.13 État du déploiement
+P403 [normal] L’application web de gestion et de suivi des stagiaires a été déployée à l’aide de Docker, une plateforme de conteneurisation permettant d’exécuter les différents composants d’une application dans des environnements isolés.
+P404 [normal] Cette solution a été retenue afin de faciliter l’installation, la configuration et l’exécution de l’application. Elle permet de regrouper les dépendances nécessaires au fonctionnement des services et de limiter les différences de configuration entre les environnements de développement et de déploiement.
+P405 [normal] Le déploiement repose sur les trois composants principaux du projet : le frontend développé avec React, le backend réalisé avec Java et Spring Boot, ainsi que la base de données PostgreSQL. Docker permet d’organiser leur exécution et leur communication au sein d’un environnement conteneurisé.
+P406 [normal] La construction du frontend a été réalisée avec succès et les paramètres de configuration du backend permettent de définir la connexion à PostgreSQL ainsi que l'emplacement de stockage des documents.
+P407 [normal] La gestion des données constitue également un point important du déploiement. Les informations enregistrées dans PostgreSQL et les documents téléversés doivent être conservés dans des espaces de stockage persistants afin d'éviter leur perte lors de la suppression ou de la recréation des conteneurs.
+P408 [normal] Enfin, le déploiement avec Docker facilite la maintenance et les futures mises à jour de l'application. Des vérifications complémentaires restent néanmoins nécessaires pour confirmer la sécurité des accès, la fiabilité des sauvegardes, le bon fonctionnement des alertes automatiques et la stabilité de l'application dans son environnement d'exploitation.
+P409 [normal] Ainsi, le déploiement de l'application avec Docker constitue une étape concrète de sa réalisation, permettant d'exécuter les différents composants du système dans un environnement organisé et reproductible.
+P410 [Heading 2] 2.14 Difficultés rencontrées et solutions apportées
+P411 [normal] Au cours du développement de l'application, plusieurs difficultés techniques ont été rencontrées, notamment dans la configuration de la sécurité, la gestion des autorisations et la cohérence entre les différentes couches du système.
+P412 [normal] L'une des principales difficultés concernait la configuration de Spring Security, particulièrement au niveau de la classe SecurityConfig. L'application comportant plusieurs catégories d'utilisateurs, il était nécessaire de définir précisément les fonctionnalités accessibles à chaque rôle. Cette configuration demandait une attention particulière afin d'éviter qu'un utilisateur puisse effectuer des opérations ne correspondant pas à ses responsabilités.
+P413 [normal] Pour répondre à cette difficulté, les règles d'accès ont été organisées selon les rôles, les méthodes HTTP et les différentes routes de l'API. Les opérations sensibles, telles que la gestion des comptes utilisateurs et des autorisations, ont été soumises à des restrictions spécifiques. Certaines routes ont également été interdites afin d'empêcher l'accès direct à des fonctionnalités qui ne devaient pas être exposées.
+P414 [normal] Une autre difficulté concernait la cohérence entre les entités Java et la structure de la base PostgreSQL. Certaines modifications du modèle nécessitaient une adaptation des classes et des formulaires afin de conserver une correspondance correcte avec les tables existantes. La vérification des entités JPA et du schéma SQL a permis de corriger ces incompatibilités.
+P415 [normal] Enfin, l'évolution progressive des fonctionnalités a nécessité plusieurs ajustements des règles métier, notamment pour les changements de statut, la validation des rapports et la clôture des participations. Ces adaptations ont été accompagnées de vérifications et de corrections afin de préserver le fonctionnement des autres modules.
+P416 [normal] Ces difficultés m'ont permis d'approfondir mes connaissances en sécurité des applications web, en gestion des autorisations et en développement avec Spring Boot. Elles m'ont également montré l'importance d'une bonne organisation du code et de tests réguliers pour assurer la cohérence entre les différentes fonctionnalités.
+P417 [Heading 1] 3 Évaluation du projet et connaissances acquises
+P418 [Heading 1] 3.1 Bilan fonctionnel
+P419 [normal] Le développement de l’application web de gestion et de suivi des stagiaires a permis de mettre en place une solution fonctionnelle répondant aux besoins de gestion administrative et de suivi des stages au sein de la Cellule SIIGFP du Ministère de l’Économie et des Finances.
+P420 [normal] L’application centralise les informations personnelles et académiques des stagiaires, la gestion des stages et des affectations, le suivi des rapports d’activité, la gestion documentaire ainsi que les évaluations et les soutenances. Ces différents modules fonctionnent de manière complémentaire afin d’assurer un suivi complet de chaque stagiaire, depuis son enregistrement jusqu’à la clôture de son stage.
+P421 [normal] Les tableaux de bord et les fonctionnalités de pilotage permettent de consulter les informations essentielles, de suivre les échéances et d’identifier les dossiers nécessitant une intervention. Le système d’alertes automatiques facilite la surveillance des événements importants, tandis que la gestion des rôles et des autorisations assure la protection des informations selon les responsabilités de chaque utilisateur.
+P422 [normal] Les différentes fonctionnalités ont été développées, intégrées et testées afin de vérifier leur bon fonctionnement. Les tests réalisés ont notamment porté sur les règles métier, les échanges entre le frontend et le backend, les opérations sur la base de données ainsi que les principaux parcours utilisateurs.
+P423 [normal] L’application a également été déployée à l’aide de Docker, permettant d’exécuter les différents composants du système dans un environnement conteneurisé.
+P424 [normal] Dans l’ensemble, les fonctionnalités prévues ont été réalisées et sont opérationnelles, permettant de disposer d’une application complète pour la gestion administrative et le suivi des stagiaires au sein de la Cellule SIIGFP.
+P425 [Heading 2] 3.2 Bilan technique
+P426 [normal] Sur le plan technique, la réalisation de l'application a permis de mettre en place une architecture structurée, reposant sur une séparation claire entre l'interface utilisateur, les traitements métier et la gestion des données.
+P427 [normal] L'utilisation de Java et Spring Boot pour le backend, de React pour le frontend et de PostgreSQL pour la base de données a facilité l'organisation des différents modules. Les services métier assurent l'application des règles de gestion, tandis que les contraintes SQL contribuent à préserver la cohérence et l'intégrité des informations enregistrées.
+P428 [normal] Une attention particulière a été portée à la sécurité et à la fiabilité des opérations. Les mécanismes d'authentification et de contrôle d'accès permettent de limiter les fonctionnalités selon les rôles des utilisateurs. Les traitements sensibles, notamment la clôture des stages, la validation des rapports et la gestion documentaire, intègrent également des vérifications destinées à éviter les opérations non autorisées ou incohérentes.
+P429 [normal] Le déploiement de l'application à l'aide de Docker a également constitué une étape importante du projet. La conteneurisation permet d'organiser l'exécution des différents composants et de faciliter la reproduction de l'environnement nécessaire au fonctionnement du système.
+P430 [normal] Malgré ces résultats, certains aspects techniques peuvent encore être améliorés. La gestion des volumes importants de données pourrait notamment bénéficier de mécanismes de pagination et de requêtes mieux adaptées, afin de limiter le chargement inutile d'informations en mémoire.
+P431 [normal] D'autres améliorations concernent la gestion des migrations de la base de données, la qualité de génération des documents PDF, l'adaptation des interfaces aux appareils mobiles ainsi que le renforcement des procédures de sauvegarde et de restauration.
+P432 [normal] Dans l'ensemble, le projet a permis de réaliser une application fonctionnelle, organisée autour d'une architecture cohérente et de mécanismes de sécurité adaptés aux principales opérations métier. Les améliorations identifiées constituent des perspectives d'optimisation destinées à renforcer sa maintenabilité, ses performances et sa fiabilité à long terme.
+P433 [Heading 2] 
+P434 [Heading 2] 
+P435 [Heading 2] 3.3 Apports à l’organisme d’accueil
+P436 [normal] La réalisation de l’application web de gestion et de suivi des stagiaires constitue une contribution à l’amélioration des activités administratives au sein de la Cellule SIIGFP du Ministère de l’Économie et des Finances.
+P437 [normal] L’un des principaux apports de cette application est la centralisation des informations relatives aux stagiaires. Les données personnelles, les parcours académiques, les affectations, les rapports d’activité et les documents administratifs sont regroupés dans un même système, facilitant ainsi leur consultation et leur suivi.
+P438 [normal] L’application permet également d’améliorer l’organisation du suivi des stages grâce à la gestion des périodes, des encadreurs et des différentes étapes administratives. Les responsables disposent ainsi d’une meilleure visibilité sur les stages en cours, les rapports à examiner et les dossiers nécessitant une intervention.
+P439 [normal] Le système d’alertes automatiques constitue un autre apport important. Il permet de signaler les échéances, les rapports manquants et les dossiers incomplets, réduisant ainsi la nécessité d’effectuer certaines vérifications manuelles. Les tableaux de bord et les indicateurs facilitent également la consultation des informations essentielles et l’identification des actions prioritaires.
+P440 [normal] Sur le plan de la sécurité, la gestion des rôles et des autorisations permet de contrôler l’accès aux données selon les responsabilités de chaque utilisateur. L’historisation des opérations contribue également à assurer la traçabilité des modifications et des décisions administratives.
+P441 [normal] Enfin, l’application facilite la gestion de la clôture des stages en vérifiant les documents et les rapports nécessaires. Elle prévoit également une procédure de clôture forcée permettant à l’administrateur de clôturer un dossier incomplet dans certaines situations, tout en conservant une trace de cette décision. L’utilisation de cette fonctionnalité doit toutefois respecter les règles administratives définies par le service.
+P442 [normal] Dans l’ensemble, l’application apporte un outil centralisé permettant de simplifier l’organisation des dossiers, de faciliter le suivi des stagiaires et d’améliorer la visibilité sur les opérations administratives. Elle constitue ainsi une base informatique pouvant accompagner durablement la gestion des stages au sein de la Cellule SIIGFP.
+P443 [Heading 2] 
+P444 [Heading 2] 
+P445 [Heading 2] 3.4 Bilan personnel et compétences acquises
+P446 [normal] Ce stage de fin d'études au sein de la Cellule SIIGFP du Ministère de l'Économie et des Finances m'a permis de mettre en pratique les connaissances acquises durant ma formation en Licence Informatique à l'IT University. Il a également constitué une expérience enrichissante, tant sur le plan technique que professionnel.
+P447 [normal] Sur le plan technique, j'ai pu approfondir mes compétences en développement d'applications web, notamment avec Java, Spring Boot, React et PostgreSQL. La réalisation du projet m'a permis de mieux comprendre l'organisation d'une architecture en plusieurs couches, la conception d'API REST et la communication entre le frontend, le backend et la base de données.
+P448 [normal] La conception de la base de données a également renforcé mes connaissances en modélisation relationnelle. J'ai appris à mieux organiser les informations, à définir les relations entre les entités et à mettre en place des contraintes permettant de préserver la cohérence des données.
+P449 [normal] L'une des expériences les plus importantes a été la configuration de la sécurité avec Spring Security. La gestion de l'authentification, des rôles et des autorisations m'a permis de mieux comprendre les enjeux liés à la protection des informations et à la restriction des accès selon les responsabilités des utilisateurs. Les difficultés rencontrées dans la configuration de SecurityConfig m'ont notamment amené à approfondir mes recherches et à améliorer ma compréhension du fonctionnement de Spring Security.
+P450 [normal] J'ai également développé mes compétences en résolution de problèmes grâce aux différentes erreurs rencontrées pendant le développement. La recherche de leurs causes, l'analyse du code et la mise en place de corrections m'ont appris à adopter une démarche plus méthodique.
+P451 [normal] Les phases de tests et de déploiement ont constitué un autre apprentissage important. Elles m'ont permis de mieux comprendre l'intérêt des vérifications techniques, de la gestion des dépendances et de l'utilisation de Docker pour exécuter une application dans un environnement conteneurisé.
+P452 [normal] Sur le plan professionnel, ce stage m'a permis de découvrir le fonctionnement d'un environnement administratif et l'importance de développer des solutions répondant à des besoins concrets. Il m'a également sensibilisé à la nécessité de respecter les exigences fonctionnelles, d'organiser mon travail et de prendre en compte la maintenabilité d'une application.
+P453 [normal] Enfin, cette expérience m'a permis de gagner en autonomie, de renforcer ma capacité d'analyse et de développer ma persévérance face aux difficultés techniques. Elle représente une étape importante dans mon parcours universitaire et dans ma préparation à une future carrière dans le développement logiciel.
+P454 [Heading 2] 3.5 Perspectives d’évolution
+P455 [normal] Bien que l’application web de gestion et de suivi des stagiaires soit fonctionnelle et déployée avec Docker, plusieurs améliorations peuvent être envisagées afin de renforcer ses performances, sa sécurité et sa facilité d’utilisation.
+P456 [normal] Une première perspective concerne l’optimisation des performances. À mesure que le nombre de stagiaires, de stages et de documents augmente, certaines opérations pourraient nécessiter davantage de ressources. La mise en place d’une pagination côté base de données, l’optimisation des requêtes SQL et l’amélioration du chargement des informations permettraient de maintenir des temps de réponse adaptés, même avec un volume de données plus important.
+P457 [normal] Une deuxième amélioration porte sur l’ergonomie et l’accessibilité de l’interface. Des ajustements pourraient être apportés afin de faciliter l’utilisation de l’application sur les smartphones et les tablettes. L’amélioration de la navigation au clavier, de la lisibilité des informations et de la présentation des formulaires contribuerait également à offrir une meilleure expérience utilisateur.
+P458 [normal] La gestion documentaire et la génération des rapports constituent aussi des axes d’amélioration. Il serait notamment possible de perfectionner la mise en page des documents PDF, d’améliorer la prise en charge des caractères spéciaux et de proposer des modèles de documents adaptés aux besoins administratifs du service.
+P459 [normal] Sur le plan technique, l’évolution du projet pourrait intégrer une gestion plus structurée des migrations de la base de données ainsi que l’automatisation des tests et du déploiement à travers une chaîne d’intégration et de livraison continues (CI/CD). Ces mécanismes faciliteraient les mises à jour de l’application tout en limitant les risques de régression.
+P460 [normal] Une autre perspective concerne la supervision et la sauvegarde des données. La mise en place d’outils de surveillance permettrait de suivre l’état des services, les erreurs et l’exécution des alertes automatiques. Des procédures régulières de sauvegarde et de restauration contribueraient également à renforcer la fiabilité de l’environnement déployé.
+P461 [normal] Enfin, une interface d’administration plus avancée pourrait être développée afin de permettre aux utilisateurs autorisés de configurer certains paramètres de suivi, notamment les seuils des alertes et les règles de notification, sans intervenir directement dans le code source.
+P462 [normal] Ces différentes perspectives permettraient de faire évoluer progressivement l’application vers une solution plus performante, plus facile à maintenir et mieux adaptée à une utilisation durable au sein de la Cellule SIIGFP du Ministère de l’Économie et des Finances.
+P463 [normal] 
+P464 [Heading 1] Conclusion générale
+P465 [normal] Ce stage de fin d’études au sein de la Cellule SIIGFP du Ministère de l’Économie et des Finances m’a permis de concevoir et de développer une application web destinée à faciliter la gestion administrative et le suivi des stagiaires.
+P466 [normal] L’objectif principal du projet était de mettre en place une solution centralisée permettant de gérer les informations personnelles et académiques des stagiaires, leurs affectations, leurs rapports d’activité, leurs documents administratifs ainsi que les différentes étapes de leur parcours jusqu’à la clôture du stage.
+P467 [normal] Pour réaliser cette application, j’ai utilisé plusieurs technologies, notamment Java et Spring Boot pour le backend, React pour le frontend et PostgreSQL pour la gestion des données. L’association de ces technologies a permis de construire une architecture structurée, dans laquelle les différentes fonctionnalités communiquent de manière cohérente.
+P468 [normal] Le projet a également intégré des mécanismes de sécurité et de contrôle d’accès, un système de validation des rapports hebdomadaires, une gestion documentaire, des évaluations finales ainsi que des alertes automatiques destinées à faciliter le suivi des échéances et des dossiers nécessitant une intervention..
+P469 [normal] Au-delà de la réalisation technique, ce projet m’a permis de renforcer mes connaissances en développement web, en conception de bases de données et en sécurité informatique. Les difficultés rencontrées, particulièrement dans la configuration de Spring Security et l’application des règles métier, ont contribué à développer ma capacité d’analyse, ma rigueur et mon autonomie dans la résolution des problèmes.
+P470 [normal] Bien que l’application soit fonctionnelle, plusieurs perspectives d’amélioration restent envisageables, notamment l’optimisation des performances, l’amélioration de l’ergonomie, l’automatisation des procédures de déploiement et le renforcement des mécanismes de sauvegarde et de supervision.
+P471 [normal] En définitive, ce projet constitue une contribution à la modernisation du suivi administratif des stagiaires au sein de la Cellule SIIGFP. Il représente également une expérience importante dans mon parcours universitaire, en me permettant de mettre en pratique mes compétences et de mieux comprendre les exigences du développement d’une application destinée à un environnement professionnel.
+P472 [normal] 
+P473 [Heading 1] 
+P474 [Heading 1] 
+P475 [Heading 1] 
+P476 [Heading 1] 
+P477 [Heading 1] 
+P478 [Heading 1] 
+P479 [Heading 1] 
+P480 [Heading 1] 
+P481 [Heading 1] 
+P482 [Heading 1] Bibliographie
+P483 [normal] Les références bibliographiques suivantes regroupent les principales documentations techniques consultées dans le cadre de la conception et du développement de l'application web de gestion et de suivi des stagiaires. Elles ont permis d'approfondir les connaissances relatives aux technologies utilisées, à la gestion des données et à la sécurité des applications web.
+P484 [normal] [R1] Spring. Spring Boot Reference Documentation. Documentation officielle de Spring Boot. Disponible sur : https://docs.spring.io/spring-boot/reference/
+P485 [normal] [R2] Spring. Using @Transactional. Documentation officielle du Spring Framework relative à la gestion des transactions. Disponible sur : https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html
+P486 [normal] [R3] Spring. Authorize HttpServletRequests. Documentation officielle de Spring Security concernant la gestion des autorisations HTTP. Disponible sur : https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html
+P487 [normal] [R4] PostgreSQL Global Development Group. PostgreSQL 15 Documentation — Constraints. Documentation officielle relative aux contraintes d'intégrité des bases de données relationnelles. Disponible sur : https://www.postgresql.org/docs/15/ddl-constraints.html
+P488 [normal] [R5] React. Thinking in React. Documentation officielle sur la conception d'interfaces utilisateur à l'aide de composants React. Disponible sur : https://react.dev/learn/thinking-in-react
+P489 [normal] [R6] Oracle. Java Platform, Standard Edition 17 Documentation. Documentation officielle du langage Java et de ses bibliothèques. Disponible sur : https://docs.oracle.com/en/java/javase/17/
+P490 [normal] [R7] Hibernate. Hibernate ORM User Guide. Documentation officielle sur la correspondance objet-relationnel et la persistance des entités Java. Disponible sur : https://docs.jboss.org/hibernate/orm/
+P491 [normal] [R8] Vite. Getting Started. Documentation officielle relative à l'environnement de développement et à la construction des applications frontend. Disponible sur : https://vite.dev/guide/
+P492 [normal] [R9] OWASP Foundation. Authorization Cheat Sheet. Recommandations relatives à la gestion des autorisations et au contrôle d'accès dans les applications web. Disponible sur : https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+P493 [normal] [R10] Apache Software Foundation. Apache PDFBox — Documentation. Documentation officielle de la bibliothèque de traitement des documents PDF. Disponible sur : https://pdfbox.apache.org/
+P494 [normal] [R11] Docker Inc. Docker Documentation. Documentation officielle sur la création, la configuration et l'exécution des conteneurs. Disponible sur : https://docs.docker.com/
+P495 [normal] 
+TABLE 0
+Rôle | Périmètre | Opérations caractéristiques
+ADMIN | Assurer la gestion generale de l’application. | Gérer les utilisateurs, les stagiaires, les encadreurs, les stages, les affectations, les documents et le suivi administratif.
+ENCADREUR | Assurer le suivi des stagiaires qui lui sont affectes. | Consulter les dossiers autorisés, examiner les rapports d'activité, formuler des observations et effectuer les évaluations.
+STAGIAIRE | Consulter et renseigner les informations relatives a son stage. | Consulter son dossier, rédiger et soumettre ses rapports d'activité, consulter les observations et suivre l'évolution de son stage.
+TABLE 1
+Phase | Activités principales
+Analyse des besoins | Étude du cahier des charges, identification des acteurs et définition des fonctionnalités.
+Conception | Modélisation de la base de données, conception de l'architecture et définition des règles métier.
+Développement backend | Création des entités, services, API REST et mécanismes de sécurité.
+Développement frontend | Création des interfaces React et intégration avec le backend.
+Tests et corrections | Vérification des fonctionnalités, identification et correction des anomalies.
+TABLE 2
+Technologie | Version | Utilisation
+Java | 17 | Langage de programmation utilisé pour développer le backend.
+Spring Boot | 4.1.0 | Framework permettant de développer les services métier et les API REST.
+Spring Security | Dépendance du projet | Gestion de l'authentification et des autorisations des utilisateurs.
+Spring Data JPA | Dépendance du projet | Gestion de la persistance des données et des échanges avec la base relationnelle.
+PostgreSQL | 15 (environnement local documenté) | Système de gestion de base de données relationnelle.
+React | 19.2.8 | Bibliothèque JavaScript utilisée pour développer l'interface utilisateur.
+Vite | 8.2.2 | Outil de développement et de compilation du frontend.
+Apache PDFBox | 3.0.8 | Traitement des documents PDF.
+Maven | — | Gestion des dépendances et construction du backend.
+Node.js et npm | — | Environnement et gestion des dépendances du frontend.
+ESLint | — | Analyse statique du code JavaScript et détection de problèmes de qualité.
+TABLE 3
+Ensemble | Tables représentatives | Fonction
+Identité et études | stagiaires, stagiaire_academique | Identifier la personne et contextualiser son parcours académique.
+Organisation | departements, structures_accueil, encadreurs, stages, cadres_stage | Définir le cadre d’accueil et les responsabilités.
+Participation | stage_participant, stage_participant_evenements | Porter les dates, les affectations et les actes de gestion.
+Suivi pédagogique | rapports_activite, rapport_observations, evaluations_finales, evaluation_criteres | Conserver les productions, observations et notes.
+Pièces et échéances | fichiers, stage_participant_fichiers, soutenances, alertes | Relier les documents, rendez-vous et situations à traiter.
+Sécurité et traçabilité | utilisateurs, utilisateurs_role, sessions_utilisateur, journal_audit | Authentifier, habiliter et conserver certaines traces d’opération.
+TABLE 4
+Modalité | Pièces manquantes | Rapports achevés non validés | Trace
+Ordinaire | Bloquantes | Bloquants | Événement CLOTURE et historique de statut.
+Dérogation documentaire | Autorisées si ignorerDocumentsManquants vaut vrai | Restent bloquants | Liste réelle des pièces manquantes ajoutée au motif.
+Forcée | Autorisées | Autorisés | Décision administrative et listes des pièces et périodes manquantes ajoutées au motif.
+TABLE 5
+Parcours | Pages ou composants | Vérification complémentaire
+Admission et consultation | StagiairesPage, StagiaireDetailPage, AcademiquesPanel | Saisie, validation et navigation avec données de recette.
+Suivi individuel | MonDossierPage, ParticipationDetailPage | Portée du compte et visibilité des informations.
+Production hebdomadaire | MesRapports, RapportWeeks, RapportActions | Préremplissage, soumission, correction et validation.
+Décision administrative | ParticipationActions, ClotureConfirmation | Information comprise et confirmation de la clôture forcée.
+Pilotage | DashboardPage, PilotagePanel, AlertesPage | Lisibilité des échéances et accès aux dossiers concernés.

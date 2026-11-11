@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile>
+ <version>LibreOffice v1</version>
+ <device>
+  <type>opencl</type>
+  <name>Intel(R) UHD Graphics 630</name>
+  <driver>25.20.100.6577</driver>
+  <time>22891</time>
+  <errors>false</errors>
+ </device>
+ <device>
+  <type>opencl</type>
+  <name>Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz</name>
+  <driver>7.6.0.1125</driver>
+  <time>25654</time>
+  <errors>false</errors>
+ </device>
+ <device>
+  <type>opencl</type>
+  <name>NVIDIA GeForce GTX 1050 Ti</name>
+  <driver>581.80</driver>
+  <time>72408</time>
+  <errors>false</errors>
+ </device>
+ <device>
+  <type>native</type>
+  <time>3537408</time>
+  <errors>false</errors>
+ </device>
+</profile>
