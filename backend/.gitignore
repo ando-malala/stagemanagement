@@ -35,3 +35,4 @@ build/
 # Local database credentials
 .env.local
 uploads/
+conception/data_clean_reel_2026.sql
