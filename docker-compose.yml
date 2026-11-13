@@ -13,6 +13,7 @@ services:
       - ./conception/Conception2.sql:/docker-entrypoint-initdb.d/01-Conception2.sql:ro
       - ./conception/reparer_initialisation_suivi_stagiaire.sql:/docker-entrypoint-initdb.d/02-reparer_initialisation_suivi_stagiaire.sql:ro
       - ./conception/data_clean_reel_2026.sql:/docker-entrypoint-initdb.d/03-data_clean_reel_2026.sql:ro
+      - ./conception/admin_script.sql:/docker-entrypoint-initdb.d/04-admin_script.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U siigfp -d suivi_stagiaire"]
       interval: 10s
