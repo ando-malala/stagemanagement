@@ -5,7 +5,7 @@ COPY package.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
+RUN npm run build -- --configLoader native
 
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf

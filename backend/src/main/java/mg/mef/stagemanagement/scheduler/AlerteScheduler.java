@@ -22,7 +22,7 @@ public class AlerteScheduler {
     }
 
     @Scheduled(
-            cron = "0 0 6 * * *",
+            cron = "0 0 10 * * *",
             zone = "Indian/Antananarivo"
     )
     public void executerVerificationQuotidienne() {
